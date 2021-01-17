@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simParams>
+	<idealParams resolutionScale="1." width="752" height="480" ox="363.274567" oy="243.725825" fx="363.823059" fy="425.474792" />
+	<staticParams maxLensIterations="20" maxPixError="0.1" k1="0." k2="0." t1="0." t2="0." k3="0." k4="0." k5="0." k6="0." />
+	<vignetParams vignetFile="" vignetThresh1="0.15" vignetThresh2="0.15" />
+	
+	<camInAcEu0 roll="90.0" pitch="-20.0" yaw="0." desc="fsr2015, nominal"/>
+	<camInAcEu roll="84.0" pitch="-20.0" yaw="0." desc="fsr2015 with correction"/>
+	
+	<sensorParams cameraFps="1" phasePercent="0.8"/>
+	<dynamicParams td="0.0" tr="0.0" te="0" motionBlurExtraSamples="5" ti="0" />
+
+</simParams>
+

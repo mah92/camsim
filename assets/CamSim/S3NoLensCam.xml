@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simParams>
+	<!-- Galaxy S3 + No Lens with no distortion -->
+<!-- ox: 314.114190, oy:230.803412, fovX:61.580678, fovY:48.139218 -->
+<idealParams resolutionScale="1." width="640" height="480" oxOffset="-5.385810" oyOffset="-8.696588" f="536.171772" />
+<staticParams maxLensIterations="20" maxPixError="0.1" k1="0.000000" k2="0.000000" t1="0.003001" t2="-0.000687" k3="0.000000" k4="0.000000" k5="0.000000" k6="0.000000" />	
+<vignetParams vignetFile="" vignetThresh1="0.15" vignetThresh2="0.15" />
+</simParams>
+

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simParams>
+	<idealParams resolutionScale="1." width="480" height="640" oxOffset="0." oyOffset="0." fovY="70." />
+	<staticParams maxLensIterations="20" maxPixError="0.1" k1="0." k2="0." t1="0." t2="0." k3="0." k4="0." k5="0." k6="0." />
+	<vignetParams vignetFile="" vignetThresh1="0." vignetThresh2="1." />
+	
+	<camInAcEu roll="0.0" pitch="-90.0" yaw="90." desc="downwards"/>
+	
+	<sensorParams cameraFps="25" phasePercent="0.0"/>
+	<dynamicParams td="0.0" tr="0.0" te="0.0" motionBlurExtraSamples="10" ti="0.0" />
+	
+	<signalParams dayLight="1." noiseAmp="0.0" seed="12" desc="zero"/>
+
+</simParams>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simParams>
+	<!-- Galaxy S3 + Low offset Fisheye with 5 param -->
+	<!-- ox: 305.599, oy:226.736 -->
+	<idealParams resolutionScale="1." width="640" height="480" oxOffset="-14.401" oyOffset="-13.264" f="307.6075" />
+	<staticParams maxLensIterations="50" maxPixError="0.1" k1="-0.390024" k2="0.111124" t1="-0.0012744" t2="-0.0081517" k3="-0.00842763" k4="0.000000" k5="0.000000" k6="0.000000" desc = "calibrated by agisoft-lens" />
+    <vignetParams vignetFile="vignet-S3LowOffset.bmp" vignetThresh1="0.05" vignetThresh2="0.5" />
+
+    <sensorParams cameraFps="30." phasePercent="0."/>
+	<dynamicParams td="0.0" tr="0.033" te="6.875e-05" motionBlurExtraSamples="5" ti="0"/>
+	<dynamicParams0 td="0.0" tr="0.0" te="0." motionBlurExtraSamples="5" ti="0"/>
+</simParams>
+

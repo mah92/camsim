@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simParams>
+	<!-- Possible camera -->
+	<idealParams resolutionScale="1." width="640" height="480" oxOffset="0." oyOffset="0." fovX="112" />
+	<staticParams maxLensIterations="20" maxPixError="0.1" k1="-0.07" k2="-0.01" t1="0" t2="0" k3="0" k4="0" k5="0" k6="0" />
+	<vignetParams vignetFile="" vignetThresh1="0." vignetThresh2="1." />
+	
+	<dynamicParams td="0.0" tr="0.033" te="6.875e-05" motionBlurExtraSamples="5" ti="0"/>
+</simParams>

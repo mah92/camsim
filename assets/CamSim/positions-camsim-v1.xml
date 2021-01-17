@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nsrgraphics project="camsim">
+		
+<elements>
+    <resource></resource>
+    <destsize width="1024" height="768"/>
+    <node name="FullView" pos_x="512" pos_y="384" pos_z="0" width="1024" height="768" />
+</elements>
+
+<elements>
+    <resource></resource>
+    <srcsize width="1024" height="768"/>
+    <destsize width="1024" height="768"/>
+    <node name="CamTouch" left="0" up="0" right="1024" down="730" />
+</elements>
+
+</nsrgraphics>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simParams>
+	<!-- parameters for simulating opencv's asymetric circles pattern calibration sequence -->
+	<!-- read readme.txt before use -->
+	<mainParams renderWhat="IMAGE" showWhat="PATTERN" />
+
+	<!-- mapParams -->
+	<mapParams desc = "" centerLat="0." centerLon="0."/>
+	
+	<!-- patternParams -->
+	<patternParams metricWidth="2862." patternFile="acircles_pattern-patternsX-towards-imageTop(North).gif" desc="metricWidth is total width of pattern, originally 28.62cm as height of A4 paper"/>
+	<patternParams0 metricWidth="8410." patternFile="april_6x6_80x80cm_A0.gif" desc="metricWidth is total width of pattern, originally 84.10cm as width of A0 paper"/>
+
+	<!-- pathParams -->
+	<pathParams0 pathFile="path-chessboard-S3fisheye-lowoffset-opencv+posetracker.csv" csvPositionFmt="XYZ" trackerType="0"/>
+	<pathParams pathFile="path-chessboard-S3fisheye-lowoffset-agisoftlens+posetracker.csv" csvPositionFmt="XYZ" trackerType="0"/>
+
+	<pathParamsExtra speedFactor="1." worldScale="1." altOffset="0."/>
+
+	<!-- default parameters for usual cameras -->
+	<!-- ### DON'T CHANGE, BUT OVERRIDE BY INCLUDED CAM FILE ### -->
+	<sensorParams cameraFps="30" phasePercent="0."/>
+	<dynamicParams td="0.0" tr="0.0" te="0.0" motionBlurExtraSamples="1" ti="0"/>
+	<marginParams extraMargin="1.7" extraZoom="1.0"/>
+	<signalParams dayLight="1.0" noiseAmp="0." seed="12" />
+	<camInAcEu roll="0." pitch="0." yaw="0." desc="cam looks towards ac nose"/>
+	<!-- ### DON'T CHANGE, BUT OVERRIDE BY INCLUDED CAM FILE ### -->
+
+	<!-- includeParams, overriding parameters for specific cameras -->
+	<includeParams includeFile="S3FishEye5ParamCam-OpenCV.xml" />
+	
+	<sensorParams cameraFps="1." phasePercent="0."/>
+	<dynamicParams td="0.0" tr="0.0" te="0." motionBlurExtraSamples="0" ti="0"/>
+
+</simParams>

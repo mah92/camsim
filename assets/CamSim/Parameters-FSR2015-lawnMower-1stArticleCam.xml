@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simParams>
+	<!-- parameters for custom FSR2015 ASL dataset simulation -->
+	<!-- read readme.txt before use -->
+	<mainParams renderWhat="IMAGE" showWhat="MAP" />
+
+	<!-- mapParams -->
+	<mapParams desc = "fsr2015" centerLat="47.115880655" centerLon="8.67212173" maxAlt="100000" maxDist="11100" zoomLevel = "16"/> //25fps
+	<mapParams0 desc = "fsr2015" centerLat="47.115880655" centerLon="8.67212173" maxAlt="100000" maxDist="11100" zoomLevel = "17"/> //15fps
+	<mapParams0 desc = "fsr2015" centerLat="47.115880655" centerLon="8.67212173" maxAlt="100000" maxDist="11100" zoomLevel = "18"/> //Not works
+	<mapParams0 desc = "fsr2015" centerLat="47.115880655" centerLon="8.67212173" maxAlt="100000" maxDist="1110" zoomLevel = "18"/> //21fps
+	
+	<!-- pathParams -->
+	<pathParams0 pathFile="path_1hSegment.csv" csvPositionFmt="LLA" trackerType="6" accMax="10" angAccMax="60" controlFreq="800"/>
+	<pathParams pathFile="path_lawnmower.csv" csvPositionFmt="LLA" trackerType="6" accMax="10" angAccMax="60" controlFreq="800"/>
+	<pathParams0 pathFile="path_rectSpiral.csv" csvPositionFmt="LLA" trackerType="6" accMax="10" angAccMax="60" controlFreq="800"/>
+	<pathParams0 pathFile="path-test.csv" csvPositionFmt="XYZ" trackerType="1" accMax="10" angAccMax="60" controlFreq="800"/>
+    <pathParams0 pathFile="path_lawnmower_no_translation.csv" csvPositionFmt="LLA" trackerType="6" accMax="10" angAccMax="60" controlFreq="800"/>
+	<pathParams0 pathFile="path_lawnmower_no_rotation.csv" csvPositionFmt="LLA" trackerType="6" accMax="10" angAccMax="60" controlFreq="800"/>
+    <pathParams0 pathFile="path_lawnmower_nadir.csv" csvPositionFmt="LLA" trackerType="6" accMax="10" angAccMax="60" controlFreq="800"/>
+
+	<pathParamsExtra speedFactor="1." worldScale="1." altOffset="0."/>
+
+	<!-- default parameters for usual cameras -->
+	<!-- ### DON'T CHANGE, BUT OVERRIDE BY INCLUDED CAM FILE ### -->
+	<sensorParams cameraFps="30" phasePercent="0."/>
+	<dynamicParams td="0.0" tr="0.0" te="0.0" motionBlurExtraSamples="1" ti="0"/>
+	<marginParams extraMargin="1.7" extraZoom="1.0"/>
+	<signalParams dayLight="1.0" noiseAmp="0.0" seed="12" />
+	<camInAcEu0 roll="0." pitch="0." yaw="0." desc="cam looks towards ac nose"/>
+	<camInAcEu roll="0." pitch="-90." yaw="0." desc="cam looks towards down"/>
+	<!-- ### DON'T CHANGE, BUT OVERRIDE BY INCLUDED CAM FILE ### -->
+
+	<!-- includeParams, overriding parameters for specific cameras -->
+	<includeParams0 includeFile="Fsr2015Gray5ParamCam.xml" />
+	<includeParams0 includeFile="idealCam.xml" />
+	<includeParams0 includeFile="testCamera.xml" />
+	<includeParams includeFile="S3FishEye5ParamCam-AgisoftLens.xml" />
+	<includeParams0 includeFile="S3FishEye5ParamCam-OpenCV.xml" />
+	
+	<dynamicParams td="0.0" tr="0.0" te="0.0" motionBlurExtraSamples="30" ti="0.0"/>
+    
+	<sensorParams cameraFps="1." phasePercent="0."/>
+
+	<camInAcEu roll="0." pitch="0." yaw="0." desc="cam looks towards ac nose"/>
+	<camInAcEu0 roll="-90." pitch="-90." yaw="0." desc="cam looks in aircraft coordinates, view towards z of aircraft, right towards nose"/>
+	<camInAcEu roll="0." pitch="90." yaw="0." desc="cam looks in aircraft coordinates, view towards z of aircraft, right towards nose"/>
+
+	<signalParams0 dayLight="1." noiseAmp="0.038" seed="12" desc="1sigma is measured as 5.65/255 in grayscale image so color image noise is assumed as sqrt(3)*5.65/255"/>
+	<signalParams0 dayLight="1." noiseAmp="0.1" seed="12" desc="1sigma is measured as 5.65/255 in grayscale image so color image noise is assumed as sqrt(3)*5.65/255"/>
+	<signalParams dayLight="1." noiseAmp=".0" seed="12" desc="1sigma is measured as 5.65/255 in grayscale image so color image noise is assumed as sqrt(3)*5.65/255"/>
+</simParams>

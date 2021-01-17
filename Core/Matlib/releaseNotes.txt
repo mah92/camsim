@@ -1,0 +1,13 @@
+v12: 980115
+a bug fix in overloading '[]', causing a dot - cross product bug fix
+bug fixes in 2*A ?/? functions by converting input "Matrice M" to "Matrice &M"
+added minus matrix syntax
+added matlab syntax
+many cleanups
+
+v13: 
+memry leak fix in inverse function
+removing DEFINITION_2D, the new memory config merges advantages of direct access and continuous memory
+removing IGNORE_MOVE setting, move syntax is now declarative using "Matrice&a = b" or "a << b + c" syntax
+added matrix subset usage
+new function grouping
