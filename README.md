@@ -1,14 +1,32 @@
 # In the name of ALLAH
 
-# Nasir Project
+# Nasir project for distorted camera simulation
 
 ## Preface
 
-This code is the result of near a decade of coding and experience on the field of robotics navigation.
-
 This is an extended airborne camera simulation including geometric, photometric and temporal distortions.
 
-Hopefully, it will be used in the proper hands, as it's name suggests.
+It can be run online (capable of generating over 30frames/second) or store the images for offline usage.
+
+This code is the result of less than a decade of need, experience, and coding on the field of robotics navigation.
+
+It can be used for evaluating different image-processing algorithms under these kinds of distortions and parameters:
+
+* Any Installation angle under aircraft
+* Pinhole camera model
+* Geometric distortions including Brown-Conrady 5 parameter distortion
+* Photometric distortions including gaussian noise, vignetting, and a total gain(as time of day)
+* Temporal distortions including delay, motion blur, rolling shutter and interlacing
+
+The earth surface is assumed to have an arbitrary shape, formed by satellite and digital elevation maps; Or it can include just a calibration pattern.
+
+The aircraft moves on an input path, determined by a descrete flight log of positions and angles in any frequency (which can consist of two to thousands of points)
+
+The path generator algorithm, makes an eligible high frequency path with constrained velocities and accelerations.
+
+A simple bias/noise simulation of usual airborne sensors including accelerometer, gyroscope, magnetometer(compass), pressure altimeter and gps is also included.
+
+Hopefully, this simulator will be used in the proper hands, as it's name suggests.
 
 ## Installation
 
@@ -285,7 +303,9 @@ $make -j4
 
 ## Libraries
 
-These independant libraries can be reviewed  before reviewing the main program:
+Remember to have enough patience if you want to understand the whole program. Although I have tried hard to make the program readable, years of working cannot be understood in a glance.
+
+These independant libraries can be reviewed before reviewing the main program:
 
 * pugixml
 * libtiff
@@ -293,6 +313,8 @@ These independant libraries can be reviewed  before reviewing the main program:
 * MathLib
 * numbuffer
 * plot3d
+
+Impatient readers can just check the glsl shaders under View/nsrOSGShaders.cpp
 
 ## Shortkeys
 
