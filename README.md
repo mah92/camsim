@@ -18,23 +18,27 @@ Ensure that the proper GPU driver is installed to prevent bad behaviour like sys
 
 A good graphic card ensures the speed of execution.
 
-sudo apt-get install cmake build-essential
+$sudo apt-get install cmake build-essential
 
-sudo apt-get install xdotool
+$sudo apt-get install xdotool
 
-sudo apt-get install libplplot-dev
+$sudo apt-get install libplplot-dev
 
-sudo apt-get install libosgearth-dev openscenegraph-plugin-osgearth
+$sudo apt-get install libopenscenegraph-dev openscenegraph
 
-osg-earth is not mandatory, just installed for a proper OpenSceneGraph installation
+$sudo apt-get install libopencv-dev
 
-go to the program folder
+It is also posible to install libosgearth-dev, openscenegraph-plugin-osgearth if the OpenSceneGraph does not get installed correctly.
 
-mkdir build
+After installations, go to the program folder and run:
 
-cmake ..
+$mkdir build
 
-make -j4
+$cd build
+
+$cmake ..
+
+$make -j4
 
 ## Usage
 
@@ -302,7 +306,7 @@ Working with manual aircraft path is possible using short keys described as foll
 * '+'/'-': increasing/decreasing aircraft yawaltitude angle (manual mode)
 
 ### Investigating through diagrams
-Being used to matlab plots, I was searching for a similar ploting toolbox in C/C++ with no success, so I wrote a similar plot library based on plplot.
+Being used to matlab plots, I was searching for a similar ploting toolbox in C/C++ with no success, so I wrote a similar library based on plplot.
 
 It is not very nice but is usable. Navigating through diagrams is possible using short keys described as follows:
 * Alt+right/left   arrows: Navigate between different figures
@@ -313,8 +317,9 @@ It is not very nice but is usable. Navigating through diagrams is possible using
 * Shift+up/down    arrows: Shift Vertically
 
 ### Other Shortkeys
-'c'/'q': will stop the simulation and stop for final review by user
-'Esc': will close the simulation instantly
+* 'c'/'q': will stop the simulation and stop for final review by user
+* 'Esc': will close the simulation instantly
+
 ## Notes
 * If shaking is seen in the shown image(or calib pattern), make it bigger
 
