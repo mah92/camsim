@@ -1,4 +1,4 @@
-# In the name of ALLAH
+# بسم اله الرحمن الرحیم - هست کلید در گنج حکیم
 
 # Nasir project for distorted camera simulation
 
