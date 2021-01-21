@@ -7,7 +7,7 @@
 	<!-- mapParams -->
 	<mapParams0 desc = "fsr2015" centerLat="47.115880655" centerLon="8.67212173" maxAlt="100000" maxDist="11100" zoomLevel = "16"/> //25fps
 	<mapParams0 desc = "fsr2015" centerLat="47.115880655" centerLon="8.67212173" maxAlt="100000" maxDist="11100" zoomLevel = "17"/> //15fps
-	<mapParams desc = "fsr2015" centerLat="47.115880655" centerLon="8.67212173" maxAlt="100000" maxDist="2220" zoomLevel = "17"/> //?fps
+	<mapParams desc = "fsr2015" centerLat="47.115880655" centerLon="8.67212173" maxAlt="100000" maxDist="11100" zoomLevel = "16"/> //?fps
 	<mapParams0 desc = "fsr2015" centerLat="47.115880655" centerLon="8.67212173" maxAlt="100000" maxDist="2220" zoomLevel = "18"/> //24fps
 	<mapParams0 desc = "fsr2015" centerLat="47.115880655" centerLon="8.67212173" maxAlt="100000" maxDist="11100" zoomLevel = "18"/> //Not works
 	<mapParams0 desc = "fsr2015" centerLat="47.115880655" centerLon="8.67212173" maxAlt="100000" maxDist="1110" zoomLevel = "18"/> //21fps
@@ -56,5 +56,6 @@
 	<camInAcEu0 roll="0.0" pitch="0.0" yaw="0." desc=""/>
 	<camInAcEu0 roll="0.0" pitch="-90.0" yaw="-180." desc=""/>
 	<camInAcEu0 roll="0.0" pitch="-90.0" yaw="90." desc="downwards-yawed"/>
+	<camInAcEu roll="0.0" pitch="-25.0" yaw="0." desc="downwards-yawed"/>
 
 </simParams>
