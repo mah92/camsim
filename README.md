@@ -44,9 +44,9 @@ $sudo apt-get install libplplot-dev
 
 $sudo apt-get install libopenscenegraph-dev openscenegraph
 
-$sudo apt-get install libopencv-dev
+$sudo apt-get install libopencv-dev (optional)
 
-It is also posible to install libosgearth-dev, openscenegraph-plugin-osgearth if the OpenSceneGraph does not get installed correctly.
+It is also possible to install libosgearth-dev, openscenegraph-plugin-osgearth if the OpenSceneGraph does not get installed correctly.
 
 After installations, go to the program folder and run:
 
@@ -57,6 +57,15 @@ $cd build
 $cmake ..
 
 $make -j4
+
+## Errors
+In Ubuntu 20.04 I also needed to do the following commands to prevent some complier linker errors:
+
+sudo ln -s /usr/lib/x86_64-linux-gnu/libSM.so.6 /usr/lib/x86_64-linux-gnu/libSM.so
+
+sudo ln -s /usr/lib/x86_64-linux-gnu/libICE.so.6 /usr/lib/x86_64-linux-gnu/libICE.so
+
+sudo ln -s /usr/lib/x86_64-linux-gnu/libXext.so.6 /usr/lib/x86_64-linux-gnu/libXext.so
 
 ## Usage
 
