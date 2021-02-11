@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @file
  * این فایل اعداد ثابتی مثل مکان داده ها را در بر دارد. معادل این کلاس
  * در زبان جاوا هم وجود دارد که باید با هم مطابق باشند
@@ -32,9 +32,6 @@ int createBuf(int* elem, int width)
 {
 	static int next_elem = 1;
 	*elem = next_elem;
-
-	n.Z.elems[*elem - 1] = width;
-
 	next_elem = *elem + width; //next_elem
 }
 	
@@ -47,11 +44,6 @@ void SetIndexes()
 	n.Z.Depth = 5000;    //SensorsBuffer saves SensDepth * SensorsVector
 	//Depth == 2 needed for trapezoidal gyro, acc integration
 	n.Z.Readers = 3; //first is for datalog, second for ordinary usage
-
-	n.Z.elems = (char*)malloc(n.Z.Total * sizeof(char));
-	for(i = 0; i < n.Z.Total; i++) {
-		n.Z.elems[i] = 0;
-	}
 
 	//Sensor vector
 	createBuf(&n.Z.Acc, 3); 		   //3*Accelerometer(m/s2)(shows:F_contact/m = F_total/m - g)
