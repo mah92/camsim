@@ -26,6 +26,7 @@ MACRO(FIND_OSG_LIBRARY MYLIBRARY MYLIBRARYNAME)
     FIND_LIBRARY("${MYLIBRARY}_DEBUG"
         NAMES "${MYLIBRARYNAME}${CMAKE_DEBUG_POSTFIX}"
         PATHS
+        /usr/lib/x86_64-linux-gnu
         ${OSG_DIR}/lib/Debug
         ${OSG_DIR}/lib64/Debug
         ${OSG_DIR}/lib
@@ -48,6 +49,7 @@ MACRO(FIND_OSG_LIBRARY MYLIBRARY MYLIBRARYNAME)
         PATHS
         ~/Library/Frameworks
         /Library/Frameworks
+        /usr/lib/x86_64-linux-gnu
         /usr/local/lib
         /usr/local/lib64
         /usr/lib
@@ -86,6 +88,7 @@ MACRO(FIND_OSG_LIBRARY MYLIBRARY MYLIBRARYNAME)
         PATHS
         ~/Library/Frameworks
         /Library/Frameworks
+        /usr/lib/x86_64-linux-gnu
         /usr/local/lib
         /usr/local/lib64
         /usr/lib

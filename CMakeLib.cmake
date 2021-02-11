@@ -1,39 +1,3 @@
-##for multi touch 
-##sudo apt-get install libevdev-dev
-##sudo apt-get install libmtdev-dev
-##sudo apt-get install xdotool
-##sudo apt-get install liblzma-dev
-##sudo apt-get install libeigen3-dev
-##sudo apt-get install libplplot-dev
-
-#sudo apt-get install libosgearth-dev openscenegraph-plugin-osgearth
-#sudo apt-get install libsm-dev
-#sudo apt-get install qt5-default
-
-
-#######################################3
-#symbol lookup error: /usr/lib/x86_64-linux-gnu/libQt5XcbQpa.so.5: undefined symbol: FT_Get_Font_Format
-#remove /usr/local/lib/libfreetype.so, libfreetype.so.6
-
-########################################3
-
-
-## install gcc & g++ 4.8 for eigen
-##sudo apt-get install python-software-properties
-##sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-##sudo apt-get update
-##sudo apt-get install gcc-4.8
-##sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50
-##sudo apt-get install g++-4.8
-##sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
-##gcc --version # check gcc and g++ version
-##gcc-7 test is OK but gcc-8 is buggy
-
-##both the current program compiler and osg compiler should belong to before or after gcc-5.4, otherwise linking error occurs
-
-##add -llzma to end of target link libraries
-##if you got error with mtdev, check if you have run program with sudo
-
 if( ${ARCHITECTURE} STREQUAL "armv7l" )
 	target_link_libraries( ${PROJECT_NAME} "/usr/lib/arm-linux-gnueabihf/libX11.so.6" ) #${X11_LIBRARIES})
 	target_link_libraries( ${PROJECT_NAME}  -lm)
