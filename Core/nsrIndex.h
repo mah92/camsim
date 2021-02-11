@@ -6,8 +6,6 @@ extern "C" {
 #endif
 
 typedef struct {
-	char* elems;
-
 	//Common////////////////////////////////////
 	int	Acc, Gyro, MMM, MMR, Eu,
 		GPS_LLA, GPS_V, GPS_DOP, GPS_Other,
