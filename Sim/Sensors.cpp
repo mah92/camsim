@@ -15,14 +15,11 @@ extern "C" {
 
 //local
 static Matrice CI2B(3, 3), MMR(3, 1), MM(3, 1), mmr(3, 1), mmm(3, 1);
-static double Lat0, lon0, alt0, xLoc, yLoc, zLoc;
+static double Lat0, lon0, alt0;
 static double T;
-static int pindex;
 
 //local camera
-static double RefIx, RefIy, RefIz;
 static Matrice RefI(3, 1), SBinI(3, 1), dR(3, 1), MB(3, 1), MCam(3, 1);
-static double Xcam, Ycam, Zcam, fx, fy, fov_x, fov_y, fov_x_m, fov_y_m, noise_x, noise_y, noise_z, cx, cy, Xscreen, Yscreen, Zscreen, Xscreenfinal, Yscreenfinal, Zscreenfinal, pixels_x, pixels_y;
 
 //memory
 static int tpre_inited = 0;

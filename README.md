@@ -67,6 +67,8 @@ sudo ln -s /usr/lib/x86_64-linux-gnu/libICE.so.6 /usr/lib/x86_64-linux-gnu/libIC
 
 sudo ln -s /usr/lib/x86_64-linux-gnu/libXext.so.6 /usr/lib/x86_64-linux-gnu/libXext.so
 
+On run time faults, try replacing between wxwidgets and qtwidget in plplots library (nsrPlot.cpp).
+
 ## Usage
 
 1. Set addresses.txt for input maps - output log addresses

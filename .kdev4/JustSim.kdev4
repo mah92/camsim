@@ -1,40 +1,16 @@
-[Buildset]
-BuildItems=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x01\x00\x00\x00\x0b\x00\x00\x00\x00\x01\x00\x00\x00\x0e\x00J\x00u\x00s\x00t\x00S\x00i\x00m)
-
 [CMake]
 Build Directory Count=1
 Current Build Directory Index-Host System=0
 
 [CMake][CMake Build Directory 0]
 Build Directory Path=/home/oem/Android/workspace/JustSim/build
-Build Type=Release
+Build Type=
 CMake Binary=/usr/bin/cmake
 CMake Executable=/usr/bin/cmake
 Environment Profile=
 Extra Arguments=
-Install Directory=
+Install Directory=/usr/local
 Runtime=Host System
-
-[Launch]
-Launch Configurations=Launch Configuration 0
-
-[Launch][Launch Configuration 0]
-Configured Launch Modes=execute
-Configured Launchers=nativeAppLauncher
-Name=CamSim
-Type=Native Application
-
-[Launch][Launch Configuration 0][Data]
-Arguments=
-Dependencies=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x01\x00\x00\x00\x0b\x00\x00\x00\x00\x02\x00\x00\x00\x0e\x00J\x00u\x00s\x00t\x00S\x00i\x00m\x00\x00\x00\x0c\x00C\x00a\x00m\x00S\x00i\x00m)
-Dependency Action=Build
-EnvironmentGroup=
-Executable=file:///home/oem/Android/workspace/JustSim
-External Terminal=konsole --noclose --workdir %workdir -e %exe
-Project Target=JustSim,CamSim
-Use External Terminal=false
-Working Directory=
-isExecutable=false
 
 [Project]
 VersionControlSupport=kdevgit

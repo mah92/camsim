@@ -213,6 +213,7 @@ int nsrOsgInitOsgWindow(int x, int y, int _full_screen_width, int _full_screen_h
 	commonOsgInitOsgWindow2();
 
 	LOGI(TAG, " Initialized scenes!\n");
+    return 0;
 }
 
 int nsrOsgDraw()

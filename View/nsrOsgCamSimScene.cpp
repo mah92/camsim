@@ -305,6 +305,7 @@ int CamSimScene::InitOsgWindow(int x, int y, int _screen_width, int _screen_heig
 	 */
 
 	LOGI(TAG, " Added earth scenegraph...\n");
+    return 0;
 }
 
 int CamSimScene::Draw(double frame_timestamp_s)
@@ -362,7 +363,7 @@ int CamSimScene::Draw(double frame_timestamp_s)
 	distortedDrawable->inVecCallback->setElement(UNIFORM_VY, v_cam2.y());
 	distortedDrawable->inVecCallback->setElement(UNIFORM_VZ, v_cam2.z());
 #endif
-
+    return 0;
 }
 
 void CamSimScene::Pause()

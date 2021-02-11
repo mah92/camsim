@@ -32,6 +32,7 @@ int simInit()
 {
 	Init_Sim(Sim);
 	nsrPoseMakerInit();
+    return 0;
 }
 
 int simLoop(double time_barrier)
@@ -86,6 +87,7 @@ int simLoop(double time_barrier)
 int simClose()
 {
 	nsrPoseMakerClose();
+    return 0;
 }
 
 #ifdef __cplusplus

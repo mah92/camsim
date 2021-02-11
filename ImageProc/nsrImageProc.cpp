@@ -14,6 +14,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/videoio.hpp>
 #include <opencv2/opencv.hpp>
 
 #include "nsrCore.h"
@@ -39,6 +40,7 @@ extern "C" {
 #endif
 
 Plot3d *plt3d = NULL;
+cv::VideoWriter* camcorder = NULL;
 
 int nsrInitImageProc()
 {
@@ -55,7 +57,7 @@ int nsrImageProc(uint8_t *data, int width, int height, int channels, double fram
 	int type;
 	static double last_time = 0;
 	
-	//Gray conversion///////////////////////////////////////////////
+	//Make matrix///////////////////////////////////////////////
 	if(channels == 1) type = CV_8UC1;
 	if(channels == 3) type = CV_8UC3;
 	if(channels == 4) type = CV_8UC4;
@@ -64,6 +66,16 @@ int nsrImageProc(uint8_t *data, int width, int height, int channels, double fram
 
 	imshow("colorInput", colorInput);
 	cv::waitKey(5);
+	
+	//Save vid//////////////////////////////////////////////////////
+#if 0
+	if(camcorder==NULL) {
+		camcorder = new cv::VideoWriter("/home/oem/Android/workspace/JustSim/build/test.mp4", cv::CAP_GSTREAMER, VideoWriter::fourcc('M','J','P','G'), (int)param_camera_fps, cv::Size(width, height), true /*bool isColor*/ );
+		//camcorder = new cv::VideoWriter("appsrc ! videoconvert ! avenc_h264 ! matroskamux ! filesink location=test.mp4");
+	}
+	
+	*(camcorder) << colorInput;
+#endif	
 	
 	//calc position////////////////////////////////////////
 	osg::Vec3d lla, lla0, xyz;
@@ -86,12 +98,17 @@ int nsrImageProc(uint8_t *data, int width, int height, int channels, double fram
 	plt3d->updateView(); //time reached contained
 	
 	last_time = frame_timestamp_s;
+    
+    return 0;
 }
 
 void nsrEndImageProc()
 {
 	if(plt3d != NULL)
 		delete plt3d;
+	
+	if(camcorder!=NULL)
+		delete camcorder;
 }
 
 #ifdef __cplusplus

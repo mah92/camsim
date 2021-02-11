@@ -332,6 +332,7 @@ namespace nsr
 				d = 2.*et;
 
 			v.fill2(d * e1, d * e2, d * e3);
+            return th;
 		}
 
 		//Operations/////////////////////////

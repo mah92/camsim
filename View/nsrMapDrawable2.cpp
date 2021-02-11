@@ -314,6 +314,7 @@ int MapDrawable2::setCoordCenter(double center_lat, double center_lon, double ce
 	ecef_center_x = ecef.x();
 	ecef_center_y = ecef.y();
 	ecef_center_z = ecef.z();
+    return 0;
 }
 
 int MapDrawable2::getCoordCenter(double &_ecef_center_x, double &_ecef_center_y, double &_ecef_center_z)
@@ -321,7 +322,7 @@ int MapDrawable2::getCoordCenter(double &_ecef_center_x, double &_ecef_center_y,
 	_ecef_center_x = ecef_center_x;
 	_ecef_center_y = ecef_center_y;
 	_ecef_center_z = ecef_center_z;
-
+    return 0;
 }
 
 int MapDrawable2::addMapTile(int xTile, int yTile, int zoom, int dem_resolution) //-1 for no dem
@@ -435,6 +436,7 @@ int MapDrawable2::addSeenMapRegion(double latmean, double lonmean, double max_al
 int MapDrawable2::removeMapTiles()
 {
 	removeChild(0, getNumChildren());
+    return 0;
 }
 
 #define HighValue 100000

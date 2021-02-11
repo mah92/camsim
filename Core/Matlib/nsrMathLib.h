@@ -221,8 +221,9 @@ public:
 			return elem(m, 0);
 		else if(p->r == 1)
 			return elem(0, m);
-		else
-			LOGE("matlib:", "not one dimentional!\n");
+		
+        LOGE("matlib:", "not one dimentional!\n");
+        return elem(m, 0);
 	}
 
 	/** @brief
@@ -235,8 +236,9 @@ public:
 			return elem(m, 0);
 		else if(p->r == 1)
 			return elem(0, m);
-		else
-			LOGE("matlib:", "not one dimentional!\n");
+		
+        LOGE("matlib:", "not one dimentional!\n");
+        return elem(m, 0);
 	}
 
 	//Not works in row matrices for better berformance

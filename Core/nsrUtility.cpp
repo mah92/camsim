@@ -156,6 +156,7 @@ double getMonoTime()
 		return -1;
 	}
 #endif
+    return -1;
 }
 
 double _biasTime = 0;//in clock cycles, set once in init(single thread), after that read only

@@ -58,6 +58,7 @@ public:
 		hasHeight = false;
 		dstAR = -1;
 		color = 0xFFFFFFFF;
+        return 0;
 	}
 
 	bool isEmpty()
@@ -111,6 +112,7 @@ public:
 		for(i = 0; i < allprms.size(); i++)
 			delete allprms[i];
 		allprms.clear();
+        return 0;
 	}
 
 	~ImageDrawableParamsReader() {clear();}

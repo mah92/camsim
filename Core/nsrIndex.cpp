@@ -33,6 +33,7 @@ int createBuf(int* elem, int width)
 	static int next_elem = 1;
 	*elem = next_elem;
 	next_elem = *elem + width; //next_elem
+	return 0;
 }
 	
 void SetIndexes()
