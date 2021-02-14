@@ -40,7 +40,7 @@ extern "C" {
 #endif
 
 Plot3d *plt3d = NULL;
-cv::VideoWriter* camcorder = NULL;
+cv::Ptr<cv::VideoWriter> camcorder = NULL;
 
 int nsrInitImageProc()
 {
@@ -64,17 +64,25 @@ int nsrImageProc(uint8_t *data, int width, int height, int channels, double fram
 
 	colorInput = Mat(height, width, type, data);//, size_t step=AUTO_STEP);
 
-	imshow("colorInput", colorInput);
+    cv::Mat colorInput2;
+    cvtColor(colorInput, colorInput2, cv::COLOR_RGBA2BGR);
+     
+	imshow("colorInput", colorInput2);
 	cv::waitKey(5);
 	
 	//Save vid//////////////////////////////////////////////////////
-#if 0
+#if 1
 	if(camcorder==NULL) {
-		camcorder = new cv::VideoWriter("/home/oem/Android/workspace/JustSim/build/test.mp4", cv::CAP_GSTREAMER, VideoWriter::fourcc('M','J','P','G'), (int)param_camera_fps, cv::Size(width, height), true /*bool isColor*/ );
-		//camcorder = new cv::VideoWriter("appsrc ! videoconvert ! avenc_h264 ! matroskamux ! filesink location=test.mp4");
+		//camcorder = new cv::VideoWriter("./test.mp4", cv::CAP_ANY, VideoWriter::fourcc('m','p','4','v'), (int)param_camera_fps, cv::Size(width, height), true /*bool isColor*/ );
+        camcorder = new cv::VideoWriter("appsrc ! autovideoconvert ! x264enc ! matroskamux ! filesink location=test.mkv sync=false", 0, (int)param_camera_fps, cv::Size(width, height), true /*bool isColor*/ );
 	}
+	assert(colorInput2.channels() == 3); //otherwise video saving would not work
 	
-	*(camcorder) << colorInput;
+	//if(camcorder) *(camcorder) << colorInput2;
+    if(camcorder) camcorder->write(colorInput2);
+    //if(myTime() > 10) camcorder->release();
+    
+
 #endif	
 	
 	//calc position////////////////////////////////////////
@@ -107,8 +115,10 @@ void nsrEndImageProc()
 	if(plt3d != NULL)
 		delete plt3d;
 	
-	if(camcorder!=NULL)
+	if(camcorder!=NULL) {
+        camcorder->release();
 		delete camcorder;
+    }
 }
 
 #ifdef __cplusplus

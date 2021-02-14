@@ -246,6 +246,8 @@ void Visualize(SimStorage &Sim, double Tplot2) //, Con)
 	double t = cbLast(mZB, n.Z.Time);
 	_UNLOCKCPP(Z_lock,);
 
+    return;
+    
 	if(time_reached(Tplot2 / param_speed_factor, 0., t, last_t) > 0.5)
 		low_freq_draw = true;
 
