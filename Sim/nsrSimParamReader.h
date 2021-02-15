@@ -90,7 +90,8 @@ extern double param_cam_in_ac_err_z;
 
 #define SAFE_MODE 0
 #define SAFE_START 1
-#define param_end_time (20*60/param_speed_factor)
+//#define param_end_time (20*60/param_speed_factor)
+#define param_end_time (5*60/param_speed_factor)
 
 #ifdef __cplusplus
 extern "C" {

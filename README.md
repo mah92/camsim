@@ -1,6 +1,6 @@
 # بسم اله الرحمن الرحیم - هست کلید در گنج حکیم
 
-# Nasir project for distorted camera simulation
+# Nasir project for distorted airborne camera simulation
 
 ## Preface
 
@@ -68,6 +68,37 @@ sudo ln -s /usr/lib/x86_64-linux-gnu/libICE.so.6 /usr/lib/x86_64-linux-gnu/libIC
 sudo ln -s /usr/lib/x86_64-linux-gnu/libXext.so.6 /usr/lib/x86_64-linux-gnu/libXext.so
 
 On run time faults, try replacing between wxwidgets and qtwidget in plplots library (nsrPlot.cpp).
+
+On error: "assertion 'G_IS_DBUS_CONNECTION (connection)' failed", solve by:
+
+sudo apt purge fcitx-module-dbus
+
+## Demos
+This is a simulated flight on the FSR2015-ASL dataset path. 
+
+Average height over ground is 110m, and the speed is run at 10x averaging to 100m/s.
+
+The camera is set to 10fps, with a 15 degrees tilt angle.
+
+Temporal distortions:
+
+[![](http://img.youtube.com/vi/ycKcSkNn92g/0.jpg)](http://www.youtube.com/watch?v=ycKcSkNn92g "Temporal Distortions")
+
+Notice the camera outage at extremely high speeds.
+
+The input ideal images are rendered bigger, as temporal(and lens) distortions need data from outside the normal field-of-view. For extremely high speeds, this margin might not be enough. To prevent this problem, increase the extraMargin parameter (with the cost of slower runs).
+
+Lens(geometric+photometric) distortions:
+
+[![](http://img.youtube.com/vi/rAvg9q-ifg4/0.jpg)](http://www.youtube.com/watch?v=rAvg9q-ifg4 "Lens Distortions")
+
+Photometric distortions:
+
+[![](http://img.youtube.com/vi/5xjyVF5mRhE/0.jpg)](http://www.youtube.com/watch?v=5xjyVF5mRhE "Photometric Distortions")
+
+Installation angle errors:
+
+[![](http://img.youtube.com/vi/z30gOlqYwpk/0.jpg)](http://www.youtube.com/watch?v=z30gOlqYwpk "Installation angle errors")
 
 ## Usage
 

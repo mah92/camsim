@@ -22,7 +22,7 @@
     <pathParams0 pathFile="path_lawnmower_nadir.csv" csvPositionFmt="LLA" trackerType="6" accMax="10" angAccMax="60" controlFreq="800"/>
 	<pathParams0 pathFile="path_space.csv" csvPositionFmt="LLA" trackerType="6" accMax="10" angAccMax="60" controlFreq="800"/>
 
-	<pathParamsExtra speedFactor="1." worldScale="1." altOffset="0."/>
+	<pathParamsExtra speedFactor="10." worldScale="1." altOffset="0."/>
 
 	<!-- default parameters for usual cameras -->
 	<!-- ### DON'T CHANGE, BUT OVERRIDE BY INCLUDED CAM FILE ### -->
@@ -47,15 +47,26 @@
 	<sensorParams cameraFps="10" phasePercent="0."/>
 
 	<signalParams0 dayLight="1." noiseAmp="0.038" seed="12" desc="1sig is measured as 5.65/255 in grayscale image so color image noise is assumed as sqrt(3)*5.65/255"/>
-    <signalParams dayLight="1." noiseAmp=".00" seed="200" desc="logical noise"/>
+    <signalParams dayLight="1." noiseAmp=".0" seed="200" desc="logical noise"/>
     <signalParams0 dayLight="1." noiseAmp=".0" seed="12" desc="zero noise"/>
-	<dynamicParams td="0.0" tdErr="0." tr="0.00" te="6.875e-05" motionBlurExtraSamples="5" ti="0"/>
+	
+    <dynamicParams0 td="0.0" tdErr="0." tr="0.00" te="6.875e-05" motionBlurExtraSamples="5" ti="0.0" desc="normal"/>
+    <dynamicParams td="0.0" tdErr="0." tr="0.00" te="0." motionBlurExtraSamples="5" ti="0.0" desc="original"/>
+    <dynamicParams0 td="0.1" tdErr="0." tr="0.00" te="0.00" motionBlurExtraSamples="5" ti="0." desc="pure delay"/>
+    <dynamicParams0 td="0.0" tdErr="0." tr="0.00" te="0.10" motionBlurExtraSamples="30" ti="0." desc="motion blur"/>
+    <dynamicParams0 td="0.0" tdErr="0." tr="0.10" te="0.00" motionBlurExtraSamples="5" ti="0." desc="rolling shutter"/>
+    <dynamicParams0 td="0.0" tdErr="0." tr="0.00" te="0.00" motionBlurExtraSamples="5" ti="0.100" desc="interlacing"/>
+    <dynamicParams0 td="0.1" tdErr="0." tr="0.10" te="0.10" motionBlurExtraSamples="30" ti="0.100" desc="hybrid"/>
 
 	<camInAcEu0 roll="0.0" pitch="-55.0" yaw="0." desc=""/>
 	<camInAcEu0 roll="0.0" pitch="-90.0" yaw="-180." desc=""/>
 	<camInAcEu0 roll="0.0" pitch="0.0" yaw="0." desc=""/>
 	<camInAcEu0 roll="0.0" pitch="-90.0" yaw="-180." desc=""/>
 	<camInAcEu0 roll="0.0" pitch="-90.0" yaw="90." desc="downwards-yawed"/>
-	<camInAcEu roll="0.0" pitch="-25.0" yaw="0." desc="downwards-yawed"/>
+    
+	<camInAcEu roll="0.0" pitch="-15.0" yaw="0." desc="downwards-yawed"/>
+	<camInAcEu0 roll="0.0" pitch="-15.0" yaw="0." xErr="5." desc="downwards-yawed"/>
+	<camInAcEu0 roll="0.0" pitch="-15.0" yaw="0." yErr="5." desc="downwards-yawed"/>
+	<camInAcEu0 roll="0.0" pitch="-15.0" yaw="0." zErr="5." desc="downwards-yawed"/>
 
 </simParams>

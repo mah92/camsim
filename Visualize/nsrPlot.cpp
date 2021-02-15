@@ -87,8 +87,8 @@ NsrFig::NsrFig(int m, int n, bool _enabled)
 	//new window
 	pls = new plstream();
 
-	pls->sdev("wxwidgets"); //lower cpu need
-	//pls->sdev("qtwidget");
+	//pls->sdev("wxwidgets"); //lower cpu need
+	pls->sdev("qtwidget");
 
 	pls->scolbg(255, 255, 255); //back ground color, should be run before init()
 
