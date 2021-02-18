@@ -82,7 +82,7 @@ The camera is set to 10fps, with a 15 degrees tilt angle.
 
 Temporal distortions:
 
-[![](http://img.youtube.com/vi/ycKcSkNn92g/0.jpg)](http://www.youtube.com/watch?v=ycKcSkNn92g "Temporal Distortions")
+[![](http://img.youtube.com/vi/HQmMbud8VcA/0.jpg)](http://www.youtube.com/watch?v=HQmMbud8VcA "Temporal Distortions")
 
 Notice the camera outage at extremely high speeds.
 
@@ -90,15 +90,15 @@ The input ideal images are rendered bigger, as temporal(and lens) distortions ne
 
 Lens(geometric+photometric) distortions:
 
-[![](http://img.youtube.com/vi/rAvg9q-ifg4/0.jpg)](http://www.youtube.com/watch?v=rAvg9q-ifg4 "Lens Distortions")
+[![](http://img.youtube.com/vi/u17KExoSsLo/0.jpg)](http://www.youtube.com/watch?v=u17KExoSsLo "Lens Distortions")
 
 Photometric distortions:
 
-[![](http://img.youtube.com/vi/5xjyVF5mRhE/0.jpg)](http://www.youtube.com/watch?v=5xjyVF5mRhE "Photometric Distortions")
+[![](http://img.youtube.com/vi/-Q92ijIwtIU/0.jpg)](http://www.youtube.com/watch?v=-Q92ijIwtIU "Photometric Distortions")
 
 Installation angle errors:
 
-[![](http://img.youtube.com/vi/z30gOlqYwpk/0.jpg)](http://www.youtube.com/watch?v=z30gOlqYwpk "Installation angle errors")
+[![](http://img.youtube.com/vi/-k1eqQOB8QE/0.jpg)](http://www.youtube.com/watch?v=-k1eqQOB8QE "Installation angle errors")
 
 ## Usage
 
