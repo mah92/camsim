@@ -299,26 +299,26 @@ char lensFragmentShader[] =
 	"uniform sampler2D vignetTexture;\n"
 	"varying vec4 distortedTexCoord;\n"
 
-	"uniform float inputVect[36];\n"
+	"uniform float inputVect[39];\n"
 
 	"float \n"
-	"	render_depth, seed, wx, wy, wz, vx, vy, vz,\n"
+	"	render_depth, seed, time_s, wx, wy, wz, vx, vy, vz,\n"
 	"		k1, k2, t1, t2, k3, k4, k5, k6,\n"
 	"			vignet_thresh1, vignet_thresh2, \n"
 	"				td, tr, te, ti,\n"
 	"				width, height,\n"
 	"					fx, fy, ox, oy, extra_margin, extra_zoom,\n"
-	"						noise_amplitude, day_light;\n"
+	"						noise_amplitude_dyn, noise_amplitude_st1, noise_amplitude_st2, day_light;\n"
 	"int extra_sampling_points, double_input;\n"
 
 	//direct sampling = 4, interpolated = 2, + xx + xx + xx +, equals 10 points
 	"#define DIRECT_SAMPLING_POINTS 2\n" //for motion blur
-	"#define MAX_LENS_ITERATIONS (int(inputVect[8]))\n" //points interploated between two sampling points, more efficient than just using DIRECT_SAMPLING_POINTS
-	"#define MAX_PIX_ERR inputVect[9]\n"
+	"#define MAX_LENS_ITERATIONS (int(inputVect[9]))\n" //points interploated between two sampling points, more efficient than just using DIRECT_SAMPLING_POINTS
+	"#define MAX_PIX_ERR inputVect[10]\n"
 
 	"#define aa 8121.	\n"
 	"#define cc 0.845213304	\n"
-	"#define rand(seed) fract(aa*seed+cc)\n" //inputs and outputs[0.,1.)
+	"#define rand(_seed) fract(aa*_seed+cc)\n" //inputs and outputs[0.,1.)
 
 	"#define pi 3.141592653\n"
 
@@ -667,7 +667,9 @@ char lensFragmentShader[] =
 	"				else\n"
 	"					color = texture2D (baseTexture2, texCoord_realRes.xy);\n" //no space after texture2D will cause warning
 	"				if(color.a < 0.5)\n" //SKY
-	"					texColor+=vec4(0.,0.749,1., 1.);\n"
+	//"					texColor+=vec4(0.,0.75,1., 1.);\n" //Blue SKY
+    //"					texColor+=vec4(0.875,0.875,1., 1.);\n" //White-Gray SKY
+    "					texColor+=vec4(0.65,0.85,1., 1.);\n" //White-Gray-Blue SKY
 	"				else\n"
 	"					texColor+=color;\n"
 
@@ -684,7 +686,7 @@ char lensFragmentShader[] =
 
 	//Main////////////////////////////////////////////////////////
 	"void main() {\n"
-	"	float n1,n2,n3,s1,s2, err;\n"
+	"	float n1,n2,n3,s1,s2, val, err;\n"
 	"	vec2 texCoord_noLens, texCoord3f1[DIRECT_SAMPLING_POINTS], texCoord3f2[DIRECT_SAMPLING_POINTS], texCoord_realRes, st;\n"
 	"	vec2 mean_texCoord, texCoord_realResMean, texCoord_realResMin, texCoord_realResMax;\n"
 	"	vec4 texColor, vignetTex, depthTex;\n"
@@ -692,22 +694,23 @@ char lensFragmentShader[] =
 	///Getting uniform inputs
 	"	render_depth = inputVect[0];\n"
 	"	seed = inputVect[1];\n"
-	"	wx = inputVect[2]; wy = inputVect[3]; wz = inputVect[4];\n" //W of cam/ned in cam axes
-	"	vx = inputVect[5]; vy = inputVect[6]; vz = inputVect[7];\n" //Vel of aircraft wrt. ned in camera coordinates
-	"	k1 = inputVect[10]; k2 = inputVect[11]; t1 = inputVect[12]; t2 = inputVect[13]; k3 = inputVect[14]; k4 = inputVect[15]; k5 = inputVect[16]; k6 = inputVect[17];\n"
-	"	vignet_thresh1 = inputVect[18]; vignet_thresh2 = inputVect[19];\n"
-	"	td = inputVect[20];\n" //center row delay of camera
-	"	tr = inputVect[21];\n" //up2down delay of camera, sign verified
-	"	te = inputVect[22];\n" //in-row delay, works when DIRECT_SAMPLING_POINTS > 1
-	"	extra_sampling_points = int(inputVect[23]);\n" //points interpolated between two sampling points, more efficient than just using DIRECT_SAMPLING_POINTS
-	"	ti = inputVect[24];\n"
-	"	width = inputVect[25]; height = inputVect[26];\n" //for normalizing calibration params
-	"	fx = inputVect[27]; fy = inputVect[28];\n" //width, height, causes changing t1 = inputVect[10] if used by #define!!!!
-	"	ox = inputVect[29]; oy = inputVect[30];\n"
-	"	extra_margin = inputVect[31];\n" //extra margin used in ideally rendered image
-	"	extra_zoom = inputVect[32];\n" //used so that image get smaller
-	"	day_light = inputVect[33]; noise_amplitude = inputVect[34];\n"
-	"	double_input = int(inputVect[35]);\n"
+    "	time_s = inputVect[2];\n"
+	"	wx = inputVect[3]; wy = inputVect[4]; wz = inputVect[5];\n" //W of cam/ned in cam axes
+	"	vx = inputVect[6]; vy = inputVect[7]; vz = inputVect[8];\n" //Vel of aircraft wrt. ned in camera coordinates
+	"	k1 = inputVect[11]; k2 = inputVect[12]; t1 = inputVect[13]; t2 = inputVect[14]; k3 = inputVect[15]; k4 = inputVect[16]; k5 = inputVect[17]; k6 = inputVect[18];\n"
+	"	vignet_thresh1 = inputVect[19]; vignet_thresh2 = inputVect[20];\n"
+	"	td = inputVect[21];\n" //center row delay of camera
+	"	tr = inputVect[22];\n" //up2down delay of camera, sign verified
+	"	te = inputVect[23];\n" //in-row delay, works when DIRECT_SAMPLING_POINTS > 1
+	"	extra_sampling_points = int(inputVect[24]);\n" //points interpolated between two sampling points, more efficient than just using DIRECT_SAMPLING_POINTS
+	"	ti = inputVect[25];\n"
+	"	width = inputVect[26]; height = inputVect[27];\n" //for normalizing calibration params
+	"	fx = inputVect[28]; fy = inputVect[29];\n" //width, height, causes changing t1 = inputVect[10] if used by #define!!!!
+	"	ox = inputVect[30]; oy = inputVect[31];\n"
+	"	extra_margin = inputVect[32];\n" //extra margin used in ideally rendered image
+	"	extra_zoom = inputVect[33];\n" //used so that image get smaller
+	"	day_light = inputVect[34]; noise_amplitude_dyn = inputVect[35]; noise_amplitude_st1 = inputVect[36]; noise_amplitude_st2 = inputVect[37];\n"
+	"	double_input = int(inputVect[38]);\n"
 
 	///Photometric distortion
 	"	vignetTex = texture2D (vignetTexture, distortedTexCoord.xy);\n" //no space after texture2D will cause warning
@@ -715,21 +718,49 @@ char lensFragmentShader[] =
 	"	vignetTex = vec4(vignetTex.x<vignet_thresh1?0.:vignetTex.x, vignetTex.y<vignet_thresh1?0.:vignetTex.y, vignetTex.z<vignet_thresh1?0.:vignetTex.z, 1.);\n"
 
 	"   n1=0.;n2=0.;n3=0.;\n"
-	"	if(render_depth < 0.5) {\n" //render color
-	"		st = distortedTexCoord.xy;\n"
-	"		s1 = rand(fract(seed));\n"
-	"		st.x+=s1;\n"
-	//uniform noise
-	"		//n1 = random(st) - 0.5;st.y+=s1;\n" //red
-	"		//n2 = random(st) - 0.5;st.x-=s1;\n" //green
-	"		//n3 = random(st) - 0.5;\n" //blue
+	"	if(render_depth < 0.5) {\n" //if rendering color
 
-	//Gaussian noise
-	"		n1 = noise_amplitude*randomN(st);st.y+=s1;\n" //red
-	"		n2 = noise_amplitude*randomN(st);st.x-=s1;\n" //green
-	"		n3 = noise_amplitude*randomN(st);\n" //blue
+    "		s1 = rand(fract(seed*0.99));\n"
+
+            //Static noise type1 (pixel wise, gray)
+    "		if(noise_amplitude_st1 > 1e-3) {\n"
+    "			st = distortedTexCoord.xy;\n"
+    "       	st.x+=s1; val = noise_amplitude_st1*randomN(st);\n"
+    "			n1 += val; n2 += val; n3 += val;\n" //gray   
+    "       }"
+
+            //Static noise type2 (row wise, gray)
+    "		if(noise_amplitude_st2 > 1e-3) {\n"
+    "			st = vec2(0., distortedTexCoord.y);\n"
+    "       	st.y+=s1; val = noise_amplitude_st2*0.707*randomN(st);\n"
+    "			n1 += val; n2 += val; n3 += val;\n" //gray   
+    "       }\n"
+
+            //Static noise type2 (col wise, gray)
+    "		if(noise_amplitude_st2 > 1e-3) {\n"
+    "			st = vec2(distortedTexCoord.x, 0.);\n"
+    "			st.x+=s1; val = noise_amplitude_st2*0.707*randomN(st);\n"
+	"			n1 += val; n2 += val; n3 += val;\n" //gray
+    "       }\n"
+
+    "		if(noise_amplitude_dyn > 1e-3) {\n"    
+    "			s1 = rand(fract(seed+time_s));\n"
+    "			st = distortedTexCoord.xy;\n"
+    
+                //Uniform noise
+	"			//st.x+=s1; n1 += noise_amplitude_dyn*(random(st) - 0.5)*2.;\n" //red
+	"			//st.y+=s1; n2 += noise_amplitude_dyn*(random(st) - 0.5)*2.;\n" //green
+	"			//st.x-=s1; n3 += noise_amplitude_dyn*(random(st) - 0.5)*2.;\n" //blue
+
+                //Gaussian noise
+	"			st.x+=s1; n1 += noise_amplitude_dyn*randomN(st);\n" //red
+	"			st.y+=s1; n2 += noise_amplitude_dyn*randomN(st);\n" //green
+	"			st.x-=s1; n3 += noise_amplitude_dyn*randomN(st);\n" //blue
+    "		}\n"
 	"   }\n"
 
+    
+    
 	//vignet invisible, no need for further processing
 	"   if(vignetTex.x < 0.001 && vignetTex.y < 0.001 && vignetTex.z < 0.001) {\n"
 	"       mgl_FragColor = vec4(n1, n2, n3, 1.);\n"

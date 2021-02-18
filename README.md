@@ -233,7 +233,11 @@ Installation angle errors:
 	* signalParams
 	dayLight between[0,1]
 	
-	noiseAmp between[0,1], is 1 sigma of added gaussian noise in each channel
+	noiseAmpDynamic between[0,1], is 1 sigma of added white gaussian noise for each pixel in each channel, notice that if the output image is ment to be a grayscale image, the 3 channel averaging reduces the noise by 1/sqrt(3)~=0.57 factor.
+	
+	noiseAmpStatic1 between[0,1], is 1 sigma of added static gaussian noise for each pixel in gray channel, this is the typical signal caused by lens dirt
+	
+	noiseAmpStatic2 between[0,1], is 1 sigma of added gaussian noise for each col/row in gray channel, this is the typical noise present in night cameras
 	
 	final pixel = DayLight*pix + noise
 

@@ -295,7 +295,9 @@ int CamSimScene::InitOsgWindow(int x, int y, int _screen_width, int _screen_heig
 	distortedDrawable->inVecCallback->setElement(UNIFORM_EXTRA_ZOOM, param_extra_zoom);
 
 	distortedDrawable->inVecCallback->setElement(UNIFORM_DAY_LIGHT, param_day_light);
-	distortedDrawable->inVecCallback->setElement(UNIFORM_NOISE_AMPLITUDE, param_noise_amp);
+	distortedDrawable->inVecCallback->setElement(UNIFORM_NOISE_AMPLITUDE_DYNAMIC, param_noise_amp_dynamic);
+	distortedDrawable->inVecCallback->setElement(UNIFORM_NOISE_AMPLITUDE_STATIC1, param_noise_amp_static1);
+	distortedDrawable->inVecCallback->setElement(UNIFORM_NOISE_AMPLITUDE_STATIC2, param_noise_amp_static2);
 #endif
 
 	/*osgUtil::Optimizer optimizer;
@@ -351,9 +353,8 @@ int CamSimScene::Draw(double frame_timestamp_s)
 	}
 
 #if RENDER_DEBUG == 0
-	distortedDrawable->inVecCallback->setElement(UNIFORM_SEED, param_seed + frame_timestamp_s); //just used for creating a random number
-	//distortedDrawable->inVecCallback->setElement(UNIFORM_SEED, myTime()); //just used for creating a random number
-	//distortedDrawable->inVecCallback->setElement(UNIFORM_SEED, frame_timestamp_s); //don't use frame_timestamp_s to prevent noise repeating
+	distortedDrawable->inVecCallback->setElement(UNIFORM_SEED, param_seed); //just used for creating a random number
+	distortedDrawable->inVecCallback->setElement(UNIFORM_TIME, frame_timestamp_s); //also used for creating a random number
 
 	distortedDrawable->inVecCallback->setElement(UNIFORM_WX, w_cam2.x());
 	distortedDrawable->inVecCallback->setElement(UNIFORM_WY, w_cam2.y());

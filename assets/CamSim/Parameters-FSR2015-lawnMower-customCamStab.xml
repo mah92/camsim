@@ -21,7 +21,7 @@
 	<sensorParams cameraFps="30" phasePercent="0."/>
 	<dynamicParams td="0.0" tr="0.0" te="0.0" motionBlurExtraSamples="1" ti="0"/>
 	<marginParams extraMargin="1.7" extraZoom="1.0"/>
-	<signalParams dayLight="1.0" noiseAmp="0.0" seed="12" />
+	<signalParams dayLight="1.0" noiseAmpDynamic="0.0" noiseAmpStatic1="0.0" noiseAmpStatic2="0.0" seed="12" />
 	<camInAcEu roll="0." pitch="0." yaw="0." desc="cam looks towards ac nose"/>
 	<!-- ### DON'T CHANGE, BUT OVERRIDE BY INCLUDED CAM FILE ### -->
 
@@ -34,7 +34,7 @@
 	<dynamicParams0 td="0." tr="0.0" te="0.0" motionBlurExtraSamples="100" ti="0.0"/>
 	<sensorParams cameraFps="25" phasePercent="0."/>
 
-	<signalParams0 dayLight="1." noiseAmp="0.038" seed="12" desc="1sigma is measured as 5.65/255 in grayscale image so color image noise is assumed as sqrt(3)*5.65/255"/>
-	<signalParams1 dayLight="1." noiseAmp="0.1" seed="12" desc="1sigma is measured as 5.65/255 in grayscale image so color image noise is assumed as sqrt(3)*5.65/255"/>
-	<signalParams dayLight="1." noiseAmp="0.0" seed="12" desc="1sigma is measured as 5.65/255 in grayscale image so color image noise is assumed as sqrt(3)*5.65/255"/>
+	<signalParams0 dayLight="1." noiseAmpDynamic="0.038" noiseAmpStatic1="0.0" noiseAmpStatic2="0.0" seed="12" desc="1sigma is measured as 5.65/255 in grayscale image so color image noise is assumed as sqrt(3)*5.65/255"/>
+	<signalParams1 dayLight="1." noiseAmpDynamic="0.1" noiseAmpStatic1="0.0" noiseAmpStatic2="0.0" seed="12" desc="1sigma is measured as 5.65/255 in grayscale image so color image noise is assumed as sqrt(3)*5.65/255"/>
+	<signalParams dayLight="1." noiseAmpDynamic="0.0" noiseAmpStatic1="0.0" noiseAmpStatic2="0.0" seed="12" desc="1sigma is measured as 5.65/255 in grayscale image so color image noise is assumed as sqrt(3)*5.65/255"/>
 </simParams>

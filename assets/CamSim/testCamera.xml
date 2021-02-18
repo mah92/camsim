@@ -13,7 +13,7 @@
 	<dynamicParams0 td="0.0" tr="0.0" te="0.0" motionBlurExtraSamples="10" ti="0.0" />
 	<dynamicParams td="0.0" tr="0.033" te="6.875e-05" motionBlurExtraSamples="5" ti="0"/>
     
-	<signalParams dayLight="1." noiseAmp="0.0" seed="12" desc="zero"/>
+	<signalParams dayLight="1." noiseAmpDynamic="0.0" noiseAmpStatic1="0.0" noiseAmpStatic2="0.0" seed="12" desc="zero"/>
     
     
 	<!-- Galaxy S3 + Low offset Fisheye with 5 param -->

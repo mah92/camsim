@@ -22,7 +22,7 @@
 	<sensorParams cameraFps="30" phasePercent="0."/>
 	<dynamicParams td="0.0" tr="0.0" te="0.0" motionBlurExtraSamples="1" ti="0"/>
 	<marginParams extraMargin="1.7" extraZoom="1.0"/>
-	<signalParams dayLight="1.0" noiseAmp="0." seed="12" />
+	<signalParams dayLight="1.0" noiseAmpDynamic="0.0" noiseAmpStatic1="0.0" noiseAmpStatic2="0.0" seed="12" />
 	<camInAcEu roll="0." pitch="0." yaw="0." desc="cam looks towards ac nose"/>
 	<!-- ### DON'T CHANGE, BUT OVERRIDE BY INCLUDED CAM FILE ### -->
 
