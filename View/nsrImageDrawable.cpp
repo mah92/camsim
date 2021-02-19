@@ -420,7 +420,7 @@ int ImageDrawable::setImageFromTexture(ImageDrawableParams* prm, osg::Vec2* scrD
 
 int ImageDrawable::setLensFromTexture1(ImageDrawableParams* prm, osg::Vec2* scrDim, osg::Texture2D* baseTexture, osg::Texture2D* depthTexture, osg::Texture2D* vignetTexture, bool render_depth)
 {
-	osg::ref_ptr<osg::Drawable> quad = osg::createTexturedQuadGeometry(
+    osg::ref_ptr<osg::Drawable> quad = osg::createTexturedQuadGeometry(
 										   osg::Vec3(-scrDim->x() * prm->width * 0.5f, -scrDim->y() * prm->height * 0.5f, 0.0f),
 										   osg::Vec3(scrDim->x() * prm->width, 0.0f, 0.0f),
 										   osg::Vec3(0.0f, +scrDim->y() * prm->height, 0.0f));
@@ -470,7 +470,6 @@ int ImageDrawable::setLensFromTexture2(ImageDrawableParams* prm, osg::Vec2* scrD
 									   osg::Texture2D* depthTexture1, osg::Texture2D* depthTexture2,
 									   osg::Texture2D* vignetTexture, bool render_depth)
 {
-
 	osg::ref_ptr<osg::Drawable> quad = osg::createTexturedQuadGeometry(
 										   osg::Vec3(-scrDim->x() * prm->width * 0.5f, -scrDim->y() * prm->height * 0.5f, 0.0f),
 										   osg::Vec3(scrDim->x() * prm->width, 0.0f, 0.0f),

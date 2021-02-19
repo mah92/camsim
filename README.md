@@ -80,6 +80,10 @@ Average height over ground is 110m, and the speed is run at 10x averaging to 100
 
 The camera is set to 10fps, with a 15 degrees tilt angle.
 
+Simulation Steps:
+
+[![](http://img.youtube.com/vi/FHoJwCSKPYY/0.jpg)](http://www.youtube.com/watch?v=FHoJwCSKPYY "Simulation Steps")
+
 Temporal distortions:
 
 [![](http://img.youtube.com/vi/HQmMbud8VcA/0.jpg)](http://www.youtube.com/watch?v=HQmMbud8VcA "Temporal Distortions")

@@ -28,7 +28,7 @@
 	<!-- ### DON'T CHANGE, BUT OVERRIDE BY INCLUDED CAM FILE ### -->
 	<sensorParams cameraFps="30" phasePercent="0."/>
 	<dynamicParams td="0.0" tr="0.0" te="0.0" motionBlurExtraSamples="1" ti="0"/>
-	<marginParams extraMargin="1.7" extraZoom="1.0"/>
+	<marginParams extraMargin="1.7" extraZoom="1."/>
 	<signalParams dayLight="1.0" noiseAmpDynamic="0.0" noiseAmpStatic1="0.0" noiseAmpStatic2="0.0" seed="130" />
 	<camInAcEu0 roll="0." pitch="0." yaw="0." desc="cam looks towards ac nose"/>
 	<camInAcEu roll="0." pitch="-90." yaw="0." desc="cam looks towards down"/>
@@ -42,23 +42,24 @@
 	<includeParams0 includeFile="S3FishEye5ParamCam-AgisoftLens.xml" />
 	<includeParams0 includeFile="S3FishEye5ParamCam-OpenCV.xml" />
 	
-	<sensorParams cameraFps="10" phasePercent="0."/>
+	<sensorParams cameraFps="25" phasePercent="0."/>
 
-    <signalParams dayLight="1." noiseAmpDynamic="0.0" noiseAmpStatic1="0." noiseAmpStatic2="0.0" seed="12" desc="zero noise"/>
+    <signalParams0 dayLight="1." noiseAmpDynamic="0.0" noiseAmpStatic1="0." noiseAmpStatic2="0.0" seed="12" desc="zero noise"/>
     <signalParams0 dayLight="1." noiseAmpDynamic="0.1" noiseAmpStatic1="0.0" noiseAmpStatic2="0.0" seed="200" desc="pixelwise white gaussian noise"/>
     <signalParams0 dayLight="1." noiseAmpDynamic="0.0" noiseAmpStatic1="0.1" noiseAmpStatic2="0.0" seed="200" desc="pixelwise static noise"/>
     <signalParams0 dayLight="1." noiseAmpDynamic="0.0" noiseAmpStatic1="0.0" noiseAmpStatic2="0.1" seed="200" desc="row/colwise static noise (night cameras)"/>
     <signalParams0 dayLight="0.5" noiseAmpDynamic="0.0" noiseAmpStatic1="0.0" noiseAmpStatic2="0.0" seed="200" desc="1/10 daylight"/>
     <signalParams0 dayLight="0.5" noiseAmpDynamic="0.1" noiseAmpStatic1="0.1" noiseAmpStatic2="0.1" seed="200" desc="alltogether"/>
-	<signalParams0 dayLight="1." noiseAmpDynamic="0.038" noiseAmpStatic1="0.0" noiseAmpStatic2="0.0" seed="12" desc="1sig is measured as 5.65/255 in grayscale image so color image noise is assumed as sqrt(3)*5.65/255"/>
+	<signalParams dayLight="1." noiseAmpDynamic="0.038" noiseAmpStatic1="0.0" noiseAmpStatic2="0.0" seed="12" desc="1sig is measured as 5.65/255 in grayscale image so color image noise is assumed as sqrt(3)*5.65/255"/>
 	
     <dynamicParams0 td="0.0" tdErr="0." tr="0.00" te="6.875e-05" motionBlurExtraSamples="5" ti="0.0" desc="normal"/>
-    <dynamicParams td="0.0" tdErr="0." tr="0.00" te="0." motionBlurExtraSamples="5" ti="0.0" desc="original"/>
+    <dynamicParams0 td="0.0" tdErr="0." tr="0.00" te="0." motionBlurExtraSamples="5" ti="0.0" desc="original"/>
     <dynamicParams0 td="0.1" tdErr="0." tr="0.00" te="0.00" motionBlurExtraSamples="5" ti="0." desc="pure delay"/>
     <dynamicParams0 td="0.0" tdErr="0." tr="0.00" te="0.10" motionBlurExtraSamples="30" ti="0." desc="motion blur"/>
     <dynamicParams0 td="0.0" tdErr="0." tr="0.10" te="0.00" motionBlurExtraSamples="5" ti="0." desc="rolling shutter"/>
     <dynamicParams0 td="0.0" tdErr="0." tr="0.00" te="0.00" motionBlurExtraSamples="5" ti="0.100" desc="interlacing"/>
     <dynamicParams0 td="0.1" tdErr="0." tr="0.10" te="0.10" motionBlurExtraSamples="30" ti="0.100" desc="hybrid"/>
+    <dynamicParams td="0.1" tdErr="0." tr="0.040" te="6.875e-05" motionBlurExtraSamples="30" ti="0.040" desc="real"/>
 
 	<camInAcEu0 roll="0.0" pitch="-55.0" yaw="0." desc=""/>
 	<camInAcEu0 roll="0.0" pitch="-90.0" yaw="-180." desc=""/>
@@ -72,11 +73,11 @@
 	<camInAcEu0 roll="0.0" pitch="-15.0" yaw="0." zErr="5." desc="downwards-yawed"/>
         
 	<idealParams0 resolutionScale="1." width="640" height="480"/>
-    <idealParams0 resolutionScale="1." width="640" height="480" oxOffset="-14.401" oyOffset="-13.264" f="307.6075" />
-	<staticParams0 maxLensIterations="50" maxPixError="0.1" k1="-0.390024" k2="0.111124" t1="-0.0012744" t2="-0.0081517" k3="-0.00842763" k4="0.000000" k5="0.000000" k6="0.000000" desc = "calibrated by agisoft-lens" />
-    <vignetParams0 vignetFile="vignet-S3LowOffset.bmp" vignetThresh1="0.05" vignetThresh2="0.5" />
+    <idealParams resolutionScale="1." width="720" height="540" oxOffset="-14.401" oyOffset="-13.264" f="307.6075" />
+	<staticParams maxLensIterations="50" maxPixError="0.1" k1="-0.390024" k2="0.111124" t1="-0.0012744" t2="-0.0081517" k3="-0.00842763" k4="0.000000" k5="0.000000" k6="0.000000" desc = "calibrated by agisoft-lens" />
+    <vignetParams vignetFile="vignet-S3LowOffset.bmp" vignetThresh1="0.05" vignetThresh2="0.5" />
 
     <idealParams0 width="640" height="540" desc="used for publishing a FullHD video in 3x2 cells" />
-    <idealParams0 width="720" height="540" desc="used for publishing a FullHD video in 2x2 cells" />
-
+    <idealParams width="720" height="540" desc="used for publishing a FullHD video in 2x2 cells(AR:4/3)" />
+    <idealParams0 width="810" height="540" desc="used for publishing a FullHD video in 2x2 cells(AR:3/2)" />
 </simParams>
