@@ -28,6 +28,11 @@ A simple bias/noise simulation of usual airborne sensors including accelerometer
 
 Hopefully, this simulator will be used in the proper hands, as it's name suggests.
 
+## References
+This simulator is based on the following article. Please cite the paper when using this toolbox or parts of it in an academic publication.
+
+Mahmoudi, A., Sabzehparvar, M., & Mortazavi, M. (2021). A virtual environment for evaluation of computer vision algorithms under general airborne camera imperfections. Journal of Navigation, 1-21. doi:10.1017/S0373463321000060
+
 ## Installation
 
 It is tested on ubuntu 16.04 and 18.04 LTS, although it also used to work on Android before simplifications.
@@ -58,7 +63,9 @@ $cmake ..
 
 $make -j4
 
-## Errors
+remember 
+
+## Typcal Errors
 In Ubuntu 20.04 I also needed to do the following commands to prevent some complier linker errors:
 
 sudo ln -s /usr/lib/x86_64-linux-gnu/libSM.so.6 /usr/lib/x86_64-linux-gnu/libSM.so
@@ -67,7 +74,7 @@ sudo ln -s /usr/lib/x86_64-linux-gnu/libICE.so.6 /usr/lib/x86_64-linux-gnu/libIC
 
 sudo ln -s /usr/lib/x86_64-linux-gnu/libXext.so.6 /usr/lib/x86_64-linux-gnu/libXext.so
 
-On run time faults, try replacing between wxwidgets and qtwidget in plplots library (nsrPlot.cpp).
+On run-time faults, try replacing between wxwidgets and qtwidget in plplots library (nsrPlot.cpp).
 
 On error: "assertion 'G_IS_DBUS_CONNECTION (connection)' failed", solve by:
 
@@ -424,10 +431,3 @@ It is not very nice but is usable. Navigating through diagrams is possible using
  use opencv "charuco", kalibr "april", or better, agisoft-lens "wide chess" pattern(if focus in close range is not a problem)
 
 * Remember to correct alt and angle offsets in nsrPoseSim.cpp line 194
-
-## References
- If you want to use the simulator or odometry, remember to cite the following articles:
- 
- TO Be filled...
- 
- 
