@@ -33,16 +33,12 @@ Plot3d::Plot3d(cv::String _win_name)
 	last_y = 0;
 	last_draw_time = -100;
 
-	cv::namedWindow(win_name, 0);
 	image0 = cv::Mat(height, width, CV_8UC3);
 	image0 = 0;
-	cv::imshow(win_name, image0);
 
 	f = ((width - 1.) / 2.) / tan(fov_x / 2.*M_PI / 180.);
 	ox = (width - 1.) / 2.;
 	oy = (height - 1.) / 2.;
-
-	cv::setMouseCallback(win_name, onMouse, this);
 
 	cv::createTrackbar("distance", win_name, &distance, 10000, distanceCallback, this);
 	///TODO: change position of origin point
@@ -127,7 +123,7 @@ void Plot3d::drawCam(int cam_color, Matrice &posCam, nsr::Quat &quCam)
 	Matrice pos(3, 1);
 	cv::Scalar color;
 	float pix_x[5], pix_y[5];
-
+	
 	if(cam_color == 0)
 		color = cv::Scalar(0, 255, 0); //real, green
 	else if(cam_color == 1)
@@ -171,8 +167,11 @@ void Plot3d::updateView()
 	int i, k, cam_color;
 	double time_s = myTime();
 
-	if(last_draw_time < 0) //first time
+	if(last_draw_time < 0) {//first time
 		last_draw_time = time_s;
+		cv::namedWindow(win_name, 0); //By adding delay in cv::namedWindow in this phase, a plplot bug in nsrPlot.cpp is suppressed
+		cv::setMouseCallback(win_name, onMouse, this);
+	}
 
 	if(!drag && execution_turn >= 0) //Don't update in automatic runs when mouse not exists
 		return;
