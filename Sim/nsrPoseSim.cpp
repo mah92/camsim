@@ -342,6 +342,14 @@ void nsrPoseMakerStep()
 		for(i = 0; i < 6; i++)
 			ac_real_acc[i] = 0;
 	}
+	
+    //correct yaw command to follow real yaw with maximum 180 degrees
+    //printf("pre_cmd:%f", ac_command[5]);
+	while(ac_command[5] - ac_real[5] > 180.)
+        ac_command[5]-=360.;
+    while(ac_command[5] - ac_real[5] < -180.)
+        ac_command[5]+=360.;
+    //printf("ac_real:%f, post_cmd:%f", ac_real[5], ac_command[5]);
 
 	//2 x controller loops to track linear interpolation and input/output 1st order filter for continuous acceleration///////
 	if(param_tracker_type == TRACKER_TYPE_2xSQRT_INOUT_FILTER) {
@@ -354,7 +362,7 @@ void nsrPoseMakerStep()
 			ac[i] = ac_real[i] += pos2rate_cont[i]->dt * ac_real_velocity[i];
 		}
 
-		//printf("ac_command:%f, ac_real%f, goal_velocity:%f\n", ac_command[0], ac_real[0], pos2rate_cont[0]->goal_velocity);
+        //printf(":::t:%f, cmd yaw:%f, yaw:%f, yaw vel:%f, goal_vel:%f, goal_acc:%f\n", pose_maker_time_s, ac_command[5], ac_real[5], ac_real_velocity[5], pos2rate_cont[5]->goal_velocity, rate2acc_cont[5]->goal_velocity);
 	}
 
 	//2 x controller loops to track linear interpolation and output 1st order filter for continuous acceleration///////

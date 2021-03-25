@@ -40,9 +40,6 @@ Plot3d::Plot3d(cv::String _win_name)
 	ox = (width - 1.) / 2.;
 	oy = (height - 1.) / 2.;
 
-	cv::createTrackbar("distance", win_name, &distance, 10000, distanceCallback, this);
-	///TODO: change position of origin point
-
 	posQuCam.resize(3);
 	posQuTempCam.resize(3);
 	int i;
@@ -171,6 +168,7 @@ void Plot3d::updateView()
 		last_draw_time = time_s;
 		cv::namedWindow(win_name, 0); //By adding delay in cv::namedWindow in this phase, a plplot bug in nsrPlot.cpp is suppressed
 		cv::setMouseCallback(win_name, onMouse, this);
+        cv::createTrackbar("distance", win_name, &distance, 10000, distanceCallback, this); ///TODO: change position of origin point
 	}
 
 	if(!drag && execution_turn >= 0) //Don't update in automatic runs when mouse not exists
