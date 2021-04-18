@@ -567,12 +567,12 @@ char lensFragmentShader[] =
 	"}\n"
 
 	//frame_time_offset is the center frame time offset compensated outside for sensor inputs
-	"void inverse_rolling_shutter(in vec2 distortedTexCoord_, in vec2 texCoord_noLens, in float frame_time_offset, in int frame_num, out vec2 texCoord_noLensNoRS[DIRECT_SAMPLING_POINTS]) {\n"
+    //Assuming no depth change in RS period
+	"void inverse_rolling_shutter(in vec2 distortedTexCoord_, in vec2 texCoord_noLens, in float frame_time_offset, in float distance, out vec2 texCoord_noLensNoRS[DIRECT_SAMPLING_POINTS]) {\n"
 	"	int i,j,row, RK2_STEPS;\n"
-	"	float deltaT, deltaT2, Z;\n"
-	"	vec2 h_no_rs, h_with_rs, h1, h2, dh2dt0, dh2dt1, dh2dt2, texCoord_realRes;\n"
-	"	vec3 VCam2Z, WCam, Vel2Z;\n"
-	"	vec4 depthTex;\n"
+	"	float deltaT, deltaT2;\n"
+	"	vec2 h_no_rs, h_with_rs, h1, h2, dh2dt0, dh2dt1, dh2dt2;\n"
+	"	vec3 VCam2Z, WCam;\n"
 
 	//positive deltaT means future
 	//we assume upper rows are scanned first(past, older) so have negetive deltaT
@@ -586,17 +586,7 @@ char lensFragmentShader[] =
 
 	"	WCam = vec3(wx, wy, wz);\n" //W of cam/ned in cam axes
 
-	//Assuming no depth change in RS period
-	"	texCoord_realRes = (texCoord_noLens - vec2(.5, .5)) / extra_margin + vec2(.5, .5);\n" //zoom to needed resolution
-	"	if(frame_num == 0)\n"
-	"		depthTex = texture2D (depthTexture1, texCoord_realRes);\n" //no space after texture2D will cause warning
-	"	else\n"
-	"		depthTex = texture2D (depthTexture2, texCoord_realRes);\n" //no space after texture2D will cause warning
-
-	"	Z = depthTex.r*(255.*255.) + depthTex.g*255. + depthTex.b\n;" //verified
-	"	//Z = 3000.;\n"
-
-	"	VCam2Z = vec3(vx / Z, vy / Z, vz / Z);\n" //Vel of aircraft wrt. ned in camera coordinates
+	"	VCam2Z = vec3(vx / distance, vy / distance, vz / distance);\n" //Vel of aircraft wrt. ned in camera coordinates
 
 	//Corrected texCoord can be converted to u, v with a linear relationship
 	"	h_with_rs = vec2(texCoord_noLens.x*width, (1.-texCoord_noLens.y)*height);\n"
@@ -683,10 +673,43 @@ char lensFragmentShader[] =
 	"	}\n"
 	"	texColor /= float(count);\n" //sampling = 4, interpolated = 2, + xx + xx + xx +, equals 10 points
 	"}\n"
+        
+    //gives dpeth in Z direction not distance
+    "float get_depth(in vec2 distortedTexCoord_, in vec2 texCoord_noLens, in int frame_num) {\n"
+	"	int row;\n"
+	"	float Z;\n"
+	"	vec2 texCoord_realRes;\n"
+	"	vec4 depthTex;\n"
+
+	"	row = int((1.-distortedTexCoord_.y)*height);\n"
+	"	texCoord_realRes = (texCoord_noLens - vec2(.5, .5)) / extra_margin + vec2(.5, .5);\n" //zoom to needed resolution
+	"	if(frame_num == 0)\n"
+	"		depthTex = texture2D (depthTexture1, texCoord_realRes);\n" //no space after texture2D will cause warning
+	"	else\n"
+	"		depthTex = texture2D (depthTexture2, texCoord_realRes);\n" //no space after texture2D will cause warning
+
+	"	Z = depthTex.r*(255.*255.) + depthTex.g*255. + depthTex.b\n;" //verified
+    "   return Z;\n"
+    "}\n"
+    
+    "vec4 applyFog( in vec4  rgb,\n"      // original color of the pixel
+    "           in float distance,\n" // camera to point distance
+    "           in vec3  rayOri,\n"   // camera position
+    "           in vec3  rayDir ) {\n"  // camera to point vector
+    
+    "   float FogStart = 10.;\n"
+    "   float FogEnd = 1000.;\n"
+    "   //float fogAmount = 0.5; \n"
+    "   float fogAmount = clamp((distance - FogStart) / (FogEnd - FogStart), 0., 1.);\n"
+    "   //float fogAmount = c*exp(-rayOri.y*b)*(1.0-exp(-distance*rayDir.y*b))/rayDir.y;\n"
+    "   vec4  fogColor  = vec4(0.5,0.6,0.7, 1.);\n"
+    "   return mix( rgb, fogColor, fogAmount );\n"
+    "}\n"
 
 	//Main////////////////////////////////////////////////////////
 	"void main() {\n"
 	"	float n1,n2,n3,s1,s2, val, err;\n"
+    "   float depth1, depth2, depth;"
 	"	vec2 texCoord_noLens, texCoord3f1[DIRECT_SAMPLING_POINTS], texCoord3f2[DIRECT_SAMPLING_POINTS], texCoord_realRes, st;\n"
 	"	vec2 mean_texCoord, texCoord_realResMean, texCoord_realResMin, texCoord_realResMax;\n"
 	"	vec4 texColor, vignetTex, depthTex;\n"
@@ -781,11 +804,16 @@ char lensFragmentShader[] =
 
 	///Temporal distortion
 	"	//texCoord3f1[0] = texCoord_noLens;\n"
-	"	if(double_input == 0)\n"
-	"		inverse_rolling_shutter(distortedTexCoord.xy, texCoord_noLens, -td-0.5*ti          , 0, texCoord3f1);\n" //because delay is compensated outside
-	"	else {\n"
-	"		inverse_rolling_shutter(distortedTexCoord.xy, texCoord_noLens, -td-0.5*tr-ti-0.5*te, 0, texCoord3f1);\n" //because delay is compensated outside
-	"		inverse_rolling_shutter(distortedTexCoord.xy, texCoord_noLens, -td+0.5*tr-0.+0.5*te, 1, texCoord3f2);\n" //because delay is compensated outside
+	"	if(double_input == 0) {\n"
+    "       depth1 = get_depth(distortedTexCoord.xy, texCoord_noLens, 0);\n"
+	"		inverse_rolling_shutter(distortedTexCoord.xy, texCoord_noLens, -td-0.5*ti          , depth1, texCoord3f1);\n" //because delay is compensated outside
+    "       depth = depth1;\n"
+	"	} else {\n"
+    "       depth1 = get_depth(distortedTexCoord.xy, texCoord_noLens, 0);\n"
+	"		inverse_rolling_shutter(distortedTexCoord.xy, texCoord_noLens, -td-0.5*tr-ti-0.5*te, depth1, texCoord3f1);\n" //because delay is compensated outside
+    "       depth2 = get_depth(distortedTexCoord.xy, texCoord_noLens, 1);\n"
+	"		inverse_rolling_shutter(distortedTexCoord.xy, texCoord_noLens, -td+0.5*tr-0.+0.5*te, depth2, texCoord3f2);\n" //because delay is compensated outside
+    "       depth = (depth1 + depth2)/2.;\n"
 	"	}\n"
 
 	"	//if(texCoord_noLens.x > 0.5) {\n" //render depth, not color
@@ -809,6 +837,14 @@ char lensFragmentShader[] =
 	"		//else \n"
 	"		//	blur_distortion(texCoord3f2, 1, texColor);\n"
 
+    //fog, assuming no change of depth during frame
+	"       float u = (texCoord_noLens.x*width - ox)/fx;\n"
+	"       float v = ((1.-texCoord_noLens.y)*height - oy)/fy;\n" //y in a picture is defined from up to down
+    "       float distance = depth*sqrt(1. + u*u + v*v);\n"
+    "       vec3 rayOri = vec3(0., 0., 0.);\n"
+    "       vec3 rayDir = vec3(0., 0., 0.);\n"
+    "       texColor = applyFog(texColor, distance, rayOri, rayDir);\n"
+    
 	"		mgl_FragColor = vec4(vignetTex.x*day_light*texColor.r + n1,"
 	"								vignetTex.y*day_light*texColor.g + n2,"
 	"									vignetTex.z*day_light*texColor.b + n3, 1.);\n"
