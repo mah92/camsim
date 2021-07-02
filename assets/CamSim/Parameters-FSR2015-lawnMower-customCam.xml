@@ -22,7 +22,7 @@
     <pathParams0 pathFile="path_lawnmower_nadir.csv" csvPositionFmt="LLA" trackerType="6" accMax="10" angAccMax="60" controlFreq="800"/>
 	<pathParams0 pathFile="path_space.csv" csvPositionFmt="LLA" trackerType="6" accMax="10" angAccMax="60" controlFreq="800"/>
 
-	<pathParamsExtra speedFactor="10." worldScale="1." altOffset="0."/>
+	<pathParamsExtra speedFactor="1." worldScale="1." altOffset="0."/>
 
 	<!-- default parameters for usual cameras -->
 	<!-- ### DON'T CHANGE, BUT OVERRIDE BY INCLUDED CAM FILE ### -->

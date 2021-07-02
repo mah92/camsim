@@ -67,3 +67,15 @@ else (THREADS_FOUND)
     message("Can't find pthreads!")
 endif (THREADS_FOUND)
 
+##ROS###################
+find_package(catkin COMPONENTS roscpp rosbag std_msgs sensor_msgs geometry_msgs)
+
+if (catkin_FOUND)
+    message("-- ROS found!")
+    add_definitions(-DROS_FOUND)
+    include_directories(${catkin_INCLUDE_DIRS})
+    target_link_libraries( ${PROJECT_NAME} 	${catkin_LIBRARIES})
+else (catkin_FOUND)
+	message("-- ROS not found!")
+endif (catkin_FOUND)
+ 

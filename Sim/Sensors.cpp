@@ -8,6 +8,7 @@
 #include "./nsrPoseSim.h"
 #include "Matlib/nsrQuat.h"
 #include "Sim/nsrSimParamReader.h"
+#include "Sim/nsrRosInterface.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,6 +36,7 @@ void Sensors(SimStorage &Sim)
 	osg::Vec3d lla, v_ac, a_ac, acc_ac, w_ac;
 	osg::Quat acInNedQu;
 
+    double senx, seny, senz;
 	double t = Sim.t;
 
 	nsrPoseMakerExtract(t, 0,
@@ -57,7 +59,10 @@ void Sensors(SimStorage &Sim)
 	else T = 1;
 
 	//Calculate CI2B (Change to Body Rotation Matrix)////////
-	nsr::Quat(acInNedQu.x(), acInNedQu.y(), acInNedQu.z(), acInNedQu.w()).getRotMat(CI2B);
+	nsr::Quat q(acInNedQu.x(), acInNedQu.y(), acInNedQu.z(), acInNedQu.w());
+    q.getRotMat(CI2B);
+    
+    registerRosGroundTruth(t, lla.x(), lla.y(), lla.z(), q.e1, q.e2, q.e3, q.et);
 
 	//Accelerometers////////////////////////////////////////
 	if(n.Z.Acc != 0 && Freq(n.Z.Acc) > 1e-6)  //40Hz Acc
@@ -72,11 +77,17 @@ void Sensors(SimStorage &Sim)
 				Noise(n.Z.Acc + 2) = 0;
 			}
 
+            senx = acc_ac.x() + Noise(n.Z.Acc + 0); //Acc
+			seny = acc_ac.y() + Noise(n.Z.Acc + 1);
+			senz = acc_ac.z() + Noise(n.Z.Acc + 2);
+            
 			_LOCKCPP(Z_lock, -1);
-			cbPush(mZB, n.Z.Acc + 0, acc_ac.x() + Noise(n.Z.Acc + 0), t); //Acc
-			cbPush(mZB, n.Z.Acc + 1, acc_ac.y() + Noise(n.Z.Acc + 1), t);
-			cbPush(mZB, n.Z.Acc + 2, acc_ac.z() + Noise(n.Z.Acc + 2), t);
+			cbPush(mZB, n.Z.Acc + 0, senx, t); cbPush(mZB, n.Z.Acc + 1, seny, t); cbPush(mZB, n.Z.Acc + 2, senz, t);
 			_UNLOCKCPP(Z_lock, -1);
+            
+            registerRosAcc(t, senx, seny, senz,
+                SAFE_MODE == 1 ? 0 : RMS(n.Z.Acc + 0), SAFE_MODE == 1 ? 0 : RMS(n.Z.Acc + 1), SAFE_MODE == 1 ? 0 : RMS(n.Z.Acc + 2)
+            );
 		}
 
 	//Gyro//////////////////////////////////////////////////
@@ -94,11 +105,17 @@ void Sensors(SimStorage &Sim)
 				Noise(n.Z.Gyro + 2) = 0;
 			}
 
+			senx = w_ac.x() + Noise(n.Z.Gyro + 0); //Gyro
+			seny = w_ac.y() + Noise(n.Z.Gyro + 1);
+			senz = w_ac.z() + Noise(n.Z.Gyro + 2);
+			
 			_LOCKCPP(Z_lock, -1);
-			cbPush(mZB, n.Z.Gyro + 0, w_ac.x() + Noise(n.Z.Gyro + 0), t); //Gyro
-			cbPush(mZB, n.Z.Gyro + 1, w_ac.y() + Noise(n.Z.Gyro + 1), t);
-			cbPush(mZB, n.Z.Gyro + 2, w_ac.z() + Noise(n.Z.Gyro + 2), t);
+			cbPush(mZB, n.Z.Gyro + 0, senx, t); cbPush(mZB, n.Z.Gyro + 1, seny, t); cbPush(mZB, n.Z.Gyro + 2, senz, t);
 			_UNLOCKCPP(Z_lock, -1);
+            
+            registerRosGyro(t, senx, seny, senz,
+                SAFE_MODE == 1 ? 0 : RMS(n.Z.Gyro + 0), SAFE_MODE == 1 ? 0 : RMS(n.Z.Gyro + 1), SAFE_MODE == 1 ? 0 : RMS(n.Z.Gyro + 2)
+            );
 
 			//printf("%f, %f, %f\n", w_ac.x(), w_ac.y(), w_ac.z());
 		}
@@ -122,11 +139,15 @@ void Sensors(SimStorage &Sim)
 			mmm.fill2(MM[0] + Noise(n.Z.MMM + 0), MM[1] + Noise(n.Z.MMM + 1), MM[2] + Noise(n.Z.MMM + 2));
 			mmm = mmm / norm(mmm);
 
+            senx = mmm[0]; seny = mmm[1]; senz = mmm[2];
+            
 			_LOCKCPP(Z_lock, -1);
-			cbPush(mZB, n.Z.MMM + 0, mmm[0], t);
-			cbPush(mZB, n.Z.MMM + 1, mmm[1], t);
-			cbPush(mZB, n.Z.MMM + 2, mmm[2], t);
+			cbPush(mZB, n.Z.MMM + 0, senx, t); cbPush(mZB, n.Z.MMM + 1, seny, t); cbPush(mZB, n.Z.MMM + 2, senz, t);
 			_UNLOCKCPP(Z_lock, -1);
+            
+            registerRosMag(t, senx, seny, senz,
+                SAFE_MODE == 1 ? 0 : RMS(n.Z.MMM + 0), SAFE_MODE == 1 ? 0 : RMS(n.Z.MMM + 1), SAFE_MODE == 1 ? 0 : RMS(n.Z.MMM + 2)
+            );
 		}
 
 	//GPS////////////////////////////////////////////////////
@@ -142,12 +163,18 @@ void Sensors(SimStorage &Sim)
 					Noise(n.Z.GPS_LLA + 2) = 0;
 				}
 
-#define EarthRadius 6378137
+                #define EarthRadius 6378137
+                senx = lla.x() + Noise(n.Z.GPS_LLA + 0) * (180 / M_PI) / EarthRadius;
+                seny = lla.y() + Noise(n.Z.GPS_LLA + 1) * (180 / M_PI) / (EarthRadius * cos(lla.x()*M_PI / 180));
+                senz = lla.z() + /*param_world_scale?? * */ Noise(n.Z.GPS_LLA + 2);
+                
 				_LOCKCPP(Z_lock, -1);
-				cbPush(mZB, n.Z.GPS_LLA + 0, lla.x() + Noise(n.Z.GPS_LLA + 0) * (180 / M_PI) / EarthRadius, t); //GPS
-				cbPush(mZB, n.Z.GPS_LLA + 1, lla.y() + Noise(n.Z.GPS_LLA + 1) * (180 / M_PI) / (EarthRadius * cos(lla.x()*M_PI / 180)), t);
-				cbPush(mZB, n.Z.GPS_LLA + 2, lla.z() + /*param_world_scale?? * */ Noise(n.Z.GPS_LLA + 2), t);
+				cbPush(mZB, n.Z.GPS_LLA + 0, senx, t); cbPush(mZB, n.Z.GPS_LLA + 1, seny, t); cbPush(mZB, n.Z.GPS_LLA + 2, senz, t);
 				_UNLOCKCPP(Z_lock, -1);
+                
+                registerRosGPS(t, senx, seny, senz,
+                    SAFE_MODE == 1 ? 0 : RMS(n.Z.GPS_LLA + 0), SAFE_MODE == 1 ? 0 : RMS(n.Z.GPS_LLA + 1), SAFE_MODE == 1 ? 0 : RMS(n.Z.GPS_LLA + 2)
+                );
 
 				//Magnetometer Reference////////////////////////////////
 				//Put in the n.Z.MM if for MMR to be defined
@@ -164,20 +191,31 @@ void Sensors(SimStorage &Sim)
 				mmr.fill2(MMR[0] + Noise(n.Z.MMR + 0), MMR[1] + Noise(n.Z.MMR + 1), MMR[2] + Noise(n.Z.MMR + 2));
 				mmr = mmr / norm(mmr);
 
+                senx = mmr[0];
+                seny = mmr[1];
+                senz = mmr[2];
+                
 				_LOCKCPP(Z_lock, -1);
-				cbPush(mZB, n.Z.MMR + 0, mmr[0], t);
-				cbPush(mZB, n.Z.MMR + 1, mmr[1], t);
-				cbPush(mZB, n.Z.MMR + 2, mmr[2], t);
+				cbPush(mZB, n.Z.MMR + 0, senx, t); cbPush(mZB, n.Z.MMR + 1, seny, t); cbPush(mZB, n.Z.MMR + 2, senz, t);
 				_UNLOCKCPP(Z_lock, -1);
-				//}
+                
+                registerRosMagRef(t, senx, seny, senz,
+                    SAFE_MODE == 1 ? 0 : RMS(n.Z.MMR + 0), SAFE_MODE == 1 ? 0 : RMS(n.Z.MMR + 1), SAFE_MODE == 1 ? 0 : RMS(n.Z.MMR + 2)
+                );
 			}
 
 			if(n.Z.GPS_V != 0) {
+                senx = 180 / M_PI * atan2(v_ac.y(), v_ac.x());
+                seny = sqrt(v_ac.x()*v_ac.x() + v_ac.y()*v_ac.y());
+                senz = -v_ac.z();
+                
 				_LOCKCPP(Z_lock, -1);
-				cbPush(mZB, n.Z.GPS_V + 0, 180 / M_PI * atan2(v_ac.y(), v_ac.x()), t);
-				cbPush(mZB, n.Z.GPS_V + 1, sqrt(v_ac.x()*v_ac.x() + v_ac.y()*v_ac.y()), t);
-				cbPush(mZB, n.Z.GPS_V + 2, -v_ac.z(), t);
+				cbPush(mZB, n.Z.GPS_V + 0, senx, t); cbPush(mZB, n.Z.GPS_V + 1, seny, t); cbPush(mZB, n.Z.GPS_V + 2, senz, t);
 				_UNLOCKCPP(Z_lock, -1);
+                
+                registerRosGPSVel(t, v_ac.x(), v_ac.y(), v_ac.z(),
+                    0,0,0
+                );
 			}
 		}
 
@@ -188,22 +226,14 @@ void Sensors(SimStorage &Sim)
 			if(SAFE_MODE == 1) {
 				Noise(n.Z.PrsAlt) = 0;
 			}
-
+			
+			senz = lla.z() + /*param_world_scale?? * */ Noise(n.Z.PrsAlt);
+            
 			_LOCKCPP(Z_lock, -1);
-			cbPush(mZB, n.Z.PrsAlt, lla.z() + /*param_world_scale?? * */ Noise(n.Z.PrsAlt), t);//Prs
-			//cbPush(mZB, n.Z.PrsAlt, -Loc[1] + Noise(n.Z.PrsAlt), t);//Prs
+			cbPush(mZB, n.Z.PrsAlt, senz, t);//Prs
 			_UNLOCKCPP(Z_lock, -1);
-
-			//APrs////////////////////////////////////////////////////
-			Noise(n.Z.PrsAcc) = normrnd(Bias(n.Z.PrsAcc), RMS(n.Z.PrsAcc)); //APrs
-			if(SAFE_MODE == 1) {
-				Noise(n.Z.PrsAcc) = 0;
-			}
-
-			//APrs=-(V[2]-Vpre[2])/T;
-			_LOCKCPP(Z_lock, -1);
-			cbPush(mZB, n.Z.PrsAcc, a_ac.z() + Noise(n.Z.PrsAcc), t);//APrs
-			_UNLOCKCPP(Z_lock, -1);
+            
+            registerRosPrsAlt(t, senz, SAFE_MODE == 1 ? 0 : RMS(n.Z.PrsAlt));
 		}
 
 	//Time//////////////////////////////////////////////////

@@ -9,6 +9,7 @@
  * //Quaternion definition://////////////////////
  * Titterton & simulink: [cos(mu/2) l*sin(mu/2) m*sin(mu/2) n*sin(mu/2)]
  * here, osg & clementon msckf impl.:[l*sin(mu/2) m*sin(mu/2) n*sin(mu/2) cos(mu/2)]
+ * JPL convention is used here not the hamiltonian one
  *
  * //Quat2vector mult. definition:///////////////
  * quaternion imaginary math:
@@ -16,21 +17,21 @@
  * CB2I <-> q ** r := q * r * q.conj()
  * CI2B <-> q ** r := q.conj() * r * q
  *
- * 1) QUAT_IS_CI2B
+ * 1) QUAT_IS_CI2B (JPL)
  * - matlab quaternion rotation(aerospace blockset)  //verified
  * - matlab quaternion to DCM(aerospace blockset)  //verified
  * - recommended
  *
- * 2) QUAT_IS_CB2I
+ * 2) QUAT_IS_CB2I (Hamiltonian)
  * - titterton //verified
  * - osg //verified
  *
  * //Quat2Quat mult. definition://///////////////
- * 1) QUAT_IS_CI2B
+ * 1) QUAT_IS_CI2B (JPL)
  * - osg //verified
  * - recommended as complies with CI2B rotation
  *
- * 2) QUAT_IS_CB2I
+ * 2) QUAT_IS_CB2I (Hamiltonian)
  * Quaternion imaginary math(et,e1,e2,e3) = (et+e1*i+e2*j+e3*k)
  * It is reverse of CI2B(p.q instead of q.p )
  * - titterton //verified
@@ -57,8 +58,8 @@
  * Qu2Eu & Eu2Qu formulas are wrong within a few degrees
  */
 
-#define QUAT_IS_CI2B
-//#define QUAT_IS_CB2I
+#define QUAT_IS_CI2B   //JPL quaternion definition, recommended
+//#define QUAT_IS_CB2I //Hamiltonian quaternion definition, NOT fully implmented
 
 #ifndef __NSR_QUAT_H__
 #define __NSR_QUAT_H__

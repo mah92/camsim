@@ -94,6 +94,7 @@ set( CamSimsrc
     ${maindir}/Sim/Sensors.cpp
     ${maindir}/Sim/nsrPoseSim.cpp
     ${maindir}/Sim/nsrSimParamReader.cpp
+    ${maindir}/Sim/nsrRosInterface.cpp
 
     ${maindir}/Visualize/nsrVisualize.cpp
 	${maindir}/Visualize/nsrMatShow.cpp

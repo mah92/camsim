@@ -171,9 +171,11 @@ void nsrReadSimParams(const char* filename)
 					param_do_what = DO_SAVE_BMP;
 				if(strcmp("IMAGE_PROC", strparam_do_what) == 0)
 					param_do_what = DO_IMAGE_PROC;
+                if(strcmp("SAVE_ROS_BAG", strparam_do_what) == 0)
+                    param_do_what = DO_SAVE_ROS_BAG;
 			}
 
-			LOGI(TAG, "mainParams: %i, %i\n", param_render_what, param_show_what);
+			LOGI(TAG, "mainParams: %i, %i, %i\n", param_render_what, param_show_what, param_do_what);
 		}
 
 		if(strcmp(node_name, "mapParams") == 0) {

@@ -29,6 +29,8 @@
 
 #include <osgDB/WriteFile>
 
+#include "Sim/nsrRosInterface.h"
+
 #undef TAG
 #define TAG "Cpp:OsgViewer:"
 
@@ -122,6 +124,12 @@ public:
 			image->flipVertical();//5 fps drop!!
 			nsrImageProc(image->data(), width, height, 4, frame_timestamp_s);
 		}
+		
+		if(param_do_what == DO_SAVE_ROS_BAG) {
+            image->flipVertical();//5 fps drop!!
+            registerRosImage(frame_timestamp_s, image->data(), width, height, width*4, 4);
+            registerRosCamInfo(frame_timestamp_s);
+        }
 	}
 };
 

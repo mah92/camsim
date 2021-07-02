@@ -16,6 +16,7 @@
 #include "Core/nsrUtility.h" //for time_reached
 #include "Visualize/nsrVisualize.h"
 #include "Matlib/nsrQuat.h"
+#include "Sim/nsrRosInterface.h"
 
 #include <unistd.h> //usleep
 
@@ -32,6 +33,10 @@ int simInit()
 {
 	Init_Sim(Sim);
 	nsrPoseMakerInit();
+    
+    if(param_do_what == DO_SAVE_ROS_BAG)
+        rosOpen();
+    
     return 0;
 }
 
@@ -86,6 +91,7 @@ int simLoop(double time_barrier)
 
 int simClose()
 {
+    rosClose();
 	nsrPoseMakerClose();
     return 0;
 }

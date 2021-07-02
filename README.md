@@ -51,6 +51,8 @@ $sudo apt-get install libopenscenegraph-dev openscenegraph
 
 $sudo apt-get install libopencv-dev (optional)
 
+Install ROS (optional)
+
 It is also possible to install libosgearth-dev, openscenegraph-plugin-osgearth if the OpenSceneGraph does not get installed correctly.
 
 After installations, go to the program folder and run:
@@ -155,7 +157,7 @@ Installation angle errors:
 	
 	showWhat = "MAP" or "PATTERN"
 	
-	doWhat = "SAVE_BMP" or "IMAGE_PROC"
+	doWhat = "SAVE_BMP" or "IMAGE_PROC" or "SAVE_ROS_BAG" (if ros exists)
 
 	* mapParams
 	
