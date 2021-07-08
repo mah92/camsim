@@ -82,6 +82,7 @@ extern double param_day_light;
 extern double param_noise_amp_dynamic;
 extern double param_noise_amp_static1;
 extern double param_noise_amp_static2;
+extern double param_max_fog_distance;
 
 extern double param_cam_in_ac_roll;
 extern double param_cam_in_ac_pitch;

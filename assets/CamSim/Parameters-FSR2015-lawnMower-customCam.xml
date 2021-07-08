@@ -51,7 +51,9 @@
     <signalParams0 dayLight="0.5" noiseAmpDynamic="0.0" noiseAmpStatic1="0.0" noiseAmpStatic2="0.0" seed="200" desc="1/10 daylight"/>
     <signalParams0 dayLight="0.5" noiseAmpDynamic="0.1" noiseAmpStatic1="0.1" noiseAmpStatic2="0.1" seed="200" desc="alltogether"/>
 	<signalParams dayLight="1." noiseAmpDynamic="0.038" noiseAmpStatic1="0.0" noiseAmpStatic2="0.0" seed="12" desc="1sig is measured as 5.65/255 in grayscale image so color image noise is assumed as sqrt(3)*5.65/255"/>
-	
+    	
+	<signalParams fogVisibilityDistance="1000." desc="linear fog model"/>
+
     <dynamicParams0 td="0.0" tdErr="0." tr="0.00" te="6.875e-05" motionBlurExtraSamples="5" ti="0.0" desc="normal"/>
     <dynamicParams0 td="0.0" tdErr="0." tr="0.00" te="0." motionBlurExtraSamples="5" ti="0.0" desc="original"/>
     <dynamicParams0 td="0.1" tdErr="0." tr="0.00" te="0.00" motionBlurExtraSamples="5" ti="0." desc="pure delay"/>

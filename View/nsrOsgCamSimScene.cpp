@@ -298,6 +298,7 @@ int CamSimScene::InitOsgWindow(int x, int y, int _screen_width, int _screen_heig
 	distortedDrawable->inVecCallback->setElement(UNIFORM_NOISE_AMPLITUDE_DYNAMIC, param_noise_amp_dynamic);
 	distortedDrawable->inVecCallback->setElement(UNIFORM_NOISE_AMPLITUDE_STATIC1, param_noise_amp_static1);
 	distortedDrawable->inVecCallback->setElement(UNIFORM_NOISE_AMPLITUDE_STATIC2, param_noise_amp_static2);
+	distortedDrawable->inVecCallback->setElement(UNIFORM_MAX_FOG_DISTANCE, param_max_fog_distance);
 #endif
 
 	/*osgUtil::Optimizer optimizer;

@@ -89,6 +89,7 @@ double param_day_light = 0.7;
 double param_noise_amp_dynamic = 0.1;
 double param_noise_amp_static1 = 0.1;
 double param_noise_amp_static2 = 0.1;
+double param_max_fog_distance = 1000.;
 
 double param_cam_in_ac_roll = 0.;
 double param_cam_in_ac_pitch = 0.;
@@ -360,8 +361,9 @@ void nsrReadSimParams(const char* filename)
 			if(node.attribute("noiseAmpDynamic")) param_noise_amp_dynamic = node.attribute("noiseAmpDynamic").as_double();
             if(node.attribute("noiseAmpStatic1")) param_noise_amp_static1 = node.attribute("noiseAmpStatic1").as_double();
             if(node.attribute("noiseAmpStatic2")) param_noise_amp_static2 = node.attribute("noiseAmpStatic2").as_double();
+            if(node.attribute("fogVisibilityDistance")) param_max_fog_distance = node.attribute("fogVisibilityDistance").as_double();
 			if(node.attribute("seed")) param_seed = node.attribute("seed").as_int();
-			LOGI(TAG, "signalParams: %f, %f, %f, %f, %i\n", param_day_light, param_noise_amp_dynamic, param_noise_amp_static1, param_noise_amp_static2, param_seed);
+			LOGI(TAG, "signalParams: %f, %f, %f, %f, %f, %i\n", param_day_light, param_noise_amp_dynamic, param_noise_amp_static1, param_noise_amp_static2, param_max_fog_distance, param_seed);
 		}
 
 		if(strcmp(node_name, "camInAcEu") == 0) {

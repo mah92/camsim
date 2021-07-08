@@ -9,6 +9,6 @@
 	<includeParams0 includeFile="Parameters-FSR2015-lawnMower-customCamStab.xml" />
 	
 	<mainParams0 renderWhat="IMAGE" doWhat="SAVE_IMAGE" />
-	<mainParams0 renderWhat="IMAGE" doWhat="IMAGE_PROC" />
-    <mainParams renderWhat="IMAGE" doWhat="SAVE_ROS_BAG" />
+	<mainParams renderWhat="IMAGE" doWhat="IMAGE_PROC" />
+    <mainParams0 renderWhat="IMAGE" doWhat="SAVE_ROS_BAG" />
 </simParams>

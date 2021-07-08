@@ -299,7 +299,7 @@ char lensFragmentShader[] =
 	"uniform sampler2D vignetTexture;\n"
 	"varying vec4 distortedTexCoord;\n"
 
-	"uniform float inputVect[39];\n"
+	"uniform float inputVect[40];\n"
 
 	"float \n"
 	"	render_depth, seed, time_s, wx, wy, wz, vx, vy, vz,\n"
@@ -308,7 +308,8 @@ char lensFragmentShader[] =
 	"				td, tr, te, ti,\n"
 	"				width, height,\n"
 	"					fx, fy, ox, oy, extra_margin, extra_zoom,\n"
-	"						noise_amplitude_dyn, noise_amplitude_st1, noise_amplitude_st2, day_light;\n"
+	"						noise_amplitude_dyn, noise_amplitude_st1, noise_amplitude_st2, day_light,\n"
+    "                           fog_end;\n"
 	"int extra_sampling_points, double_input;\n"
 
 	//direct sampling = 4, interpolated = 2, + xx + xx + xx +, equals 10 points
@@ -674,7 +675,8 @@ char lensFragmentShader[] =
 	"	texColor /= float(count);\n" //sampling = 4, interpolated = 2, + xx + xx + xx +, equals 10 points
 	"}\n"
         
-    //gives dpeth in Z direction not distance
+    //Fog/////////////////////////////////////////////////////////////////
+    //gives depth in Z direction not distance
     "float get_depth(in vec2 distortedTexCoord_, in vec2 texCoord_noLens, in int frame_num) {\n"
 	"	int row;\n"
 	"	float Z;\n"
@@ -697,10 +699,10 @@ char lensFragmentShader[] =
     "           in vec3  rayOri,\n"   // camera position
     "           in vec3  rayDir ) {\n"  // camera to point vector
     
-    "   float FogStart = 10.;\n"
-    "   float FogEnd = 1000.;\n"
+    "   float fog_start = 0.;\n"
+    "   //float fog_end = 1000.;\n"
     "   //float fogAmount = 0.5; \n"
-    "   float fogAmount = clamp((distance - FogStart) / (FogEnd - FogStart), 0., 1.);\n"
+    "   float fogAmount = clamp((distance - fog_start) / (fog_end - fog_start), 0., 1.);\n"
     "   //float fogAmount = c*exp(-rayOri.y*b)*(1.0-exp(-distance*rayDir.y*b))/rayDir.y;\n"
     "   vec4  fogColor  = vec4(0.5,0.6,0.7, 1.);\n"
     "   return mix( rgb, fogColor, fogAmount );\n"
@@ -733,7 +735,8 @@ char lensFragmentShader[] =
 	"	extra_margin = inputVect[32];\n" //extra margin used in ideally rendered image
 	"	extra_zoom = inputVect[33];\n" //used so that image get smaller
 	"	day_light = inputVect[34]; noise_amplitude_dyn = inputVect[35]; noise_amplitude_st1 = inputVect[36]; noise_amplitude_st2 = inputVect[37];\n"
-	"	double_input = int(inputVect[38]);\n"
+    "   fog_end = inputVect[38];\n"
+	"	double_input = int(inputVect[39]);\n"
 
 	///Photometric distortion
 	"	vignetTex = texture2D (vignetTexture, distortedTexCoord.xy);\n" //no space after texture2D will cause warning
@@ -837,13 +840,15 @@ char lensFragmentShader[] =
 	"		//else \n"
 	"		//	blur_distortion(texCoord3f2, 1, texColor);\n"
 
-    //fog, assuming no change of depth during frame
-	"       float u = (texCoord_noLens.x*width - ox)/fx;\n"
-	"       float v = ((1.-texCoord_noLens.y)*height - oy)/fy;\n" //y in a picture is defined from up to down
-    "       float distance = depth*sqrt(1. + u*u + v*v);\n"
-    "       vec3 rayOri = vec3(0., 0., 0.);\n"
-    "       vec3 rayDir = vec3(0., 0., 0.);\n"
-    "       texColor = applyFog(texColor, distance, rayOri, rayDir);\n"
+            //fog, assuming no change of depth during frame
+    "       if(fog_end > 0.1) {\n"
+	"          float u = (texCoord_noLens.x*width - ox)/fx;\n"
+	"          float v = ((1.-texCoord_noLens.y)*height - oy)/fy;\n" //y in a picture is defined from up to down
+    "           float distance = depth*sqrt(1. + u*u + v*v);\n"
+    "           vec3 rayOri = vec3(0., 0., 0.);\n"
+    "           vec3 rayDir = vec3(0., 0., 0.);\n"
+    "           texColor = applyFog(texColor, distance, rayOri, rayDir);\n"
+    "       }\n"
     
 	"		mgl_FragColor = vec4(vignetTex.x*day_light*texColor.r + n1,"
 	"								vignetTex.y*day_light*texColor.g + n2,"

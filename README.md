@@ -252,7 +252,9 @@ Installation angle errors:
 	
 	noiseAmpStatic2 between[0,1], is 1 sigma of added gaussian noise for each col/row in gray channel, this is the typical noise present in night cameras
 	
-	final pixel = DayLight*pix + noise
+	fogVisibilityDistance in meters, is the max visibility distance based on a linear fog model
+	
+	final pixel = (DayLight*fog(pix) + noise)
 
 	* camInAcEu
 	
