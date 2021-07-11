@@ -1,0 +1,27 @@
+# Blender MTL File: 'None'
+# Material Count: 2
+
+newmtl 02___Default.001
+Ns 10.000002
+Ka 1.000000 1.000000 1.000000
+Kd 0.588200 0.588200 0.588200
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Bump Object_430_NM.dds
+map_Kd Object_430.dds
+
+newmtl Material_1
+Ns 7.999999
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Bump Object_430_track_NM.dds
+map_Kd Object_430_track.dds
+map_d Object_430_track.dds

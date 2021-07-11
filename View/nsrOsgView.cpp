@@ -213,9 +213,7 @@ int nsrOsgInitOsgWindow(int x, int y, int _full_screen_width, int _full_screen_h
 	//osg::Camera::FRAME_BUFFER_OBJECT hides camera output and causes higher speed(at least 3 fps), other options has no effect
 	saveCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT); //FRAME_BUFFER_OBJECT(the only one that has effect), PIXEL_BUFFER_RTT, PIXEL_BUFFER, FRAME_BUFFER
 	saveCamera->setFinalDrawCallback(new ReadBufferCallback(saveTexture));
-
-	///////////////////////////////////////////////////////
-
+    
 	initTickRate(&renderTickRate);
 
 	commonOsgInitOsgWindow2();

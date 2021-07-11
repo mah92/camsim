@@ -44,8 +44,6 @@ or
 extern "C" {
 #endif
 
-static double ecef_center_x = 0, ecef_center_y = 0, ecef_center_z = 0;
-
 ////////////////////////////////////////////
 //Notes:
 //1)Reference frame:
@@ -70,7 +68,7 @@ osg::Geometry* createTileGeometryInCPU(const std::string &texfile, int xTile, in
 {
 	unsigned int i, j;
 	unsigned int columns, rows;
-	double lat_rad, lon_rad;
+	double lat, lon;
 	float alt;
 	double ecef_x, ecef_y, ecef_z;
 	float row_percent, col_percent;
@@ -117,24 +115,20 @@ osg::Geometry* createTileGeometryInCPU(const std::string &texfile, int xTile, in
 		for(j = 0; j < columns; j++) {
 			row_percent = (float)i / (float)(rows - 1);
 			col_percent = (float)j / (float)(columns - 1);
-			tile2lla_rad(xTile + col_percent, yTile + row_percent, zoom, lat_rad, lon_rad);//lat is geodetic
+			tile2lla(xTile + col_percent, yTile + row_percent, zoom, lat, lon);//lat is geodetic
 
 			if(!use_dem)
 				alt = 0;
 			else
-				demGetHeight(lat_rad * 180. / M_PI, lon_rad * 180. / M_PI, alt);
+				demGetHeight(lat, lon, alt);
 
 			//alt+=47.5.; // + N(undulation) to convert EGM96 msl to WGS-84///????
-			alt += nsrGeoidGetHeight(lat_rad * 180. / M_PI, lon_rad * 180. / M_PI);
+			alt += nsrGeoidGetHeight(lat, lon);
 			//printf("((%f\n", nsrGeoidGetHeight(lat_rad*180./M_PI, lon_rad*180./M_PI));
 
 			//LLA - Geodetic Lat(rad, WGS84) Lon(rad) Alt(WGS84)
-			LLA2ECEF_rad(lat_rad, lon_rad, alt, ecef_x, ecef_y, ecef_z);
-
-			//Center Offset
-			ecef_x -= ecef_center_x;
-			ecef_y -= ecef_center_y;
-			ecef_z -= ecef_center_z;
+			LLA2ECEF(lat, lon, alt, ecef_x, ecef_y, ecef_z);
+            ECEF2CCEF(ecef_x, ecef_y, ecef_z);
 
 			(*vertices)[i * columns + j].set(ecef_x, ecef_y, ecef_z);
 			//vertices[0]*=0.00003;
@@ -196,7 +190,7 @@ osg::Geometry* createImageGeometryInCPU(const std::string &texfile, double cente
 {
 	unsigned int i, j;
 	unsigned int columns, rows;
-	double lat_rad, lon_rad;
+	double lat, lon;
 	float alt;
 	double ecef_x, ecef_y, ecef_z;
 	float row_percent, col_percent;
@@ -242,25 +236,21 @@ osg::Geometry* createImageGeometryInCPU(const std::string &texfile, double cente
 		for(j = 0; j < columns; j++) {
 			row_percent = (float)i / (float)(rows - 1);
 			col_percent = (float)j / (float)(columns - 1);
-			image2lla(center_lat, center_lon, center_alt, metric_width, metric_height, col_percent, row_percent, lat_rad, lon_rad); //geocentric
-			lat_rad *= M_PI / 180.; lon_rad *= M_PI / 180.;
+			image2lla(center_lat, center_lon, center_alt, metric_width, metric_height, col_percent, row_percent, lat, lon); //geocentric
 
 			if(!use_dem)
 				alt = 0;
 			else
-				demGetHeight(lat_rad * 180. / M_PI, lon_rad * 180. / M_PI, alt);
+				demGetHeight(lat, lon, alt);
 			alt += center_alt;
 
-			alt += nsrGeoidGetHeight(lat_rad * 180. / M_PI, lon_rad * 180. / M_PI);
-			//printf("((%f\n", nsrGeoidGetHeight(lat_rad*180./M_PI, lon_rad*180./M_PI));
+			alt += nsrGeoidGetHeight(lat, lon);
+			//printf("((%f\n", nsrGeoidGetHeight(lat, lon));
 
-			LLA2ECEF_rad(lat_rad, lon_rad, alt, ecef_x, ecef_y, ecef_z); //geodetic
-
-			//Center Offset
-			ecef_x -= ecef_center_x;
-			ecef_y -= ecef_center_y;
-			ecef_z -= ecef_center_z;
-
+            //LLA - Geodetic Lat(rad, WGS84) Lon(rad) Alt(WGS84)
+			LLA2ECEF(lat, lon, alt, ecef_x, ecef_y, ecef_z);
+            ECEF2CCEF(ecef_x, ecef_y, ecef_z);
+            
 			(*vertices)[i * columns + j].set(ecef_x, ecef_y, ecef_z);
 			//vertices[0]*=0.00003;
 			(*texcoords)[i * columns + j].set((float)col_percent, (float)(1. - row_percent));
@@ -302,27 +292,6 @@ osg::Geometry* createImageGeometryInCPU(const std::string &texfile, double cente
 	geom->getOrCreateStateSet()->setAttributeAndModes( program.get() );
 	*/
 	return geom.release();
-}
-
-/**
- *  LLA - Geodetic Lat(deg, WGS84) Lon(deg) Alt(WGS84)
- */
-int MapDrawable2::setCoordCenter(double center_lat, double center_lon, double center_alt)
-{
-	osg::Vec3d ecef = LLA2ECEF(osg::Vec3d(center_lat, center_lon, center_alt));
-
-	ecef_center_x = ecef.x();
-	ecef_center_y = ecef.y();
-	ecef_center_z = ecef.z();
-    return 0;
-}
-
-int MapDrawable2::getCoordCenter(double &_ecef_center_x, double &_ecef_center_y, double &_ecef_center_z)
-{
-	_ecef_center_x = ecef_center_x;
-	_ecef_center_y = ecef_center_y;
-	_ecef_center_z = ecef_center_z;
-    return 0;
 }
 
 int MapDrawable2::addMapTile(int xTile, int yTile, int zoom, int dem_resolution) //-1 for no dem
@@ -389,7 +358,7 @@ int MapDrawable2::addMapRegion(double latmin, double latmax, double lonmin, doub
 	return tiles;
 }
 
-#define EARTH_RADIUS 6378137.
+#define EARTH_RADIUS (getEarthRadius()) // 6378137.
 
 //geocentric lat(deg) & lon(deg)
 int MapDrawable2::addSeenMapRegion(double latmean, double lonmean, double max_alt, double distance, int manual_zoom) //adds seen map

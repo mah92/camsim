@@ -292,26 +292,39 @@ void nsrPoseMakerStep()
 		}
 		if(ch == 0 && pose_maker_time_s < last_key_time + 0.1) //Keep button pressed
 			ch = last_ch;
+        
+        double CY = cos(ac_command[5]*M_PI/180.);
+        double SY = sin(ac_command[5]*M_PI/180.);
 
-		if(ch == KEY_UP)
-			ac_command[0] += +10 * X2LAT() * dt; //lat(deg)
-		if(ch == KEY_DOWN)
-			ac_command[0] += -10 * X2LAT() * dt; //lat(deg)
+#define SPEED 30. //Manual Speed in m/s
+        //Move in heading direction
+		if(ch == KEY_UP) {
+			ac_command[0] += SPEED * CY * X2LAT() * dt; //lat(deg)
+			ac_command[1] += SPEED * SY * Y2LON(ac_command[0]) * dt; //lat(deg)
+        }
+		if(ch == KEY_DOWN) {
+			ac_command[0] -= SPEED * CY * X2LAT() * dt; //lat(deg)
+			ac_command[1] -= SPEED * SY * Y2LON(ac_command[0]) * dt; //lat(deg)
+        }
 
-		if(ch == KEY_RIGHT)
-			ac_command[1] += +10 * Y2LON(ac_command[0]) * dt; //lon(deg)
-		if(ch == KEY_LEFT)
-			ac_command[1] += -10 * Y2LON(ac_command[0]) * dt; //lon(deg)
+		if(ch == KEY_EQUAL) {
+            ac_command[0] -= SPEED * SY * X2LAT() * dt; //lat(deg)
+			ac_command[1] += SPEED * CY * Y2LON(ac_command[0]) * dt; //lat(deg)
+        }
+		if(ch == KEY_MINUS) {
+            ac_command[0] += SPEED * SY * X2LAT() * dt; //lat(deg)
+			ac_command[1] -= SPEED * CY * Y2LON(ac_command[0]) * dt; //lat(deg)
+        }
 
 		if(ch == KEY_PAGEUP)
-			ac_command[2] += +2 * dt; //alt(m)
+			ac_command[2] += +10 * dt; //alt(m)
 		if(ch == KEY_PAGEDOWN)
-			ac_command[2] += -2 * dt; //alt(m)
+			ac_command[2] += -10 * dt; //alt(m)
 
-		if(ch == KEY_EQUAL) //==KEY_PLUS
+		if(ch == KEY_RIGHT) //==KEY_PLUS
 			ac_command[5] += +30 * dt; //yaw(deg)
-		if(ch == KEY_MINUS)
-			ac_command[5] += -30 * dt; //yaw(deg)
+		if(ch == KEY_LEFT)
+			ac_command[5] -= +30 * dt; //yaw(deg)
 
 		//printf("((ch:%i, deg:%f,dt:%f, t:%f, dy:%f\n", ch, ac_command[5], dt, pose_maker_time_s, 30*dt);
 

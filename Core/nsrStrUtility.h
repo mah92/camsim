@@ -17,10 +17,10 @@ extern "C" {
 int endsWith(const char *str, const char *suffix);
 	
 //returns len
-int findIntInLine(char* linebuf, int searchFrom, int searchTo, int* foundFrom, int* foundTo);
+int findIntInLine(const char* linebuf, int searchFrom, int searchTo, int* foundFrom, int* foundTo);
 
 //returns len
-int findFloatInLine(char* linebuf, int searchFrom, int searchTo, int* foundFrom, int* foundTo);
+int findFloatInLine(const char* linebuf, int searchFrom, int searchTo, int* foundFrom, int* foundTo);
 
 #ifdef __cplusplus
 }

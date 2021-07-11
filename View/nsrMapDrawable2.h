@@ -67,9 +67,6 @@ public:
 
 	MapDrawable2(bool _use_dem = false) : PositionAttitudeTransform(), use_dem(_use_dem) {}
 
-	int setCoordCenter(double center_lat, double center_lon, double center_alt);
-	int getCoordCenter(double &_ecef_center_x, double &_ecef_center_y, double &_ecef_center_z);
-
 	int addMapTile(int xTile, int yTile, int zoom, int dem_resolution = -1); //-1 for no dem
 	int addMapRegion(double latmin, double latmax, double lonmin, double lonmax, int zoom);
 	int addSeenMapRegion(double latmean, double lonmean, double max_alt, double distance = 10000., int manual_zoom = -1); //adds seen map

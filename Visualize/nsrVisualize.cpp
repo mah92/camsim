@@ -4,7 +4,7 @@
 
 #include "./nsrVisualize.h"
 #include "Core/RotLib/nsrRotLib.h"
-#include "Core/GeoLib/nsrGeoLib2.h"
+#include "View/nsrGeoLib.h"
 #include <math.h>
 #include "./nsrPoseSim.h"
 #include "Matlib/nsrQuat.h"

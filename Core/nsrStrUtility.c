@@ -33,7 +33,7 @@ int endsWith(const char *str, const char *suffix)
 	return strncmp(str + lenstr - lensuffix, suffix, lensuffix);
 }
 	
-int findIntInLine(char* linebuf, int searchFrom, int searchTo, int* foundFrom, int* foundTo)
+int findIntInLine(const char* linebuf, int searchFrom, int searchTo, int* foundFrom, int* foundTo)
 {
 	int i;
 	int len = 0;
@@ -51,7 +51,7 @@ int findIntInLine(char* linebuf, int searchFrom, int searchTo, int* foundFrom, i
 	return len;
 }
 
-int findFloatInLine(char* linebuf, int searchFrom, int searchTo, int* foundFrom, int* foundTo)
+int findFloatInLine(const char* linebuf, int searchFrom, int searchTo, int* foundFrom, int* foundTo)
 {
 	int i;
 	int dots = 0;

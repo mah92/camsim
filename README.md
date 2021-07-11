@@ -157,7 +157,7 @@ Installation angle errors:
 	
 	showWhat = "MAP" or "PATTERN"
 	
-	doWhat = "SAVE_BMP" or "IMAGE_PROC" or "SAVE_ROS_BAG" (if ros exists)
+	doWhat = "NOTHING", "SAVE_BMP", "IMAGE_PROC", or "SAVE_ROS_BAG" (if ros exists)
 
 	* mapParams
 	
@@ -404,17 +404,13 @@ It is not very nice but is usable. Navigating through diagrams is possible using
 * 'Esc': will close the simulation instantly
 
 ## Notes
-* If shaking is seen in the shown image(or calib pattern), make it bigger
-
-	Assume you have rendered a 2mx2m image on the earth surface. 
+* In this simulation, a custom coordinate system named CCEF is used to place things in openscenegraph
 	
 	As the earth surface is placed in ECEF coordinates, objects have very big coordinates, meaning 6,400km+
 	
 	The openscenegraph engine can not render such big coordinates without numerical errors in order of tens of centimeters.
 	
-	To eliminate these errors, use bigger tiles/calibration patterns, in order of 1000 meters.
-	
-	TODO: use a coordinate center near to earth surface
+	To eliminate these errors, a custom coordinates system parallel to ecef is used, named CCEF (Custom centered earth fixed)
 
 * If flickering is seen on far mountains or objects farther than 65Km are needed to be seen, decrease worldScale in Parameters.xml or increase both zNear, zFar in nsrOsgCamScene.cpp. Openscenegraph has limited resolution for depth.
 

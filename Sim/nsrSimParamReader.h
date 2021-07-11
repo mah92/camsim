@@ -5,7 +5,7 @@
 
 enum RenderWhat {RENDER_IMAGE, RENDER_DEPTH};
 enum ShowWhat {SHOW_MAP, SHOW_PATTERN};
-enum DoWhat {DO_SAVE_BMP, DO_IMAGE_PROC, DO_SAVE_ROS_BAG};
+enum DoWhat {DO_NOTHING, DO_SAVE_BMP, DO_IMAGE_PROC, DO_SAVE_ROS_BAG};
 
 extern int param_seed;
 extern int param_render_what;

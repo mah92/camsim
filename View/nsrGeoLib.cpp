@@ -104,12 +104,67 @@ static double a2 = EarthRadius * EarthRadius;
 static double e2 = e * e;
 
 static double _scale = 1.;
+
+static double ecef_center_x = 0., ecef_center_y = 0., ecef_center_z = 0.;
+
 void setEarthScale(double scale)
 {
 	_scale = scale;
 	EarthRadius = scale * 6378137;
 	a2 = EarthRadius * EarthRadius;
 }
+
+double getEarthRadius()
+{
+    return EarthRadius;
+}
+
+//Using shifted ecef coordinates to prevent large numbers
+//ECEF: Earth Centered Earth Fixed
+//CCEF: Custom Centered Earth Fixed
+//Geodetic lat(deg)
+void setCCEFCenter(double lat, double lon, double alt)
+{
+    double ecef_x, ecef_y, ecef_z;
+    
+    LLA2ECEF(lat, lon, alt, ecef_x, ecef_y, ecef_z);
+
+	ecef_center_x = ecef_x;
+	ecef_center_y = ecef_y;
+	ecef_center_z = ecef_z;
+}
+
+osg::Vec3d ECEF2CCEF(osg::Vec3d ecef)
+{
+    ecef.x()-=ecef_center_x;
+    ecef.y()-=ecef_center_y;
+    ecef.z()-=ecef_center_z;
+    
+    return ecef;
+}
+
+osg::Vec3d CCEF2ECEF(osg::Vec3d ecef)
+{
+    ecef.x()+=ecef_center_x;
+    ecef.y()+=ecef_center_y;
+    ecef.z()+=ecef_center_z;    
+    return ecef;
+}
+
+void ECEF2CCEF(double &ecef_x, double &ecef_y, double &ecef_z)
+{
+    ecef_x-=ecef_center_x;
+    ecef_y-=ecef_center_y;
+    ecef_z-=ecef_center_z;
+}
+
+void CCEF2ECEF(double &ecef_x, double &ecef_y, double &ecef_z)
+{
+    ecef_x+=ecef_center_x;
+    ecef_y+=ecef_center_y;
+    ecef_z+=ecef_center_z;
+}
+
 
 /*
  *  ECEF - Earth Centered Earth Fixed(m)
@@ -144,11 +199,14 @@ osg::Vec3d ECEF2LLA(osg::Vec3d ecef, int on_earth)
 
 /*
  *  ECEF - Earth Centered Earth Fixed(m)
- *  LLA - Geodetic Lat(rad, WGS84) Lon(rad) Alt(WGS84)
+ *  LLA - Geodetic Lat(deg, WGS84) Lon(deg) Alt(WGS84)
  *  ported from https://gist.github.com/klucar/1536194
  */
-void LLA2ECEF_rad(double lat_rad, double lon_rad, double alt, double &ecef_x, double &ecef_y, double &ecef_z)
+void LLA2ECEF(double lat, double lon, double alt, double &ecef_x, double &ecef_y, double &ecef_z)
 {
+    double lat_rad = lat * M_PI/180.;
+    double lon_rad = lon * M_PI/180.;
+    
 	double sinlat = sin(lat_rad);
 	double sin2lat = sinlat * sinlat;
 	double coslat = cos(lat_rad);
@@ -174,11 +232,11 @@ void LLA2ECEF_rad(double lat_rad, double lon_rad, double alt, double &ecef_x, do
 osg::Vec3d LLA2ECEF(osg::Vec3d lla)
 {
 	double ecef_x, ecef_y, ecef_z;
-	double lat = lla.x() * pi / 180;
-	double lon = lla.y() * pi / 180;
+	double lat = lla.x();
+	double lon = lla.y();
 	double alt = lla.z();
 
-	LLA2ECEF_rad(lat, lon, alt, ecef_x, ecef_y, ecef_z);
+	LLA2ECEF(lat, lon, alt, ecef_x, ecef_y, ecef_z);
 
 	return osg::Vec3d(ecef_x, ecef_y, ecef_z);
 }
@@ -415,6 +473,96 @@ osg::Vec3d calcWfromQu(osg::Quat pre_qu, osg::Quat qu, double dt)
 	return w;
 }
 
+
+//input lattitude should be geodetic, so that rotations along body become exact
+//input quaternion is of camera coordinates(looking at z(+), y=down, x=right) with respect to NED
+int setCamera_LLA_QU(osg::Camera *cam, const osg::Vec3d lla_cam, const osg::Quat cam_quat)
+{
+	osg::Quat q_mid, q_mid2, q_first, q_convert, q_cam0, q_first1, q_first2, q_lat, q_lon;
+	osg::Matrixd final;
+    
+	osg::Vec3d pos_ecef = LLA2ECEF(lla_cam);
+    pos_ecef = ECEF2CCEF(pos_ecef);
+
+	q_lon = osg::Quat(osg::inDegrees(lla_cam.y()), osg::Z_AXIS);
+	q_lat = osg::Quat(osg::inDegrees(-lla_cam.x()), osg::Y_AXIS); //geodetic latitude is exact reverse rotation of body along Y_AXIS of earth
+
+	//to bring osg camera z(-) toward earth(down)
+	q_mid = osg::Quat(osg::inDegrees(90.), osg::Z_AXIS) * osg::Quat(osg::inDegrees(90.), osg::Y_AXIS);
+
+	//osg camera looks at z(-), y=up, x=right( standard was looking at z(+), y=down, x=right)
+	//q_convert.inverse()* quat * q_convert, converts quat in our standard to osg standard
+	q_convert = osg::Quat(osg::inDegrees(-90.), osg::Z_AXIS) * osg::Quat(osg::inDegrees(180.), osg::X_AXIS);
+	q_cam0 = osg::Quat(osg::inDegrees(-90.), osg::Z_AXIS); //turn camera into it's zero position, multiplied after cam_quat to do rotation in cam coords
+
+	final = osg::Matrixd::rotate(q_convert.inverse() * (q_cam0 * cam_quat) * q_convert * q_mid * q_lat * q_lon) * osg::Matrixd::translate(pos_ecef); //verified
+
+	//mat(col, row)!
+	/*LOGI(TAG, "%f, %f, %f,  %f\n%f, %f, %f,  %f\n%f, %f, %f,  %f\n%f, %f, %f,  %f\n\n",
+			final(0,0), final(1,0), final(2,0), final(3,0),
+			final(0,1), final(1,1), final(2,1), final(3,1),
+			final(0,2), final(1,2), final(2,2), final(3,2),
+			final(0,3), final(1,3), final(2,3), final(3,3)
+			);*/
+
+	cam->setViewMatrix(osg::Matrixd::inverse(final));
+
+	return 0;
+}
+//////////////////////////////////////////////////////////////////////////////
+
+//convert between 2 NED-bent frames(not NED-parallel frame)
+//bent NED frame(unlike NED-parallel frame) is accurate enough even in long multi 1000KMs
+void Local2Local(double dx1, double dy1, double dz1,
+				 double Lat1, double lon1, double alt1,
+				 double Lat2, double lon2, double alt2, //inputs
+				 double &dx2, double &dy2, double &dz2) //output
+{
+	double Lat, lon, alt;
+	//[Lat,lon,alt]=Local2Spherical(Local, Spherical1);
+	Local2Spherical(dx1, dy1, dz1,
+					Lat1, lon1, alt1,
+					Lat, lon, alt);
+	//[dx,dy,dz]=Spherical2Local([Lat,lon,alt, Spherical2);
+	Spherical2Local(Lat, lon, alt,
+					Lat2, lon2, alt2,
+					dx2, dy2, dz2);
+}
+
+//Convert Lat(geocentric(deg)),lon(geocentric(deg)) & alt(m)
+//to NED-bent frame(not NED-parallel frame)
+//bent NED frame(unlike NED-parallel frame) is accurate enough even in long multi 1000KMs
+void Local2Spherical(double dx, double dy, double dz,
+					 double Lat0, double lon0, double alt0, //inputs
+					 double &Lat, double &lon, double &alt) //output
+{
+	double _REarth, _pi;
+
+	_REarth = EarthRadius; //6378137;
+	_pi = 3.1415926535;
+
+	Lat = dx / _REarth * (180 / _pi) + Lat0;
+	lon = dy / _REarth * (180 / _pi) / cos(Lat0 * (_pi / 180)) + lon0;
+	alt = -dz + alt0; //z is negetive
+}
+
+//Convert NED bent frame(m) (not NED-parallel frame)
+//to Lat(geocentric(deg)),lon(geocentric(deg)) & alt(m).
+//bent NED frame(unlike NED-parallel frame) is accurate enough even in long multi 1000KMs
+void Spherical2Local(double Lat, double lon, double alt,
+					 double Lat0, double lon0, double alt0, //inputs
+					 double &dx, double &dy, double &dz) //output
+{
+	double _REarth, _pi;
+
+	_REarth = EarthRadius; //6378137;
+	_pi = 3.1415926535;
+
+	dx = (Lat - Lat0) * (_pi / 180) * _REarth;
+	dy = (lon - lon0) * (_pi / 180) * _REarth * cos(Lat0 / 180 * _pi);
+	dz = -(alt - alt0); //z is negetive
+}
+
 //////////////////////////////////////////////////////////////////////////////
 #define MAX_DEM_IN_MEM 4
 DEM dem[MAX_DEM_IN_MEM];
@@ -431,7 +579,8 @@ int demLoad(DEM* pDem, int lat, int lon)
 	double time_s = myTime();
 	//i.e:n27_e051_1arc_v3.tif //dem name always points to lower-left of region
 	//sprintf(str, "%s/%c%02i_%c%03i_1arc_v3.tif", settings.dempath, lat>=0?'n':'s', (int)(lat>=0?lat:1-lat), lon>=0?'e':'w', (int)(lon>=0?lon:1-lon) ); //for float input
-	//sprintf(str, "/storage/usb3host/dem/IRAN/%c%02i_%c%03i_1arc_v3.tif", lat>=0?'n':'s', (int)(lat>=0?lat:1-lat), lon>=0?'e':'w', (int)(lon>=0?lon:1-lon) ); //for float input
+	//sprintf(str, "/storage/usb3host/dem/IRAN/%c%02i_%c%03i_1arc_v3.tif", lat>=0?'n':'s', (int)(lat>=0?lat:1-lat), lon>=0?'e':'w', (int)(lon>=0?lon:1-lon) ); 
+    //for float input
 	//sprintf(str, "/mnt/sdcard/PitechGCS/dem/tehran/%c%02i_%c%03i_1arc_v3.tif", lat>=0?'n':'s', (int)(lat>=0?lat:1-lat), lon>=0?'e':'w', (int)(lon>=0?lon:1-lon) ); //for float input
 	//sprintf(str, "/mnt/sdcard/PitechGCS/dem/tehran/%c%02i_%c%03i_1arc_v3.tif", lat>=0?'n':'s', lat>=0?lat:-lat, lon>=0?'e':'w', lon>=0?lon:-lon ); //for int input
 	sprintf(str, "%s/%c%02i_%c%03i_1arc_v3.tif", settings.dempath, lat >= 0 ? 'n' : 's', lat >= 0 ? lat : -lat, lon >= 0 ? 'e' : 'w', lon >= 0 ? lon : -lon); //for int input
@@ -500,7 +649,7 @@ int demGetHeight(double lat, double lon, float &height)
 {
 	int row, col, w;
 	int i, slot_index;
-	float max_dist, dist;
+	float max_dist, dist, rowf, colf;
 	bool dem_slot_found = false;
 
 	//find dem if previously loaded
@@ -546,10 +695,45 @@ int demGetHeight(double lat, double lon, float &height)
 		}
 	}
 
-	row = nsrRound((nsrFloor(lat) + 1 - lat) * 3600); //rows increase from top to bottom
-	col = nsrRound((lon - nsrFloor(lon)) * 3600);
-	w = dem[slot_index].dem_width;
-	height = dem[slot_index].raster[row * w + col];	//matrix unit is in meters(uint16_t)
+    w = dem[slot_index].dem_width;
+
+    //ref:https://math.stackexchange.com/questions/3230376/interpolate-between-4-points-on-a-2d-plane
+    rowf = (nsrFloor(lat) + 1 - lat) * 3600; //rows increase from top to bottom
+	colf = (lon - nsrFloor(lon)) * 3600;
+	row = nsrFloor(rowf);
+	col = nsrFloor(colf);
+    float weight1 = (1.-(colf-nsrFloor(colf)))*(1.-(rowf-nsrFloor(rowf)));
+	float height1 = dem[slot_index].raster[row * w + col];	//matrix unit is in meters(uint16_t)
+	
+	
+    rowf = (nsrFloor(lat) + 1 - lat) * 3600; //rows increase from top to bottom
+	colf = (lon - nsrFloor(lon)) * 3600;
+	row = nsrFloor(rowf)+1;
+	col = nsrFloor(colf);    
+    if(row==3600) row--;
+    float weight2 = (1.-(colf-nsrFloor(colf)))*(rowf-nsrFloor(rowf));
+	float height2 = dem[slot_index].raster[row * w + col];	//matrix unit is in meters(uint16_t)
+
+	
+    rowf = (nsrFloor(lat) + 1 - lat) * 3600; //rows increase from top to bottom
+	colf = (lon - nsrFloor(lon)) * 3600;
+	row = nsrFloor(rowf);
+	col = nsrFloor(colf)+1;
+    if(col==3600) col--;
+    float weight3 = (colf-nsrFloor(colf))*(1.-(rowf-nsrFloor(rowf)));
+	float height3 = dem[slot_index].raster[row * w + col];	//matrix unit is in meters(uint16_t)
+	
+	
+    rowf = (nsrFloor(lat) + 1 - lat) * 3600; //rows increase from top to bottom
+	colf = (lon - nsrFloor(lon)) * 3600;
+	row = nsrFloor(rowf)+1;
+	col = nsrFloor(colf)+1;
+    if(row==3600) row--;
+    if(col==3600) col--;
+    float weight4 = (colf-nsrFloor(colf))*(rowf-nsrFloor(rowf));
+	float height4 = dem[slot_index].raster[row * w + col];	//matrix unit is in meters(uint16_t)
+	
+	height = (height1*weight1 + height2*weight2 + height3*weight3 + height4*weight4)/(weight1+weight2+weight3+weight4);
 
 	if(height > 32768) height = height - 65536; //verified
 	if(height < -1000 || height > 10000) {  // -32767:no data

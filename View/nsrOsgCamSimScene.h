@@ -5,6 +5,7 @@
 
 #include "View/nsrImageDrawable.h"
 #include "View/nsrMapDrawable2.h"
+#include "View/nsrObjectDrawable.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,7 +22,7 @@ class CamSimScene : public osg::PositionAttitudeTransform
 	osg::ref_ptr<ImageDrawable> distortedDrawable;
 
 	osg::ref_ptr<MapDrawable2> idealMapDrawable;
-
+    
 public:
 	ImageDrawableParamsReader* prmReader;
 	CamSimScene();

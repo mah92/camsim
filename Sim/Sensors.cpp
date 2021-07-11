@@ -4,7 +4,7 @@
 
 #include "./Sim.h"
 #include "Core/RotLib/nsrRotLib.h"
-#include "Core/GeoLib/nsrGeoLib2.h"
+#include "View/nsrGeoLib.h"
 #include "./nsrPoseSim.h"
 #include "Matlib/nsrQuat.h"
 #include "Sim/nsrSimParamReader.h"
@@ -163,7 +163,7 @@ void Sensors(SimStorage &Sim)
 					Noise(n.Z.GPS_LLA + 2) = 0;
 				}
 
-                #define EarthRadius 6378137
+                double EarthRadius = getEarthRadius(); //6378137
                 senx = lla.x() + Noise(n.Z.GPS_LLA + 0) * (180 / M_PI) / EarthRadius;
                 seny = lla.y() + Noise(n.Z.GPS_LLA + 1) * (180 / M_PI) / (EarthRadius * cos(lla.x()*M_PI / 180));
                 senz = lla.z() + /*param_world_scale?? * */ Noise(n.Z.GPS_LLA + 2);

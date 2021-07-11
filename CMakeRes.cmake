@@ -19,9 +19,9 @@ set( CoreSrcs
     ${Coredir}/Matlib/nsrMathLibInv.cpp
     ${Coredir}/Matlib/nsrQRDecomp.cpp
 
-    ${Coredir}/GeoLib/Local2Local.cpp
-    ${Coredir}/GeoLib/Local2Spherical.cpp
-    ${Coredir}/GeoLib/Spherical2Local.cpp
+    ##${Coredir}/GeoLib/Local2Local.cpp
+    ##${Coredir}/GeoLib/Local2Spherical.cpp
+    ##${Coredir}/GeoLib/Spherical2Local.cpp
 
     ${Coredir}/RotLib/quatToRotMat.cpp
     ${Coredir}/RotLib/eulerToRotMat.cpp
@@ -84,6 +84,7 @@ set( AllViewSrc
     ${ViewDir}/nsrImageDrawable.cpp
     ${ViewDir}/nsrImageDrawableParams.cpp
     ${ViewDir}/nsrMapDrawable2.cpp
+    ${ViewDir}/nsrObjectDrawable.cpp
     
     ${ThirdParty}/geoid.c
 )

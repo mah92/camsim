@@ -68,7 +68,7 @@ else (THREADS_FOUND)
 endif (THREADS_FOUND)
 
 ##ROS###################
-find_package(catkin COMPONENTS roscpp rosbag std_msgs sensor_msgs geometry_msgs)
+#find_package(catkin COMPONENTS roscpp rosbag std_msgs sensor_msgs geometry_msgs)
 
 if (catkin_FOUND)
     message("-- ROS found!")

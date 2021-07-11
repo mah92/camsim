@@ -8,6 +8,8 @@
 #include "pugixml/pugixml.hpp"
 //#include "View/nsrGeoLib.h"
 
+#include "nsrObjectDrawable.h"
+
 #include <math.h>
 #include <nsrUtility.h>
 
@@ -168,7 +170,10 @@ void nsrReadSimParams(const char* filename)
 			if(node.attribute("doWhat")) {
 				char strparam_do_what[20];
 				strcpy(strparam_do_what, node.attribute("doWhat").as_string());
-				if(strcmp("SAVE_BMP", strparam_do_what) == 0)
+                
+				if(strcmp("NOTHING", strparam_do_what) == 0)
+					param_do_what = DO_NOTHING;
+                if(strcmp("SAVE_BMP", strparam_do_what) == 0)
 					param_do_what = DO_SAVE_BMP;
 				if(strcmp("IMAGE_PROC", strparam_do_what) == 0)
 					param_do_what = DO_IMAGE_PROC;
@@ -385,6 +390,38 @@ void nsrReadSimParams(const char* filename)
 
 			LOGI(TAG, "camInAcEu: %f, %f, %f, errX:%f, errY:%f, errZ:%f\n", param_cam_in_ac_roll, param_cam_in_ac_pitch, param_cam_in_ac_yaw,
 				 param_cam_in_ac_err_x, param_cam_in_ac_err_y, param_cam_in_ac_err_z);
+		}
+		
+        if(strcmp(node_name, "vehicle") == 0) {
+            char pathFile[MAX_PATH_LENGTH];
+            char objFile[MAX_PATH_LENGTH];
+            double phase = 0., speed = 60.;
+            bool onEarth = true;
+            
+            strcpy(pathFile, "");
+            strcpy(objFile, "");
+            
+			if(node.attribute("pathFile")) {
+                strcpy(pathFile, globals.datapath);
+				strcat(pathFile, "/");
+                strcat(pathFile, node.attribute("pathFile").as_string());
+            }
+			if(node.attribute("onEarth")) onEarth = node.attribute("onEarth").as_bool();
+			if(node.attribute("startPhase")) phase = node.attribute("startPhase").as_double();
+			if(node.attribute("speed")) speed = node.attribute("speed").as_double();
+            if(node.attribute("objFile")) {
+                strcpy(objFile, globals.datapath);
+				strcat(objFile, "/");
+                strcat(objFile, node.attribute("objFile").as_string());
+            }
+            
+			LOGI(TAG, "vehicle: %s, %i, %f, %f, %s\n", pathFile, onEarth?1:0, phase, speed, objFile);
+            
+            if(strlen(pathFile) > 0 && strlen(objFile) > 0) {
+                allObjectDrawables.push_back(new ObjectDrawable());
+                allObjectDrawables.back()->add3DFile(objFile);
+                allObjectDrawables.back()->setPath(pathFile, onEarth, phase, speed/3.6); //convert speed from KM/h to m/s
+            }
 		}
 
 		//overrides

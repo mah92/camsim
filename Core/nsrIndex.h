@@ -20,6 +20,8 @@ typedef struct {
 	int Total, Depth, Readers;
 } SensorsNamespace;
 
+enum AltRef {ALTREF_UNKNOWN=-1, ALTREF_WGS84=0, ALTREF_ASL, ALTREF_AGL, ALTREF_AHL};
+
 //////////////////////////////////
 
 typedef struct {

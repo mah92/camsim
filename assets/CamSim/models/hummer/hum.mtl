@@ -1,0 +1,120 @@
+# Blender MTL File: 'None'
+# Material Count: 10
+
+newmtl Material__25
+Ns 10.000002
+Ka 1.000000 1.000000 1.000000
+Kd 0.588000 0.588000 0.588000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Bump Bump.tga
+map_Kd props_col.dds
+
+newmtl Material__26
+Ns 10.000002
+Ka 1.000000 1.000000 1.000000
+Kd 0.588000 0.588000 0.588000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Bump Bump.tga
+map_Kd vehicle_hmmv_retrofit_col.dds
+
+newmtl Material__27
+Ns 10.000002
+Ka 1.000000 1.000000 1.000000
+Kd 0.588000 0.588000 0.588000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd hmmv_interior_col.dds
+
+newmtl Material__28
+Ns 10.000002
+Ka 1.000000 1.000000 1.000000
+Kd 0.588000 0.588000 0.588000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd hmmv_interior_props_col.dds
+
+newmtl Material__29
+Ns 10.000002
+Ka 1.000000 1.000000 1.000000
+Kd 0.588000 0.588000 0.588000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Bump Bump.tga
+map_Kd vehicle_hmmv_props_col.dds
+
+newmtl Material__30
+Ns 10.000002
+Ka 1.000000 1.000000 1.000000
+Kd 0.588000 0.588000 0.588000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd vehicle_hmmv_decal_col.dds
+map_d vehicle_hmmv_decal_col.dds
+
+newmtl Material__31
+Ns 10.000002
+Ka 1.000000 1.000000 1.000000
+Kd 0.588000 0.588000 0.588000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Bump Bump.tga
+map_Kd hmmv_windows_bloody_col.dds
+map_d hmmv_windows_bloody_col.dds
+
+newmtl Material__32
+Ns 10.000002
+Ka 1.000000 1.000000 1.000000
+Kd 0.588000 0.588000 0.588000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Bump Bump.tga
+map_Kd hmmv_windows_bloody_col.dds
+map_d hmmv_windows_bloody_col.dds
+
+newmtl Material__33
+Ns 10.000002
+Ka 1.000000 1.000000 1.000000
+Kd 0.588000 0.588000 0.588000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd hmmv_bullet_decal_col.dds
+map_d hmmv_bullet_decal_col.dds
+
+newmtl wire_174186203
+Ns 31.999996
+Ka 1.000000 1.000000 1.000000
+Kd 0.682400 0.729400 0.796100
+Ks 0.350000 0.350000 0.350000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2

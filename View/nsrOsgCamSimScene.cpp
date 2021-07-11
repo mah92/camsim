@@ -36,7 +36,6 @@
 extern "C" {
 #endif
 
-////////////////////////////////////////
 
 ///Color Camera Textures///////////////////////////
 void createTextureCamera(osg::ref_ptr<osg::Camera> &cam, osg::ref_ptr<osg::Texture2D> &texture,
@@ -147,11 +146,12 @@ int CamSimScene::InitOsgWindow(int x, int y, int _screen_width, int _screen_heig
 	double aspectRatio = param_width / (float)param_height * (param_fy + param_f_err) / (param_fx + param_f_err); //used for pixels, checked once experimentally
 	LOGE(TAG, " idealExtendedCam (%ix%i), fovy(deg): %f, aspectRatio:%f\n", extended_width, extended_height, extended_fovy, aspectRatio);
 
-	///Maps////////////////////////////////////////////////
-	setEarthScale(param_world_scale);
-	idealMapDrawable = new MapDrawable2(true);//use dem
-	idealMapDrawable->setCoordCenter(param_map_center_lat, param_map_center_lon, 0);
+    setEarthScale(param_world_scale);
+    setCCEFCenter(param_map_center_lat, param_map_center_lon, 0); //set center of CCEF coordinates used for things in OSG
 
+	///Maps////////////////////////////////////////////////
+	idealMapDrawable = new MapDrawable2(true);//use dem
+    
 	//x, y, zoom
 	if(param_show_what == SHOW_MAP) {
 		idealMapDrawable->addSeenMapRegion(param_map_center_lat, param_map_center_lon, param_map_max_alt, param_map_max_dist, param_map_zoom);
@@ -183,7 +183,20 @@ int CamSimScene::InitOsgWindow(int x, int y, int _screen_width, int _screen_heig
 	if(DOUBLE_FRAME) idealImageCam2->addChild(idealMapDrawable);
 	idealDepthCam1->addChild(idealMapDrawable);
 	if(DOUBLE_FRAME) idealDepthCam2->addChild(idealMapDrawable);
-
+    
+    //Vehicles//////////////////////////////////////////////////
+    #define SPREAD 0.0003
+    
+    int j;
+    for(j = 0; j<allObjectDrawables.size(); j++) {
+        //allObjectDrawables[j]->setPositionLatLonAlt(47.117900+RAND(-SPREAD, SPREAD), 8.670726+RAND(-SPREAD, SPREAD), 0., ALTREF_AGL);
+        allObjectDrawables[j]->setRPY(0., 0., 0.);
+        idealImageCam1->addChild(allObjectDrawables[j]);
+        if(DOUBLE_FRAME) idealImageCam2->addChild(allObjectDrawables[j]);
+        //idealDepthCam1->addChild(allObjectDrawables[j]);
+        //if(DOUBLE_FRAME) idealDepthCam2->addChild(allObjectDrawables[j]);        
+    }
+    
 	//DEBUG
 	/*if(DOUBLE_FRAME) {
 		idealImageCam2->setClearColor(osg::Vec4(1.,0.,0., 1.)); //white
@@ -317,6 +330,11 @@ int CamSimScene::Draw(double frame_timestamp_s)
 	osg::Quat camInNedQu1, camInNedQu2, camInNedQu3;
 	osg::Vec3d w_cam1, v_cam1, w_cam2, v_cam2, w_cam3, v_cam3;
 
+    //Update Vehicles
+    int j;
+    for(j = 0; j<allObjectDrawables.size(); j++)  
+        allObjectDrawables[j]->updatePath(frame_timestamp_s);
+    
 	//Frame Timings
 	//min: -td - 0.5*tr - ti - 0.5*te
 	//max: -td + 0.5*tr - 0. + 0.5*te
@@ -328,29 +346,23 @@ int CamSimScene::Draw(double frame_timestamp_s)
 						&lla2, NULL, NULL, NULL, NULL, NULL,
 						&v_cam2, &camInNedQu2, &w_cam2);
 
-	double _ecef_center_x, _ecef_center_y, _ecef_center_z;
-	idealMapDrawable->getCoordCenter(_ecef_center_x, _ecef_center_y, _ecef_center_z);
-
-	osg::Vec3d ecef_center;
-	ecef_center.x() = _ecef_center_x; ecef_center.y() = _ecef_center_y; ecef_center.z() = _ecef_center_z;
-
 	if(!DOUBLE_FRAME) {
-		setCamera_LLA_QU(idealImageCam1.get(), lla2, camInNedQu2, ecef_center);
-		setCamera_LLA_QU(idealDepthCam1.get(), lla2, camInNedQu2, ecef_center);
+		setCamera_LLA_QU(idealImageCam1.get(), lla2, camInNedQu2);
+		setCamera_LLA_QU(idealDepthCam1.get(), lla2, camInNedQu2);
 	} else {
 		//at min time
 		nsrPoseMakerExtract(frame_timestamp_s - (param_td + param_td_err) - 0.5 * (param_tr + param_tr_err) - param_ti - 0.5 * param_te, 0,
 							&lla1, NULL, NULL, NULL, NULL, NULL,
 							&v_cam1, &camInNedQu1, &w_cam1);
-		setCamera_LLA_QU(idealImageCam1.get(), lla1, camInNedQu1, ecef_center);
-		setCamera_LLA_QU(idealDepthCam1.get(), lla1, camInNedQu1, ecef_center);
+		setCamera_LLA_QU(idealImageCam1.get(), lla1, camInNedQu1);
+		setCamera_LLA_QU(idealDepthCam1.get(), lla1, camInNedQu1);
 
 		//at max time
 		nsrPoseMakerExtract(frame_timestamp_s - (param_td + param_td_err) + 0.5 * (param_tr + param_tr_err) - 0. + 0.5 * param_te, 0,
 							&lla3, NULL, NULL, NULL, NULL, NULL,
 							&v_cam3, &camInNedQu3, &w_cam3);
-		setCamera_LLA_QU(idealImageCam2.get(), lla3, camInNedQu3, ecef_center);
-		// 		setCamera_LLA_QU(idealDepthCam2.get(), lla3, camInNedQu3, ecef_center);
+		setCamera_LLA_QU(idealImageCam2.get(), lla3, camInNedQu3);
+		// 		setCamera_LLA_QU(idealDepthCam2.get(), lla3, camInNedQu3);
 	}
 
 #if RENDER_DEBUG == 0
