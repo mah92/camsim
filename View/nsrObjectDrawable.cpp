@@ -23,7 +23,6 @@ extern "C" {
 #endif
 
 std::vector<osg::ref_ptr<ObjectDrawable> > allObjectDrawables;
-    
 
 int parseCoordLine(const char* linebuf, int linelen, double* vh_lat, double* vh_lon, double* vh_alt)
 {
@@ -193,7 +192,12 @@ void ObjectDrawable::setPath(char* _pathFile, bool _onEarth, double _phase, doub
     speed = _speed;
     onEarth = _onEarth;
     if(_phase < 0.) _phase = RAND(0., 1.);
-    printf("::%f\n", _phase);
+    
+    for(int i; i < 6; i++)
+        smoother[i]->setParams(0., 0., 0.,
+              0., 0., 
+              0.5, -1);
+    
     //Read kml file///////////////////////////////////////////////////
     char node_name[MAX_PARAM_LENGTH];
 	pugi::xml_parse_result result;
@@ -291,33 +295,7 @@ void ObjectDrawable::setPath(char* _pathFile, bool _onEarth, double _phase, doub
         }
     }
     
-    updatePathByParameters(); //might not be enoupg if called before setCCEFCenter()
-}
-
-void ObjectDrawable::updatePathByParameters()
-{
-    double _lat, _lon, _alt;
-    _lat = llaPath[current_point].x() + inbetween_position_percent*(llaPath[next_point].x()-llaPath[current_point].x());
-    _lon = llaPath[current_point].y() + inbetween_position_percent*(llaPath[next_point].y()-llaPath[current_point].y());
-    _alt = llaPath[current_point].z() + inbetween_position_percent*(llaPath[next_point].z()-llaPath[current_point].z());
-    //printf("initial lla:%f, %f, %f, %i\n\n\n\n", _lat, _lon, _alt, onEarth?1:0);    
-            
-    if(onEarth) {
-        setPositionLatLonAlt(_lat, _lon, 1., ALTREF_AGL); 
-    } else
-        setPositionLatLonAlt(_lat, _lon, _alt, ALTREF_ASL); 
-    
-    double _roll, _pitch, _yaw;
-    _roll = 0*M_PI/180;
-    _pitch = 0*M_PI/180;
-    
-    _yaw = atan2((llaPath[next_point].y() - llaPath[current_point].y())/Y2LON(llaPath[current_point].x()),
-                 (llaPath[next_point].x() - llaPath[current_point].x())/X2LAT());
-    
-    if(speed < 0)
-        _yaw +=180*M_PI/180;
-    setRPY(_roll, _pitch, _yaw);
-    
+    updatePathByParameters(); //might not be enough if called before setCCEFCenter()
 }
 
 void ObjectDrawable::updatePath(double t)
@@ -356,6 +334,48 @@ void ObjectDrawable::updatePath(double t)
     updatePathByParameters();
 }
 
+void ObjectDrawable::updatePathByParameters()
+{
+    double _lat, _lon, _alt;
+    double _roll, _pitch, _yaw;
+    
+    _lat = llaPath[current_point].x() + inbetween_position_percent*(llaPath[next_point].x()-llaPath[current_point].x());
+    _lon = llaPath[current_point].y() + inbetween_position_percent*(llaPath[next_point].y()-llaPath[current_point].y());
+    _alt = llaPath[current_point].z() + inbetween_position_percent*(llaPath[next_point].z()-llaPath[current_point].z());
+    //printf("initial lla:%f, %f, %f, %i\n\n\n\n", _lat, _lon, _alt, onEarth?1:0);    
+    
+    _roll = 0*M_PI/180;
+    _pitch = 0*M_PI/180;
+    _yaw = atan2((llaPath[next_point].y() - llaPath[current_point].y())/Y2LON(llaPath[current_point].x()),
+                 (llaPath[next_point].x() - llaPath[current_point].x())/X2LAT());
+    
+    if(speed < 0)
+        _yaw +=180*M_PI/180;
+    
+        //correct yaw command to follow real yaw with maximum 180 degrees
+    //printf("pre_cmd:%f", ac_command[5]);
+    double current_yaw = smoother[5]->get();
+    while(_yaw - current_yaw > 180.*M_PI/180)
+        _yaw-=360.*M_PI/180;
+    while(_yaw - current_yaw < -180.*M_PI/180)
+        _yaw+=360.*M_PI/180;
+        
+    _lat   = smoother[0]->step0(last_t, _lat);
+    _lon   = smoother[1]->step0(last_t, _lon);
+    _alt   = smoother[2]->step0(last_t, _alt);
+    _roll  = smoother[3]->step0(last_t, _roll);
+    _pitch = smoother[4]->step0(last_t, _pitch);
+    _yaw   = smoother[5]->step0(last_t, _yaw);
+    
+    if(onEarth) {
+        setPositionLatLonAlt(_lat, _lon, 1., ALTREF_AGL); 
+    } else
+        setPositionLatLonAlt(_lat, _lon, _alt, ALTREF_ASL); 
+    
+    setRPY(_roll, _pitch, _yaw);
+}
+
+///////////////////////////////////////
     
 #define HighValue 100000
 

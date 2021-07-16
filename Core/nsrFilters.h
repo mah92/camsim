@@ -77,6 +77,41 @@ public:
 	double simulate_dynamic_step(double value);
 };
 
+/////////////////////////////////////////
+//a controller used for states to limit accelerations as in real aircraft
+
+class SmoothPathFollower
+{
+    IIRData2 path_filter, acc_filter;
+    SQRTController* pos2rate_cont, *rate2acc_cont;
+    //memory
+	double real_position, real_velocity, real_acc;
+
+public:
+	SmoothPathFollower() : 
+        pos2rate_cont(0), rate2acc_cont(0), //NULL
+            real_position(0.), real_velocity(0.), real_acc(0.)
+	{};
+    
+    ~SmoothPathFollower()
+    {
+        if(pos2rate_cont!=0) delete pos2rate_cont;
+        if(rate2acc_cont!=0) delete rate2acc_cont;
+    }
+    
+    void setParams(double _max_velocity, double _max_accel, double _max_jerk,
+              double _linear_dist_position, double _linear_dist_velocity, 
+              double _in_filter_taw, double _out_filter_taw //negative means disabled
+    );
+    
+    void init(double current_value); //set current value
+    double get() {return real_position; }
+    
+    double step0(double time_s, double command_position); //Just a simple 1st order filter
+	double step1(double time_s, double command_position); //1xsqrt control loop 
+	double step2(double time_s, double command_position); //2xsqrt control loops + 2 filters
+};
+
 #ifdef __cplusplus
 extern "C" {
 #endif

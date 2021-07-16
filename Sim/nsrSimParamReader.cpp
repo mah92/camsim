@@ -40,7 +40,7 @@ char param_pattern_file[MAX_PATH_LENGTH] = "";
 
 char param_path_file[MAX_PATH_LENGTH];
 int param_position_format = POSITION_FMT_LLA;
-int param_tracker_type = TRACKER_TYPE_3xSQRT;
+int param_tracker_type = TRACKER_TYPE_2xSQRT_INOUT_FILTER;
 double param_control_freq = 50.;
 double param_max_acc = 0; //disabled
 double param_max_ang_acc = 0; //disabled

@@ -2,6 +2,7 @@
 #include "./nsrUtility.h"
 
 #include <math.h>
+#include <assert.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,9 +47,14 @@ ffloat doIIRfilter2(IIRData2* fD, ffloat data, ffloat time_s)
 	}
 
 	dt = time_s - fD->pre_time_s;
+    
+    if(fD->taw <= 0.) { //filter disabled
+        fD->data = data; 
+        fD->pre_time_s = time_s;
+        return fD->data;
+    }
 
 	weight = dt / (fD->taw + dt);
-
 	fD->data = weight * data + (1 - weight) * fD->data;
 
 	fD->pre_time_s = time_s;
@@ -173,6 +179,9 @@ ffloat tickRate(TickRateData* fD, int ticks)
 
 //////////////////////////////////////////////////////
 //linear_dist is half the size of total linear region
+//max_velocity <= 0 means disabled
+//max_acceleration <= 0 means disabled
+//You can not disable both max_velocity, max_acceleration
 SQRTController::SQRTController(double _max_velocity, double _max_acceleration, double _linear_dist) : pre_time(-1), pre_value(0), pre_target(0)
 {
 	//properties
@@ -180,6 +189,8 @@ SQRTController::SQRTController(double _max_velocity, double _max_acceleration, d
 	max_acceleration = _max_acceleration;
 	linear_dist = _linear_dist;
 
+    assert(max_acceleration > 0 || max_velocity > 0);
+    
 	if(max_acceleration > 0) {//if max_acceleration is not disabled
 		linear_max_command = sqrt(2 * max_acceleration * linear_dist / 2.);
 		if(max_velocity > 0) {//if max_velocity is not disabled
@@ -251,6 +262,60 @@ double SQRTController::simulate_dynamic_step(double value)
 {
 	value += goal_velocity * dt;
 	return value;
+}
+
+////////////////////////////////////////////////////
+
+void SmoothPathFollower::setParams(double _max_velocity, double _max_accel, double _max_jerk,
+                                   double _linear_dist_position, double _linear_dist_velocity,
+                                   double _in_filter_taw, double _out_filter_taw)
+{
+    if(_max_velocity > 0.|| _max_accel > 0.)
+        pos2rate_cont = new SQRTController(_max_velocity, _max_accel, _linear_dist_position);
+    if(_max_accel > 0.|| _max_jerk > 0.)
+        rate2acc_cont = new SQRTController(_max_accel, _max_jerk, _linear_dist_velocity);
+    initIIR2(&path_filter, _in_filter_taw);
+    initIIR2(&acc_filter, _out_filter_taw);
+}
+
+void SmoothPathFollower::init(double current_value) //set current value
+{
+    real_position = current_value;
+    real_velocity = 0;
+    real_acc = 0;
+}
+
+//Just a simple 1st order filter
+//Ensure position continuity
+double SmoothPathFollower::step0(double time_s, double command_position)
+{
+    real_position = doIIRfilter2(&path_filter, command_position, time_s);
+    return real_position;
+}
+
+//1 controller loop to track linear interpolation///////
+//Ensure position continuity, and limit max speed and acceleration
+double SmoothPathFollower::step1(double time_s, double command_position)
+{
+    pos2rate_cont->control_step(time_s, real_position, command_position);
+    real_position += pos2rate_cont->dt * pos2rate_cont->goal_velocity;    
+    return real_position;
+}
+    
+//2 x controller loops to track linear interpolation and input/output 1st order filter for continuous acceleration///////
+//By 2 sqrt loops, one is able to ensure position+velocity continuity and limit max speed, acceleration, and jerk
+//By 2 1st order filters in input desired position and output command, one is able to finetune acceleration vibrations
+double SmoothPathFollower::step2(double time_s, double command_position)
+{
+    double filtered_input = doIIRfilter2(&path_filter, command_position, time_s);
+    pos2rate_cont->control_step(time_s, real_position, filtered_input);
+    rate2acc_cont->control_step(time_s, real_velocity, pos2rate_cont->goal_velocity);
+    double filtered_command = doIIRfilter2(&acc_filter, rate2acc_cont->goal_velocity, time_s);
+    real_velocity += rate2acc_cont->dt * filtered_command;
+    real_position += pos2rate_cont->dt * real_velocity;
+
+    //printf(":::t:%f, cmd yaw:%f, yaw:%f, yaw vel:%f, goal_vel:%f, goal_acc:%f\n", time_s, ac_command[5], ac_real[5], ac_real_velocity[5], pos2rate_cont[5]->goal_velocity, rate2acc_cont[5]->goal_velocity);
+    return real_position;
 }
 
 #ifdef __cplusplus

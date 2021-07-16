@@ -90,7 +90,7 @@
 	<includeParams includeFile="vehiclePack.xml" />
     
     
-    <dynamicParams td="0.0" tdErr="0." tr="0.000" te="6.875e-05" motionBlurExtraSamples="30" ti="0.00" desc="ideal"/>
+    <dynamicParams td="0.0" tdErr="0." tr="0.1" te="6.875e-05" motionBlurExtraSamples="30" ti="0.00" desc="ideal"/>
     <signalParams noiseAmpDynamic="0.0" />
     <camInAcEu roll="0.0" pitch="-90.0" yaw="00." desc="downwards-yawed"/>
 </simParams>

@@ -96,23 +96,13 @@ static int last_kb_read_index = 0, last_kb_read_index2 = 0;
 static bool posemaker_mode = true;
 
 static FILE* pathCsvFile = NULL, *sensorsCsvFile = NULL;
-static SQRTController* pos2rate_cont[6];
-static SQRTController* rate2acc_cont[6];
-static SQRTController* acc2jerk_cont[6];
 
-static IIRData2 path_filter[6], acc_filter[6];
+static SmoothPathFollower* smoother[6];
 
-static double pre_line_time_s = -1;
-static double next_line_time_s = -1;
-
-static double pre_ac[6];
-static double next_ac[6];
+static double pre_line_time_s = -1, next_line_time_s = -1;
+static double pre_ac[6], next_ac[6];
 
 static double ac_real[6] = {-DBL_MAX, -DBL_MAX, -DBL_MAX, -DBL_MAX, -DBL_MAX, -DBL_MAX};
-
-static double ac_real_velocity[6] = {-DBL_MAX, -DBL_MAX, -DBL_MAX, -DBL_MAX, -DBL_MAX, -DBL_MAX};
-static double ac_real_acc[6] = {-DBL_MAX, -DBL_MAX, -DBL_MAX, -DBL_MAX, -DBL_MAX, -DBL_MAX};
-
 static double ac_command[6] = {0};
 
 void nsrPoseMakerInit()
@@ -167,48 +157,35 @@ void nsrPoseMakerInit()
 #define MAX_ANGULAR_ACC (param_max_ang_acc)
 #define MAX_ANGULAR_JERK (600)
 
+//input path filter
 #define TAW (0.5)
-#define TAW2 (0.5)
-#define TAW3 (0.05)
 
-	pos2rate_cont[0] = new SQRTController(0, MAX_ACC * X2LAT(),
-										  X2LAT()*param_world_scale * 10); //10m linear distance
-	rate2acc_cont[0] = new SQRTController(MAX_ACC * X2LAT(), MAX_JERK * X2LAT(),
-										  X2LAT()*param_world_scale * 3);//3m/s linear distance
-	acc2jerk_cont[0] = new SQRTController(MAX_JERK * X2LAT(), 0,
-										  X2LAT()*param_world_scale * 1);//1m/s2 linear distance
+//output command filter lowers acceleration variance to match real data
+//just minor output filter can be used as it causes oscilation
+#define TAW2 (0.5) //linear
+#define TAW3 (0.05) //angular
+    
+    for(i = 0; i < 6; i++)
+        smoother[i] = new SmoothPathFollower();
 
-	pos2rate_cont[1] = new SQRTController(0, MAX_ACC * Y2LON(param_map_center_lat),
-										  Y2LON(param_map_center_lat)*param_world_scale * 3);
-	rate2acc_cont[1] = new SQRTController(MAX_ACC * Y2LON(param_map_center_lat), MAX_JERK * Y2LON(param_map_center_lat),
-										  Y2LON(param_map_center_lat)*param_world_scale * 10);
-	acc2jerk_cont[1] = new SQRTController(MAX_ACC * Y2LON(param_map_center_lat), 0,
-										  Y2LON(param_map_center_lat)*param_world_scale * 1);
-
-	pos2rate_cont[2] = new SQRTController(0, MAX_ACC, param_world_scale * 10);
-	rate2acc_cont[2] = new SQRTController(MAX_ACC, MAX_JERK, param_world_scale * 10);
-	acc2jerk_cont[2] = new SQRTController(MAX_JERK, 0, param_world_scale * 1);
-
-	pos2rate_cont[3] = new SQRTController(0, MAX_ANGULAR_ACC, 0.01); //0.01deg linear distance
-	rate2acc_cont[3] = new SQRTController(MAX_ANGULAR_ACC, MAX_ANGULAR_JERK, 1); //1deg/s linear distance
-	acc2jerk_cont[3] = new SQRTController(MAX_ANGULAR_JERK, 0,  1); //1deg/s2 linear distance
-
-	pos2rate_cont[4] = new SQRTController(0, MAX_ANGULAR_ACC, 0.01);
-	rate2acc_cont[4] = new SQRTController(MAX_ANGULAR_ACC, MAX_ANGULAR_JERK, 1);
-	acc2jerk_cont[4] = new SQRTController(MAX_ANGULAR_JERK, 0,  1);
-
-	pos2rate_cont[5] = new SQRTController(0, MAX_ANGULAR_ACC, 1);
-	rate2acc_cont[5] = new SQRTController(MAX_ANGULAR_ACC, MAX_ANGULAR_JERK, 1);
-	acc2jerk_cont[5] = new SQRTController(MAX_ANGULAR_JERK, 0,  1);
-
-	for(i = 0; i < 6; i++)
-		initIIR2(&path_filter[i], TAW);
-	for(i = 0; i < 3; i++)
-		initIIR2(&acc_filter[i], TAW2);
-	for(i = 3; i < 6; i++)
-		initIIR2(&acc_filter[i], TAW3);
-
-	//param_tracker_type = 3;
+    smoother[0]->setParams(0.,
+                            MAX_ACC * X2LAT(),
+                                MAX_JERK * X2LAT(),
+                                    X2LAT()*param_world_scale * 10, //10m
+                                        X2LAT()*param_world_scale * 3, //3m/s
+                                            TAW, TAW2);
+    smoother[1]->setParams(0.,
+                            MAX_ACC * Y2LON(param_map_center_lat),
+                                MAX_JERK * Y2LON(param_map_center_lat),
+                                    Y2LON(param_map_center_lat)*param_world_scale * 3, //3m
+                                        Y2LON(param_map_center_lat)*param_world_scale * 10, //10m/s
+                                            TAW, TAW2);
+    
+    smoother[2]->setParams(0., MAX_ACC, MAX_JERK, param_world_scale * 10, param_world_scale * 10, TAW, TAW2);
+    
+    smoother[3]->setParams(0., MAX_ANGULAR_ACC, MAX_ANGULAR_JERK, 0.01, 1., TAW, TAW3);
+    smoother[4]->setParams(0., MAX_ANGULAR_ACC, MAX_ANGULAR_JERK, 0.01, 1., TAW, TAW3);
+    smoother[5]->setParams(0., MAX_ANGULAR_ACC, MAX_ANGULAR_JERK,   1., 1., TAW, TAW3);
 }
 
 double nsrPoseMakerGetStartTime()
@@ -238,7 +215,6 @@ void nsrPoseMakerStep()
 {
 	int i, err;
 	char linebuf[MAX_LINE_LENGTH];
-	double ac[6];
 
 	uint16_t ch;
 	ch = kb->getch(last_kb_read_index);
@@ -346,120 +322,64 @@ void nsrPoseMakerStep()
 
 	//Initialize starting pose
 	if(ac_real[0] < -1000) {
-		for(i = 0; i < 6; i++)
-			ac_real[i] = ac_command[i];
-
-		for(i = 0; i < 6; i++)
-			ac_real_velocity[i] = 0;
-
-		for(i = 0; i < 6; i++)
-			ac_real_acc[i] = 0;
+        for(i = 0; i < 6; i++) {
+            smoother[i]->init(ac_command[i]);
+            ac_real[i] = ac_command[i];
+        }
 	}
 	
     //correct yaw command to follow real yaw with maximum 180 degrees
     //printf("pre_cmd:%f", ac_command[5]);
-	while(ac_command[5] - ac_real[5] > 180.)
+    while(ac_command[5] - ac_real[5] > 180.)
         ac_command[5]-=360.;
     while(ac_command[5] - ac_real[5] < -180.)
         ac_command[5]+=360.;
+    
     //printf("ac_real:%f, post_cmd:%f", ac_real[5], ac_command[5]);
+    
+    	//debug////////
+#if 0
+	ac_real[0] = 0;
+	ac_real[1] = 0;
+	ac_real[2] = 3000;
+	ac_real[3] = 0;
+	ac_real[4] = 0;
+	ac_real[5] = 0;
+#endif
 
-	//2 x controller loops to track linear interpolation and input/output 1st order filter for continuous acceleration///////
-	if(param_tracker_type == TRACKER_TYPE_2xSQRT_INOUT_FILTER) {
-		for(i = 0; i < 6; i++) {
-			pos2rate_cont[i]->control_step(pose_maker_time_s, ac_real[i],
-										   doIIRfilter2(&path_filter[i], ac_command[i], pose_maker_time_s));
-			rate2acc_cont[i]->control_step(pose_maker_time_s, ac_real_velocity[i], pos2rate_cont[i]->goal_velocity);
-			ac_real_velocity[i] += rate2acc_cont[i]->dt
-								   * doIIRfilter2(&acc_filter[i], rate2acc_cont[i]->goal_velocity, pose_maker_time_s);
-			ac[i] = ac_real[i] += pos2rate_cont[i]->dt * ac_real_velocity[i];
-		}
-
-        //printf(":::t:%f, cmd yaw:%f, yaw:%f, yaw vel:%f, goal_vel:%f, goal_acc:%f\n", pose_maker_time_s, ac_command[5], ac_real[5], ac_real_velocity[5], pos2rate_cont[5]->goal_velocity, rate2acc_cont[5]->goal_velocity);
-	}
-
-	//2 x controller loops to track linear interpolation and output 1st order filter for continuous acceleration///////
-	//just minor filter can be used as it causes oscilation
-	if(param_tracker_type == TRACKER_TYPE_2xSQRT_OUTPUT_FILTER) {
-		for(i = 0; i < 6; i++) {
-			pos2rate_cont[i]->control_step(pose_maker_time_s, ac_real[i], ac_command[i]);
-			rate2acc_cont[i]->control_step(pose_maker_time_s, ac_real_velocity[i], pos2rate_cont[i]->goal_velocity);
-			ac_real_acc[i] = doIIRfilter2(&acc_filter[i], rate2acc_cont[i]->goal_velocity, pose_maker_time_s);
-			ac_real_velocity[i] += rate2acc_cont[i]->dt * ac_real_acc[i];
-			ac[i] = ac_real[i] += pos2rate_cont[i]->dt * ac_real_velocity[i];
-		}
-	}
-
-	//3 x controller loops to track linear interpolation with continuous acceleration///////
-	//oscilates and diverges
-	if(param_tracker_type == TRACKER_TYPE_3xSQRT) {
-		for(i = 0; i < 6; i++) {
-			pos2rate_cont[i]->control_step(pose_maker_time_s, ac_real[i], ac_command[i]);
-			rate2acc_cont[i]->control_step(pose_maker_time_s, ac_real_velocity[i], pos2rate_cont[i]->goal_velocity);
-			acc2jerk_cont[i]->control_step(pose_maker_time_s, ac_real_acc[i], rate2acc_cont[i]->goal_velocity, 0);
-			ac_real_acc[i] += acc2jerk_cont[i]->dt * acc2jerk_cont[i]->goal_velocity;
-			ac_real_velocity[i] += rate2acc_cont[i]->dt * ac_real_acc[i];
-			ac[i] = ac_real[i] += pos2rate_cont[i]->dt * ac_real_velocity[i];
-		}
-
-	}
-
-	//2 x controller loops to track linear interpolation///////
-	if(param_tracker_type == TRACKER_TYPE_2xSQRT) {
-		for(i = 0; i < 6; i++) {
-			pos2rate_cont[i]->control_step(pose_maker_time_s, ac_real[i], ac_command[i]);
-			rate2acc_cont[i]->control_step(pose_maker_time_s, ac_real_velocity[i], pos2rate_cont[i]->goal_velocity);
-			ac_real_velocity[i] += rate2acc_cont[i]->dt * rate2acc_cont[i]->goal_velocity;
-			ac[i] = ac_real[i] += pos2rate_cont[i]->dt * ac_real_velocity[i];
-		}
-
-		//if(pose_maker_time_s > 19.75){// && pose_maker_time_s < 20.25) {
-		//    printf("t:%f, preA:%f, NexA:%f, ComA:%f, alt:%f, rV:%f, gV:%f, gAc:%f\n", pose_maker_time_s,
-		//        (pre_ac[0]-pre_ac[0])/X2LAT(), (next_ac[0]-pre_ac[0])/X2LAT(), (ac_command[0]-pre_ac[0])/X2LAT(), (ac_real[0]-pre_ac[0])/X2LAT(),
-		//           ac_real_velocity[0]/X2LAT(), pos2rate_cont[0]->goal_velocity/X2LAT(), rate2acc_cont[0]->goal_velocity/X2LAT());
-		//	exit(10);
-		// }
-	}
-
-	//1 controller loop to track linear interpolation///////
-	if(param_tracker_type == TRACKER_TYPE_1xSQRT) {
-		for(i = 0; i < 6; i++) {
-			pos2rate_cont[i]->control_step(pose_maker_time_s, ac_real[i], ac_command[i]);
-			ac[i] = ac_real[i] += pos2rate_cont[i]->dt * pos2rate_cont[i]->goal_velocity;
-		}
-	}
-
-	//linear interpolation//////////
-	if(param_tracker_type == TRACKER_TYPE_LINEAR) {
-		for(i = 0; i < 6; i++)
-			ac[i] = ac_command[i];
-	}
-
-	//stepwise(non-continuous)////////
+    //stepwise(non-continuous)////////
 	if(param_tracker_type == TRACKER_TYPE_DESCRETE) {
 		for(i = 0; i < 6; i++)
-			ac[i]   = pre_ac[i];
+			ac_real[i] = pre_ac[i];
 	}
-
-	//debug////////
-#if 0
-	ac[i]   = 0;
-	ac[1]   = 0;
-	ac[2]   = 3000;
-	ac[3]  = 0;
-	ac[4] = 0;
-	ac[5]   = 0;
-#endif
+	
+    //follow linear interpolation//////////
+	if(param_tracker_type == TRACKER_TYPE_LINEAR) {
+		for(i = 0; i < 6; i++)
+			ac_real[i] = ac_command[i];
+	}
+	
+    //1 controller loop to track linear interpolation///////
+	if(param_tracker_type == TRACKER_TYPE_1xSQRT) {
+        for(i = 0; i < 6; i++)
+            ac_real[i] = smoother[i]->step1(pose_maker_time_s, ac_command[i]);
+	}
+	
+	//2 x controller loops to track linear interpolation and input/output 1st order filter for continuous acceleration///////
+	if(param_tracker_type == TRACKER_TYPE_2xSQRT_INOUT_FILTER) {
+		for(i = 0; i < 6; i++) 
+            ac_real[i] = smoother[i]->step2(pose_maker_time_s, ac_command[i]);
+	}
 
 	//LOGI(TAG, " pose kernel:%f, %f, %f, %f, %f, %f, %f\n", pose_maker_time_s, ac[0], ac[1], ac[2], ac[3], ac[4], ac[5]);
 
 	_LOCKCPP(Z_lock,);
-	cbPush(mZB, n.Z.GROUND_TRUTH_LLA + 0, ac[0], pose_maker_time_s / param_speed_factor);
-	cbPush(mZB, n.Z.GROUND_TRUTH_LLA + 1, ac[1], pose_maker_time_s / param_speed_factor);
-	cbPush(mZB, n.Z.GROUND_TRUTH_LLA + 2, ac[2], pose_maker_time_s / param_speed_factor);
-	cbPush(mZB, n.Z.GROUND_TRUTH_EU + 0, ac[3]*M_PI / 180, pose_maker_time_s / param_speed_factor); //in rad
-	cbPush(mZB, n.Z.GROUND_TRUTH_EU + 1, ac[4]*M_PI / 180, pose_maker_time_s / param_speed_factor);
-	cbPush(mZB, n.Z.GROUND_TRUTH_EU + 2, ac[5]*M_PI / 180, pose_maker_time_s / param_speed_factor);
+	cbPush(mZB, n.Z.GROUND_TRUTH_LLA + 0, ac_real[0], pose_maker_time_s / param_speed_factor);
+	cbPush(mZB, n.Z.GROUND_TRUTH_LLA + 1, ac_real[1], pose_maker_time_s / param_speed_factor);
+	cbPush(mZB, n.Z.GROUND_TRUTH_LLA + 2, ac_real[2], pose_maker_time_s / param_speed_factor);
+	cbPush(mZB, n.Z.GROUND_TRUTH_EU + 0, ac_real[3]*M_PI / 180, pose_maker_time_s / param_speed_factor); //in rad
+	cbPush(mZB, n.Z.GROUND_TRUTH_EU + 1, ac_real[4]*M_PI / 180, pose_maker_time_s / param_speed_factor);
+	cbPush(mZB, n.Z.GROUND_TRUTH_EU + 2, ac_real[5]*M_PI / 180, pose_maker_time_s / param_speed_factor);
 	_UNLOCKCPP(Z_lock,);
 }
 
