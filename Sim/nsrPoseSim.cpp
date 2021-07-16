@@ -177,8 +177,8 @@ void nsrPoseMakerInit()
     smoother[1]->setParams(0.,
                             MAX_ACC * Y2LON(param_map_center_lat),
                                 MAX_JERK * Y2LON(param_map_center_lat),
-                                    Y2LON(param_map_center_lat)*param_world_scale * 3, //3m
-                                        Y2LON(param_map_center_lat)*param_world_scale * 10, //10m/s
+                                    Y2LON(param_map_center_lat)*param_world_scale * 10, //10m
+                                        Y2LON(param_map_center_lat)*param_world_scale * 3, //3m/s
                                             TAW, TAW2);
     
     smoother[2]->setParams(0., MAX_ACC, MAX_JERK, param_world_scale * 10, param_world_scale * 10, TAW, TAW2);
