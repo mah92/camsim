@@ -92,7 +92,9 @@ int ObjectDrawable::add3DFile(const char* file_addr, float scale)
     addChild(csn);
     return 0;*/
  
-     osg::ref_ptr<osg::Node> loadedModel = osgDB::readNodeFile(file_addr); //importing object
+    //osgDB::Options* opt = new osgDB::Options;
+    //opt->setOptionString("DIFFUSE=0");
+    osg::ref_ptr<osg::Node> loadedModel = osgDB::readNodeFile(file_addr /*, opt*/); //importing object
 
     /*osg::ref_ptr<osg::Image> image = osgDB::readImageFile(tex_addr); //loading texture from file
     
@@ -191,7 +193,7 @@ void ObjectDrawable::setPath(char* _pathFile, bool _onEarth, double _phase, doub
     speed = _speed;
     onEarth = _onEarth;
     if(_phase < 0.) _phase = RAND(0., 1.);
-    
+    printf("::%f\n", _phase);
     //Read kml file///////////////////////////////////////////////////
     char node_name[MAX_PARAM_LENGTH];
 	pugi::xml_parse_result result;

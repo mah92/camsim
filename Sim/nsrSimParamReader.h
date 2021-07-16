@@ -12,6 +12,9 @@ extern int param_render_what;
 extern int param_show_what;
 extern int param_do_what;
 
+extern char settings_dempath[];
+extern char settings_mappath[];
+
 extern double param_map_center_lat;
 extern double param_map_center_lon;
 extern double param_map_max_alt;

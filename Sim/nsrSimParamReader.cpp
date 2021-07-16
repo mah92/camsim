@@ -11,6 +11,10 @@
 #include "nsrObjectDrawable.h"
 
 #include <math.h>
+#include <dirent.h>
+#include <errno.h>
+#include <sys/stat.h>
+
 #include <nsrUtility.h>
 
 #undef TAG
@@ -21,6 +25,9 @@ int param_seed = 12;
 int param_render_what = RENDER_IMAGE;
 int param_show_what = SHOW_PATTERN;
 int param_do_what = DO_SAVE_BMP;
+
+char settings_dempath[MAX_PATH_LENGTH];
+char settings_mappath[MAX_PATH_LENGTH];
 
 double param_map_center_lat = 35.9548;
 double param_map_center_lon = 52.1100;
@@ -111,7 +118,7 @@ void copyToSavePath(const char* filename)
 	char dest_addr[MAX_PATH_LENGTH];
 	uint8_t buf[200];
 	sprintf(source_addr, "%s/%s", globals.datapath, filename);
-	sprintf(dest_addr, "%s/%s", settings.savepath, filename);
+	sprintf(dest_addr, "%s/%s", globals.savepath, filename);
 
 	FILE *src, *dst;
 	src = fopen(source_addr, "r");
@@ -130,6 +137,7 @@ void nsrReadSimParams(const char* filename)
 {
 	char node_name[MAX_PARAM_LENGTH];
 	pugi::xml_parse_result result;
+    pugi::xml_attribute atr;
 
 	pugi::xml_document calibDoc;
 	result = calibDoc.load_file((std::string(globals.datapath) + "/" + filename).c_str());
@@ -151,25 +159,25 @@ void nsrReadSimParams(const char* filename)
 		strcpy(node_name, node.name());
 
 		if(strcmp(node_name, "mainParams") == 0) {
-			if(node.attribute("renderWhat")) {
+			if((atr = node.attribute("renderWhat"))) {
 				char strparam_render_what[20];
-				strcpy(strparam_render_what, node.attribute("renderWhat").as_string());
+				strcpy(strparam_render_what, atr.as_string());
 				if(strcmp("IMAGE", strparam_render_what) == 0)
 					param_render_what = RENDER_IMAGE;
 				if(strcmp("DEPTH", strparam_render_what) == 0)
 					param_render_what = RENDER_DEPTH;
 			}
-			if(node.attribute("showWhat")) {
+			if((atr = node.attribute("showWhat"))) {
 				char strparam_show_what[20];
-				strcpy(strparam_show_what, node.attribute("showWhat").as_string());
+				strcpy(strparam_show_what, atr.as_string());
 				if(strcmp("PATTERN", strparam_show_what) == 0)
 					param_show_what = SHOW_PATTERN;
 				if(strcmp("MAP", strparam_show_what) == 0)
 					param_show_what = SHOW_MAP;
 			}
-			if(node.attribute("doWhat")) {
+			if((atr = node.attribute("doWhat"))) {
 				char strparam_do_what[20];
-				strcpy(strparam_do_what, node.attribute("doWhat").as_string());
+				strcpy(strparam_do_what, atr.as_string());
                 
 				if(strcmp("NOTHING", strparam_do_what) == 0)
 					param_do_what = DO_NOTHING;
@@ -183,37 +191,61 @@ void nsrReadSimParams(const char* filename)
 
 			LOGI(TAG, "mainParams: %i, %i, %i\n", param_render_what, param_show_what, param_do_what);
 		}
+		
+        //demParams////////////////////////////////////////////
+        if(strcmp(node_name, "demParams") == 0) {
+            if((atr = node.attribute("addr"))) {
+                strcpy(settings_dempath, atr.as_string());
+                LOGI(TAG, " dempath: %s\n", settings_dempath);    
+            }
+        }
 
+        //mapParams////////////////////////////////////////////
 		if(strcmp(node_name, "mapParams") == 0) {
-			if(node.attribute("centerLat")) param_map_center_lat = node.attribute("centerLat").as_double();
-			if(node.attribute("centerLon")) param_map_center_lon = node.attribute("centerLon").as_double();
-			if(node.attribute("maxAlt")) param_map_max_alt = node.attribute("maxAlt").as_double();
-			if(node.attribute("maxDist")) param_map_max_dist = node.attribute("maxDist").as_double();
-			if(node.attribute("zoomLevel")) param_map_zoom = node.attribute("zoomLevel").as_int();
+         
+            if((atr = node.attribute("addr"))) {
+                strcpy(settings_mappath, atr.as_string());
+                
+                struct stat info;
+                if(stat(settings_mappath, &info) != 0) {
+                    sleep(5); //wait maybe sdcard loads
+                    if(stat(settings_mappath, &info) != 0) {
+                        sleep(5); //wait maybe sdcard loads
+                    }
+                }
+                
+                LOGI(TAG, " mappath: %s\n", settings_mappath);
+            }
+            
+			if((atr = node.attribute("centerLat"))) param_map_center_lat = atr.as_double();
+			if((atr = node.attribute("centerLon"))) param_map_center_lon = atr.as_double();
+			if((atr = node.attribute("maxAlt"))) param_map_max_alt = atr.as_double();
+			if((atr = node.attribute("maxDist"))) param_map_max_dist = atr.as_double();
+			if((atr = node.attribute("zoomLevel"))) param_map_zoom = atr.as_int();
 
 			LOGI(TAG, "mapParams: %f, %f, %f, %f, %i\n", param_map_center_lat, param_map_center_lon, param_map_max_alt, param_map_max_dist, param_map_zoom);
 		}
 
 		if(strcmp(node_name, "patternParams") == 0) {
-			if(node.attribute("metricWidth")) param_pattern_metric_width = node.attribute("metricWidth").as_double();
-			if(node.attribute("patternFile")) {
+			if((atr = node.attribute("metricWidth"))) param_pattern_metric_width = atr.as_double();
+			if((atr = node.attribute("patternFile"))) {
 				strcpy(param_pattern_file, globals.datapath);
 				strcat(param_pattern_file, "/");
-				strcat(param_pattern_file, node.attribute("patternFile").as_string());
+				strcat(param_pattern_file, atr.as_string());
 			}
 
 			LOGI(TAG, "patternParams: %f, %s\n", param_pattern_metric_width, param_pattern_file);
 		}
 
 		if(strcmp(node_name, "pathParams") == 0) {
-			if(node.attribute("pathFile")) {
+			if((atr = node.attribute("pathFile"))) {
 				strcpy(param_path_file, globals.datapath);
 				strcat(param_path_file, "/");
-				strcat(param_path_file, node.attribute("pathFile").as_string());
+				strcat(param_path_file, atr.as_string());
 			}
-			if(node.attribute("csvPositionFmt")) {
+			if((atr = node.attribute("csvPositionFmt"))) {
 				char strparam_position_format[10];
-				strcpy(strparam_position_format, node.attribute("csvPositionFmt").as_string());
+				strcpy(strparam_position_format, atr.as_string());
 				if(strcmp("LLA", strparam_position_format) == 0)
 					param_position_format = POSITION_FMT_LLA;
 				if(strcmp("XYA", strparam_position_format) == 0)
@@ -222,54 +254,54 @@ void nsrReadSimParams(const char* filename)
 					param_position_format = POSITION_FMT_XYZ;
 			}
 
-			if(node.attribute("trackerType")) param_tracker_type = node.attribute("trackerType").as_int();
-			if(node.attribute("controlFreq")) param_control_freq = node.attribute("controlFreq").as_double();
-			if(node.attribute("accMax")) param_max_acc = node.attribute("accMax").as_double();
-			if(node.attribute("angAccMax")) param_max_ang_acc = node.attribute("angAccMax").as_double();
+			if((atr = node.attribute("trackerType"))) param_tracker_type = atr.as_int();
+			if((atr = node.attribute("controlFreq"))) param_control_freq = atr.as_double();
+			if((atr = node.attribute("accMax"))) param_max_acc = atr.as_double();
+			if((atr = node.attribute("angAccMax"))) param_max_ang_acc = atr.as_double();
 			LOGI(TAG, "pathParams: %s, %i, %i, %f, %f, %f\n", param_path_file, param_tracker_type, param_position_format, param_control_freq, param_max_acc, param_max_ang_acc);
 		}
 
 		if(strcmp(node_name, "pathParamsExtra") == 0) {
-			if(node.attribute("speedFactor")) param_speed_factor = node.attribute("speedFactor").as_double();
-			if(node.attribute("worldScale")) param_world_scale = node.attribute("worldScale").as_double();
-			if(node.attribute("altOffset")) param_alt_offset = node.attribute("altOffset").as_double();
+			if((atr = node.attribute("speedFactor"))) param_speed_factor = atr.as_double();
+			if((atr = node.attribute("worldScale"))) param_world_scale = atr.as_double();
+			if((atr = node.attribute("altOffset"))) param_alt_offset = atr.as_double();
 			LOGI(TAG, "pathParamsExtra: %f, %f, %f\n", param_speed_factor, param_world_scale, param_alt_offset);
 		}
 
 		if(strcmp(node_name, "sensorParams") == 0) {
-			if(node.attribute("cameraFps")) param_camera_fps = node.attribute("cameraFps").as_double();
-			if(node.attribute("phasePercent")) param_camera_phase_percent = node.attribute("phasePercent").as_double();
+			if((atr = node.attribute("cameraFps"))) param_camera_fps = atr.as_double();
+			if((atr = node.attribute("phasePercent"))) param_camera_phase_percent = atr.as_double();
 			LOGI(TAG, "sensorParams: %f, %f\n", param_camera_fps, param_camera_phase_percent);
 		}
 
 		if(strcmp(node_name, "idealParams") == 0) {
 			double param_fov_x, param_fov_y;
-			if(node.attribute("resolutionScale")) param_resolution_scale = node.attribute("resolutionScale").as_double();
-			if(node.attribute("width")) param_width = node.attribute("width").as_int();
-			if(node.attribute("height")) param_height = node.attribute("height").as_int();
+			if((atr = node.attribute("resolutionScale"))) param_resolution_scale = atr.as_double();
+			if((atr = node.attribute("width"))) param_width = atr.as_int();
+			if((atr = node.attribute("height"))) param_height = atr.as_int();
 
-			if(node.attribute("oxOffset")) {
-				param_ox = node.attribute("oxOffset").as_double();
+			if((atr = node.attribute("oxOffset"))) {
+				param_ox = atr.as_double();
 				param_ox += param_width / 2.;
 			}
-			if(node.attribute("oyOffset")) {
-				param_oy = node.attribute("oyOffset").as_double();
+			if((atr = node.attribute("oyOffset"))) {
+				param_oy = atr.as_double();
 				param_oy += param_height / 2.;
 			}
 
-			if(node.attribute("ox")) {
-				param_ox = node.attribute("ox").as_double();
+			if((atr = node.attribute("ox"))) {
+				param_ox = atr.as_double();
 			}
-			if(node.attribute("oy")) {
-				param_oy = node.attribute("oy").as_double();
+			if((atr = node.attribute("oy"))) {
+				param_oy = atr.as_double();
 			}
 
-			if(node.attribute("fovX")) {
-				param_fov_x = node.attribute("fovX").as_double();
+			if((atr = node.attribute("fovX"))) {
+				param_fov_x = atr.as_double();
 				param_fx = (param_width / 2.) / tan(param_fov_x / 2.*M_PI / 180.);
 			}
-			if(node.attribute("fovY")) {
-				param_fov_y = node.attribute("fovY").as_double();
+			if((atr = node.attribute("fovY"))) {
+				param_fov_y = atr.as_double();
 				param_fy = (param_height / 2.) / tan(param_fov_y / 2.*M_PI / 180.);
 			}
 
@@ -279,21 +311,13 @@ void nsrReadSimParams(const char* filename)
 			if(!node.attribute("fovX") && node.attribute("fovY"))
 				param_fx = param_fy;
 
-			if(node.attribute("f"))
-				param_fx = param_fy = node.attribute("f").as_double();
+			if((atr = node.attribute("f" ))) param_fx = param_fy = atr.as_double();
+			if((atr = node.attribute("fx"))) param_fx = atr.as_double();
+			if((atr = node.attribute("fy"))) param_fy = atr.as_double();
 
-			if(node.attribute("fx"))
-				param_fx = node.attribute("fx").as_double();
-
-			if(node.attribute("fy"))
-				param_fy = node.attribute("fy").as_double();
-
-			if(node.attribute("fErr"))
-				param_f_err = node.attribute("fErr").as_double();
-			if(node.attribute("oxErr"))
-				param_ox_err = node.attribute("oxErr").as_double();
-			if(node.attribute("oyErr"))
-				param_oy_err = node.attribute("oyErr").as_double();
+			if((atr = node.attribute("fErr" ))) param_f_err = atr.as_double();
+			if((atr = node.attribute("oxErr"))) param_ox_err = atr.as_double();
+			if((atr = node.attribute("oyErr"))) param_oy_err = atr.as_double();
 
 			param_width *= param_resolution_scale;
 			param_height *= param_resolution_scale;
@@ -309,81 +333,81 @@ void nsrReadSimParams(const char* filename)
 		}
 
 		if(strcmp(node_name, "staticParams") == 0) {
-			if(node.attribute("maxLensIterations")) param_max_lens_iterations = node.attribute("maxLensIterations").as_int();
-			if(node.attribute("maxPixError")) param_max_pix_error = node.attribute("maxPixError").as_double();
-			if(node.attribute("k1")) param_k1 = node.attribute("k1").as_double();
-			if(node.attribute("k2")) param_k2 = node.attribute("k2").as_double();
-			if(node.attribute("t1")) param_t1 = node.attribute("t1").as_double();
-			if(node.attribute("t2")) param_t2 = node.attribute("t2").as_double();
-			if(node.attribute("k3")) param_k3 = node.attribute("k3").as_double();
-			if(node.attribute("k4")) param_k4 = node.attribute("k4").as_double();
-			if(node.attribute("k5")) param_k5 = node.attribute("k5").as_double();
-			if(node.attribute("k6")) param_k6 = node.attribute("k6").as_double();
+			if((atr = node.attribute("maxLensIterations"))) param_max_lens_iterations = atr.as_int();
+			if((atr = node.attribute("maxPixError"))) param_max_pix_error = atr.as_double();
+			if((atr = node.attribute("k1"))) param_k1 = atr.as_double();
+			if((atr = node.attribute("k2"))) param_k2 = atr.as_double();
+			if((atr = node.attribute("t1"))) param_t1 = atr.as_double();
+			if((atr = node.attribute("t2"))) param_t2 = atr.as_double();
+			if((atr = node.attribute("k3"))) param_k3 = atr.as_double();
+			if((atr = node.attribute("k4"))) param_k4 = atr.as_double();
+			if((atr = node.attribute("k5"))) param_k5 = atr.as_double();
+			if((atr = node.attribute("k6"))) param_k6 = atr.as_double();
 			LOGI(TAG, "staticParams: %i, %f, %f, %f, %f, %f, %f, %f, %f, %f\n", param_max_lens_iterations, param_max_pix_error, param_k1, param_k2, param_t1, param_t2,
 				 param_k3, param_k4, param_k5, param_k6);
 
-			if(node.attribute("k1Err")) param_k1_err = node.attribute("k1Err").as_double();
-			if(node.attribute("k2Err")) param_k2_err = node.attribute("k2Err").as_double();
-			if(node.attribute("t1Err")) param_t1_err = node.attribute("t1Err").as_double();
-			if(node.attribute("t2Err")) param_t2_err = node.attribute("t2Err").as_double();
-			if(node.attribute("k3Err")) param_k3_err = node.attribute("k3Err").as_double();
+			if((atr = node.attribute("k1Err"))) param_k1_err = atr.as_double();
+			if((atr = node.attribute("k2Err"))) param_k2_err = atr.as_double();
+			if((atr = node.attribute("t1Err"))) param_t1_err = atr.as_double();
+			if((atr = node.attribute("t2Err"))) param_t2_err = atr.as_double();
+			if((atr = node.attribute("k3Err"))) param_k3_err = atr.as_double();
 		}
 
 		if(strcmp(node_name, "vignetParams") == 0) {
-			if(node.attribute("vignetFile")) {
+			if((atr = node.attribute("vignetFile"))) {
 				strcpy(param_vignet_file, globals.datapath);
 				strcat(param_vignet_file, "/");
-				strcat(param_vignet_file, node.attribute("vignetFile").as_string());
+				strcat(param_vignet_file, atr.as_string());
 			}
-			if(node.attribute("vignetThresh1")) param_vignet_thresh1 = node.attribute("vignetThresh1").as_double();
-			if(node.attribute("vignetThresh2")) param_vignet_thresh2 = node.attribute("vignetThresh2").as_double();
+			if((atr = node.attribute("vignetThresh1"))) param_vignet_thresh1 = atr.as_double();
+			if((atr = node.attribute("vignetThresh2"))) param_vignet_thresh2 = atr.as_double();
 			LOGI(TAG, "vignetParams: %s, %f, %f\n", strlen(param_vignet_file) > 0 ? param_vignet_file : "NO VIGNET", param_vignet_thresh1, param_vignet_thresh2);
 		}
 
 		if(strcmp(node_name, "dynamicParams") == 0) {
-			if(node.attribute("td")) param_td = node.attribute("td").as_double();
-			if(node.attribute("tr")) param_tr = node.attribute("tr").as_double();
-			if(node.attribute("te")) param_te = node.attribute("te").as_double();
-			if(node.attribute("motionBlurExtraSamples")) param_motion_blur_extra_samples = node.attribute("motionBlurExtraSamples").as_int();
-			if(node.attribute("ti")) param_ti = node.attribute("ti").as_double();
+			if((atr = node.attribute("td"))) param_td = atr.as_double();
+			if((atr = node.attribute("tr"))) param_tr = atr.as_double();
+			if((atr = node.attribute("te"))) param_te = atr.as_double();
+			if((atr = node.attribute("motionBlurExtraSamples"))) param_motion_blur_extra_samples = atr.as_int();
+			if((atr = node.attribute("ti"))) param_ti = atr.as_double();
 
 			//The real timing contains these errors
-			if(node.attribute("tdErr")) param_td_err = node.attribute("tdErr").as_double();
-			if(node.attribute("trErr")) param_tr_err = node.attribute("trErr").as_double();
+			if((atr = node.attribute("tdErr"))) param_td_err = atr.as_double();
+			if((atr = node.attribute("trErr"))) param_tr_err = atr.as_double();
 
 			LOGI(TAG, "dynamicParams: %f, %f, %f, %i, %f, errTd:%f, errTr:%f\n", param_td, param_tr, param_te, param_motion_blur_extra_samples, param_ti,
 				 param_td_err, param_tr_err);
 		}
 
 		if(strcmp(node_name, "marginParams") == 0) {
-			if(node.attribute("extraMargin")) param_extra_margin = node.attribute("extraMargin").as_double();
-			if(node.attribute("extraZoom")) param_extra_zoom = node.attribute("extraZoom").as_double();
+			if((atr = node.attribute("extraMargin"))) param_extra_margin = atr.as_double();
+			if((atr = node.attribute("extraZoom"))) param_extra_zoom = atr.as_double();
 			LOGI(TAG, "marginParams: %f, %f,\n", param_extra_margin, param_extra_zoom);
 		}
 
 		if(strcmp(node_name, "signalParams") == 0) {
-			if(node.attribute("dayLight")) param_day_light = node.attribute("dayLight").as_double();
-			if(node.attribute("noiseAmpDynamic")) param_noise_amp_dynamic = node.attribute("noiseAmpDynamic").as_double();
-            if(node.attribute("noiseAmpStatic1")) param_noise_amp_static1 = node.attribute("noiseAmpStatic1").as_double();
-            if(node.attribute("noiseAmpStatic2")) param_noise_amp_static2 = node.attribute("noiseAmpStatic2").as_double();
-            if(node.attribute("fogVisibilityDistance")) param_max_fog_distance = node.attribute("fogVisibilityDistance").as_double();
-			if(node.attribute("seed")) param_seed = node.attribute("seed").as_int();
+			if((atr = node.attribute("dayLight"       ))) param_day_light = atr.as_double();
+			if((atr = node.attribute("noiseAmpDynamic"))) param_noise_amp_dynamic = atr.as_double();
+            if((atr = node.attribute("noiseAmpStatic1"))) param_noise_amp_static1 = atr.as_double();
+            if((atr = node.attribute("noiseAmpStatic2"))) param_noise_amp_static2 = atr.as_double();
+            if((atr = node.attribute("fogVisibilityDistance"))) param_max_fog_distance = atr.as_double();
+			if((atr = node.attribute("seed"))) atr.as_int();
 			LOGI(TAG, "signalParams: %f, %f, %f, %f, %f, %i\n", param_day_light, param_noise_amp_dynamic, param_noise_amp_static1, param_noise_amp_static2, param_max_fog_distance, param_seed);
 		}
 
 		if(strcmp(node_name, "camInAcEu") == 0) {
 			//Nominal installation angles
-			if(node.attribute("roll")) param_cam_in_ac_roll = node.attribute("roll").as_double();
-			if(node.attribute("pitch")) param_cam_in_ac_pitch = node.attribute("pitch").as_double();
-			if(node.attribute("yaw")) param_cam_in_ac_yaw = node.attribute("yaw").as_double();
+			if((atr = node.attribute("roll" ))) param_cam_in_ac_roll = atr.as_double();
+			if((atr = node.attribute("pitch"))) param_cam_in_ac_pitch = atr.as_double();
+			if((atr = node.attribute("yaw"  ))) param_cam_in_ac_yaw = atr.as_double();
 
 			//The real rotation contains these errors
-			if(node.attribute("xErr")) param_cam_in_ac_err_x = node.attribute("xErr").as_double();
-			if(node.attribute("yErr")) param_cam_in_ac_err_y = node.attribute("yErr").as_double();
-			if(node.attribute("zErr")) param_cam_in_ac_err_z = node.attribute("zErr").as_double();
+			if((atr = node.attribute("xErr"))) param_cam_in_ac_err_x = atr.as_double();
+			if((atr = node.attribute("yErr"))) param_cam_in_ac_err_y = atr.as_double();
+			if((atr = node.attribute("zErr"))) param_cam_in_ac_err_z = atr.as_double();
 
 			double param_cam_in_ac_err = 0;
-			if(node.attribute("err")) param_cam_in_ac_err = node.attribute("err").as_double();
+			if((atr = node.attribute("err"))) param_cam_in_ac_err = atr.as_double();
 			if(!node.attribute("xErr")) param_cam_in_ac_err_x = ((rand() % 2) * 2 - 1) * param_cam_in_ac_err;
 			if(!node.attribute("yErr")) param_cam_in_ac_err_y = ((rand() % 2) * 2 - 1) * param_cam_in_ac_err;
 			if(!node.attribute("zErr")) param_cam_in_ac_err_z = ((rand() % 2) * 2 - 1) * param_cam_in_ac_err;
@@ -393,43 +417,65 @@ void nsrReadSimParams(const char* filename)
 		}
 		
         if(strcmp(node_name, "vehicle") == 0) {
-            char pathFile[MAX_PATH_LENGTH];
-            char objFile[MAX_PATH_LENGTH];
-            double phase = 0., speed = 60.;
-            bool onEarth = true;
+            static bool path_inited = false;
+            static char pathFile[MAX_PATH_LENGTH] = "";
+            static bool roadDirReverse = false;
             
-            strcpy(pathFile, "");
+            char objFile[MAX_PATH_LENGTH];
+            double phase, speed;
+            int numVehicles;
+            bool onEarth;            
+            
             strcpy(objFile, "");
             
-			if(node.attribute("pathFile")) {
+            if(path_inited == false)
+                strcpy(pathFile, "");
+            
+			if((atr = node.attribute("pathFile"))) {
                 strcpy(pathFile, globals.datapath);
 				strcat(pathFile, "/");
-                strcat(pathFile, node.attribute("pathFile").as_string());
+                strcat(pathFile, atr.as_string());
+                path_inited = true;
             }
-			if(node.attribute("onEarth")) onEarth = node.attribute("onEarth").as_bool();
-			if(node.attribute("startPhase")) phase = node.attribute("startPhase").as_double();
-			if(node.attribute("speed")) speed = node.attribute("speed").as_double();
-            if(node.attribute("objFile")) {
+            
+            if((atr = node.attribute("roadDirReverse"))) roadDirReverse = atr.as_bool();
+
+            onEarth = true;
+			if((atr = node.attribute("onEarth"))) onEarth = atr.as_bool();
+                
+            phase = -1;
+            if((atr = node.attribute("startPhase"))) phase = atr.as_double();
+            
+            numVehicles = 1;
+            if((atr = node.attribute("numVehicles"))) numVehicles = atr.as_int();                
+            
+            speed = 60.;
+			if((atr = node.attribute("speed"))) speed = atr.as_double();
+            if(roadDirReverse) speed = -speed;
+
+            if((atr = node.attribute("objFile"))) {
                 strcpy(objFile, globals.datapath);
 				strcat(objFile, "/");
-                strcat(objFile, node.attribute("objFile").as_string());
+                strcat(objFile, atr.as_string());
             }
-            
-			LOGI(TAG, "vehicle: %s, %i, %f, %f, %s\n", pathFile, onEarth?1:0, phase, speed, objFile);
+			LOGI(TAG, "vehicle: %s, %i, %f, %i, %f, %s\n", pathFile, onEarth?1:0, phase, numVehicles, speed, objFile);
             
             if(strlen(pathFile) > 0 && strlen(objFile) > 0) {
-                allObjectDrawables.push_back(new ObjectDrawable());
-                allObjectDrawables.back()->add3DFile(objFile);
-                allObjectDrawables.back()->setPath(pathFile, onEarth, phase, speed/3.6); //convert speed from KM/h to m/s
+                int k;
+                for(k=0;k<numVehicles;k++) {
+                    allObjectDrawables.push_back(new ObjectDrawable());
+                    allObjectDrawables.back()->add3DFile(objFile);
+                    allObjectDrawables.back()->setPath(pathFile, onEarth, phase, speed/3.6); //convert speed from KM/h to m/s
+                }
             }
 		}
 
 		//overrides
 		if(strcmp(node_name, "includeParams") == 0) {
 			char include_file[MAX_PATH_LENGTH];
-			if(node.attribute("includeFile")) {
-				strcpy(include_file, node.attribute("includeFile").as_string());
-			}
+            
+			if((atr = node.attribute("includeFile")))
+                strcpy(include_file, atr.as_string());
 
 			LOGI(TAG, "includeParams1: %s\n", include_file); fflush(stdout);
 

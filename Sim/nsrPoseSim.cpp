@@ -151,7 +151,7 @@ void nsrPoseMakerInit()
 
 	////////////////////////////////////////////////////////////
 	char sensorsCsvFilePath[MAX_PATH_LENGTH];
-	strcpy(sensorsCsvFilePath, settings.savepath);
+	strcpy(sensorsCsvFilePath, globals.savepath);
 	strcat(sensorsCsvFilePath, "/log.csv");
 	sensorsCsvFile = fopen(sensorsCsvFilePath, "w");	//"w":= write only
 	if(sensorsCsvFile == NULL) {

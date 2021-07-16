@@ -63,9 +63,6 @@ void linuxInit()
 	char root_path[100] = "../../"; //It's relative to currrent build dir
 	strcat(root_path, PROJECT_NAME);
 	NativeOpen(root_path, myTime());
-	init_settings();
-	read_settings();
-	setDynamicAddresses();
 	setSharedBuffers();
 
 	LOGI(TAG, " Initialization complete!-\n");

@@ -8,6 +8,8 @@
 #include "Core/nsrCore.h"
 #include "ThirdParty/geoid.h"
 
+#include "nsrSimParamReader.h"
+
 #undef TAG
 #define TAG "Cpp:GeoLib:"
 
@@ -578,12 +580,12 @@ int demLoad(DEM* pDem, int lat, int lon)
 	char str[MAX_PATH_LENGTH];
 	double time_s = myTime();
 	//i.e:n27_e051_1arc_v3.tif //dem name always points to lower-left of region
-	//sprintf(str, "%s/%c%02i_%c%03i_1arc_v3.tif", settings.dempath, lat>=0?'n':'s', (int)(lat>=0?lat:1-lat), lon>=0?'e':'w', (int)(lon>=0?lon:1-lon) ); //for float input
+	//sprintf(str, "%s/%c%02i_%c%03i_1arc_v3.tif", settings_dempath, lat>=0?'n':'s', (int)(lat>=0?lat:1-lat), lon>=0?'e':'w', (int)(lon>=0?lon:1-lon) ); //for float input
 	//sprintf(str, "/storage/usb3host/dem/IRAN/%c%02i_%c%03i_1arc_v3.tif", lat>=0?'n':'s', (int)(lat>=0?lat:1-lat), lon>=0?'e':'w', (int)(lon>=0?lon:1-lon) ); 
     //for float input
 	//sprintf(str, "/mnt/sdcard/PitechGCS/dem/tehran/%c%02i_%c%03i_1arc_v3.tif", lat>=0?'n':'s', (int)(lat>=0?lat:1-lat), lon>=0?'e':'w', (int)(lon>=0?lon:1-lon) ); //for float input
 	//sprintf(str, "/mnt/sdcard/PitechGCS/dem/tehran/%c%02i_%c%03i_1arc_v3.tif", lat>=0?'n':'s', lat>=0?lat:-lat, lon>=0?'e':'w', lon>=0?lon:-lon ); //for int input
-	sprintf(str, "%s/%c%02i_%c%03i_1arc_v3.tif", settings.dempath, lat >= 0 ? 'n' : 's', lat >= 0 ? lat : -lat, lon >= 0 ? 'e' : 'w', lon >= 0 ? lon : -lon); //for int input
+	sprintf(str, "%s/%c%02i_%c%03i_1arc_v3.tif", settings_dempath, lat >= 0 ? 'n' : 's', lat >= 0 ? lat : -lat, lon >= 0 ? 'e' : 'w', lon >= 0 ? lon : -lon); //for int input
 
 	pDem->lat = nsrFloor(lat);
 	pDem->lon = nsrFloor(lon);

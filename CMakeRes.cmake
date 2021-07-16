@@ -8,7 +8,6 @@ set( ThirdParty ${CMAKE_CURRENT_LIST_DIR}/ThirdParty)
 set( CoreSrcs
     ${Coredir}/nsrDataDef.cpp
     ${Coredir}/nsrIndex.cpp
-    ${Coredir}/nsrSettings.cpp
     ${Coredir}/nsrUtility.cpp
     ${Coredir}/nsrStrUtility.c
     ${Coredir}/nsrFilters.cpp

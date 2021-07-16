@@ -9,5 +9,4 @@
 #include "./nsrIndex.h"
 #include "./nsrMsgLog.h"
 #include "./nsrDataDef.h"
-#include "./nsrSettings.h"
 #include "./nsrFilters.h"

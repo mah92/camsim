@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <simParams>
-	<!-- includeParams, overriding parameters for specific cameras -->
-	<includeParams0 includeFile="Parameters-test.xml" />
-	<includeParams0 includeFile="Parameters-FSR2015-lawnMower-grayCam.xml" />
-	<includeParams0 includeFile="Parameters-opencvCalibSequence.xml" />
+	<!-- INCLUDE MAIN SETTING FILE HERE -->
 	<includeParams includeFile="Parameters-FSR2015-lawnMower-customCam.xml" />
-	<includeParams0 includeFile="Parameters-FSR2015-lawnMower-1stArticleCam.xml" />
-	<includeParams0 includeFile="Parameters-FSR2015-lawnMower-customCamStab.xml" />
 	
+    
 	<mainParams renderWhat="IMAGE" doWhat="NOTHING" />
 	<mainParams0 renderWhat="IMAGE" doWhat="SAVE_IMAGE" />
 	<mainParams0 renderWhat="IMAGE" doWhat="IMAGE_PROC" />

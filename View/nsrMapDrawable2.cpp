@@ -25,6 +25,7 @@ or
 
 #include "nsrOSGShaders.h"
 #include "nsrImageDrawableParams.h"
+#include "nsrSimParamReader.h"
 
 #include <osg/BlendFunc>
 #include <osgDB/ReadFile>
@@ -299,7 +300,7 @@ int MapDrawable2::addMapTile(int xTile, int yTile, int zoom, int dem_resolution)
 {
 	char str[100];
 	//sprintf(str, "%s/%i/%i/%i.jpg", globals.datapath, zoom, xTile, yTile);
-	sprintf(str, "%s/%i/%i/%i.jpg", settings.mappath, zoom, xTile, yTile);
+	sprintf(str, "%s/%i/%i/%i.jpg", settings_mappath, zoom, xTile, yTile);
 	std::string texfile(str);
 
 	osg::ref_ptr<osg::Geode> geode = new osg::Geode;

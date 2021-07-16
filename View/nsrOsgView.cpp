@@ -110,7 +110,7 @@ public:
 		image->readPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE);  //GL_LUMINANCE, GL_FLOAT);
 
 		if(param_do_what == DO_SAVE_BMP) {
-			sprintf((char*)address, "%s/screenshot%05i.bmp", settings.savepath, shotindex);
+			sprintf((char*)address, "%s/screenshot%05i.bmp", globals.savepath, shotindex);
 			osgDB::writeImageFile(*image, std::string(address));
 			//bmp bad resolution, works with both GL_RGB & GL_RGBA, 1.5GB for 30fpsx60s, 7fps
 			//jpeg just works with GL_RGB in both image and save texture, 380MB for 30fpsx60s, 4fps, rms2bmp: 1.95

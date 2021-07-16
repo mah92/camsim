@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simParams>
+    <desc desc="speed is in KM/h, negative speed means reverse movement" />
+    <desc desc="startPhase show position in path, should be between[0,1], -1 for random" />
+    <desc desc="roadDirReverse makes the movement reverse" />
+    <desc desc="pathFile, and roadDirReverse can be set once before defining vehicles or for every vehicle, prefered to be set before this file" />
+    <desc desc="onEarth sets if vehicle altitudes should be discarded, default is true" />
+    <desc desc="xml file contails MSL(Absolute) altitude" />
+    <desc desc="vehicle xyz should be corrected (e.g. in blender), to obey aerospace standard, means: z: down, x: forward, y: right" />
+    <desc desc="in order to prevent fps for hundreds of vehicles, make sure vehicles don't have more than 1000-3000 tris" />
+    <desc desc="You can do this by: blender-> click on the object->click wrench->Add Modifier->Decimation->Collapse->Reduce ratio while watching the object and Triangles(Tris in below status tab)" />
+            
+	<vehicle numVehicles="7" speed = "+60" objFile="models/ambulance/ambulance.obj" desc = "32fps, 1080Tris"/>
+	<vehicle numVehicles="7" speed = "+60" objFile="models/bus/bus.obj" desc = "32fps, 1040Tris"/>
+    <vehicle numVehicles="7" speed = "+60" objFile="models/fire_truck/fire_truck.obj" desc = "31fps, 2150Tris"/>    
+    <vehicle numVehicles="7" speed = "+50" objFile="models/truck/truck.obj" desc = "27fps, 1140Tris"/>
+	<vehicle numVehicles="7" speed = "+30" objFile="models/tractor/tractor.obj" desc = "29,1220Tris"/>
+	<vehicle numVehicles="7" speed = "+60" objFile="models/van/van.obj" desc = "28fps, 1134Tris"/>    
+    <vehicle numVehicles="7" speed = "+60" objFile="models/hummer/hum.obj" desc = "23fps, 3160Tris" />    
+    <vehicle numVehicles="7" speed = "+60" objFile="models/chrysler/chrysler.obj" desc = "crash!, 2900Tris" />    
+    <vehicle numVehicles="7" speed = "+80" objFile="models/police/police-car.obj" desc = "29fps, 4000Tris" />    
+    <vehicle numVehicles="7" speed = "+60" objFile="models/car/car.obj" desc = "29fps, 3030Tris" />    
+    <vehicle numVehicles="7" speed = "+50" objFile="models/pickup/PickUp.obj" desc = "27fps, 2460Tris" />    
+    <vehicle0 numVehicles="7" speed = "+60" objFile="models/tank1/IS.obj" desc = "22fps, 9020Tris" />
+	<vehicle0 numVehicles="7" speed = "+50" objFile="models/tank2/430.obj" desc = "30fps, 2500Tris" />
+</simParams>

@@ -35,7 +35,8 @@ typedef struct GlobalsStruct_ {
 
 	/** آدرس پوشه داده ها و فایل تنظیمات  */
 	char datapath[MAX_PATH_LENGTH];
-
+    
+    char savepath[MAX_PATH_LENGTH];
 } GlobalsStruct;
 
 extern GlobalsStruct globals;
@@ -49,12 +50,6 @@ extern NumBuffer *mZB;
  * @return شماره خطا
  */
 int NativeOpen(const char* rootpath, double starttime);
-
-/**
- * تعیین و ایجاد آدرس های ذخیره سازی متغیر در محیط سی
- * @return شماره خطا
- */
-int setDynamicAddresses();
 
 /**
  * گشودن محیط سی با تعریف داده و مقدار دهی اولیه ساختارهای اصلی داده

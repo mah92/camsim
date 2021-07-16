@@ -158,7 +158,11 @@ Installation angle errors:
 	showWhat = "MAP" or "PATTERN"
 	
 	doWhat = "NOTHING", "SAVE_BMP", "IMAGE_PROC", or "SAVE_ROS_BAG" (if ros exists)
-
+	
+	* demParams
+	
+	addr: dem tiles absolute path (SRTM digital elevation files, e.g: n35_e036_1arc_v3.tif):
+	
 	* mapParams
 	
 	Rendered distance is minimum of maxDist and max horizon seen at maxAlt(spherical earth)
@@ -167,12 +171,12 @@ Installation angle errors:
 	
 	depth format: vec4(floor(floor(Z)/255.)/255., fract(floor(Z)/255.), fract(Z), 1.);
 	
-	depth map (texCoord_realResMean)get problematic(a glosbe line) when camera looks at out of map
+	addr: absolute address for Mobile Atlas Creator Format(MOBAC) files also known as inverted TMS, with 256x256 .jpg images
 	
 	zoom: if not set, is set automatically
 	
 	using dem in zooms equal or lower than 10x is canceled
-
+	
 	* patternParams
 	
 	location is laid horizontally on the zero ground at centerLat, centerLon of mapParams

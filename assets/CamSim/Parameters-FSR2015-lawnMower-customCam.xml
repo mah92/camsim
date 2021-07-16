@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <simParams>
 	<!-- parameters for custom FSR2015 ASL dataset simulation -->
-	<!-- read readme.txt before use -->
+	<!-- read README.md before use -->
 	<mainParams renderWhat="IMAGE" showWhat="MAP" />
 
+    <!-- demParams -->
+    <demParams addr = "/media/oem/Map/dem/westasia" />
+    
 	<!-- mapParams -->
+    <mapParams addr = "/media/oem/Map/map" />
+    <mapParams0 addr = "/media/oem/Map/map2" />
+    
 	<mapParams0 desc = "fsr2015" centerLat="47.115880655" centerLon="8.67212173" maxAlt="100000" maxDist="11100" zoomLevel = "16"/> //25fps
 	<mapParams0 desc = "fsr2015" centerLat="47.115880655" centerLon="8.67212173" maxAlt="100000" maxDist="11100" zoomLevel = "17"/> //15fps
 	<mapParams desc = "fsr2015" centerLat="47.115880655" centerLon="8.67212173" maxAlt="100000" maxDist="11100" zoomLevel = "16"/> //?fps
@@ -16,12 +22,7 @@
 	<pathParams0 pathFile="path_1hSegment.csv" csvPositionFmt="LLA" trackerType="6" accMax="10" angAccMax="60" controlFreq="800"/>
 	<pathParams pathFile="path_lawnmower.csv" csvPositionFmt="LLA" trackerType="6" accMax="10" angAccMax="60" controlFreq="800"/>
 	<pathParams0 pathFile="path_rectSpiral.csv" csvPositionFmt="LLA" trackerType="6" accMax="10" angAccMax="60" controlFreq="800"/>
-	<pathParams0 pathFile="path-test.csv" csvPositionFmt="XYZ" trackerType="1" accMax="10" angAccMax="60" controlFreq="800"/>
-    <pathParams0 pathFile="path_lawnmower_no_translation.csv" csvPositionFmt="LLA" trackerType="6" accMax="10" angAccMax="60" controlFreq="800"/>
-	<pathParams0 pathFile="path_lawnmower_no_rotation.csv" csvPositionFmt="LLA" trackerType="6" accMax="10" angAccMax="60" controlFreq="800"/>
-    <pathParams0 pathFile="path_lawnmower_nadir.csv" csvPositionFmt="LLA" trackerType="6" accMax="10" angAccMax="60" controlFreq="800"/>
-	<pathParams0 pathFile="path_space.csv" csvPositionFmt="LLA" trackerType="6" accMax="10" angAccMax="60" controlFreq="800"/>
-
+    
 	<pathParamsExtra speedFactor="1." worldScale="1." altOffset="0."/>
 
 	<!-- default parameters for usual cameras -->
@@ -83,7 +84,11 @@
     <idealParams width="720" height="540" desc="used for publishing a FullHD video in 2x2 cells(AR:4/3)" />
     <idealParams0 width="810" height="540" desc="used for publishing a FullHD video in 2x2 cells(AR:3/2)" />
     
-	<includeParams includeFile="vehicleParameters.xml" />
+    <vehicle pathFile="models/rossboden.kml" roadDirReverse="false" />
+	<includeParams includeFile="vehiclePack.xml" />
+    <vehicle pathFile="models/rossboden.kml" roadDirReverse="true" />
+	<includeParams includeFile="vehiclePack.xml" />
+    
     
     <dynamicParams td="0.0" tdErr="0." tr="0.000" te="6.875e-05" motionBlurExtraSamples="30" ti="0.00" desc="ideal"/>
     <signalParams noiseAmpDynamic="0.0" />

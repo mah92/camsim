@@ -24,6 +24,8 @@
 #include <limits.h>     // PATH_MAX
 #include <sys/stat.h> //for stat
 
+#include <dirent.h>
+
 #include <exception>      // std::exception, std::terminate
 
 #undef TAG
@@ -122,27 +124,66 @@ int NativeOpen(const char* rootpath,
 		strcpy(globals.datapath, globals.path);
 	}
 
-	return 0;
-}
+	//savepath//////////////////////////
+	//whenever the program is run, it build a new folder in this address and stores used setting(.xml) files, simulation output, log files, ...
+	
+    strcpy(globals.savepath, globals.path);
+    strcat(globals.savepath, "/log");
+                
+    DIR *dpdf;
+    struct dirent *epdf;
+    dpdf = opendir(globals.savepath);
+    if(dpdf == NULL) {  //log directory does not exist
+        if(mkdir_p(globals.savepath) != 0) { //make log directory in specified path
+            LOGW(TAG, " Could not make directory in(%s)!\n", globals.savepath); //specified path unaccessible
+            sprintf(globals.savepath, "%s/log", globals.path); //change to default path(project name/log)
+            if(mkdir_p(globals.savepath) != 0) { //make directory in default path
+                LOGE(TAG, " Could not make directory in(%s)!\n", globals.savepath); //default path unaccessible!!!
+                sprintf(globals.savepath, "mnt/sdcard/log"); //change to root path(mnt/sdcard/log)
+            }
+        }
+    }
+            
+    int len;
+    int last_num = 0, pure_num;
 
-//settings should be read before it
-int setDynamicAddresses()
-{
-	//savepath/////////////////////////
-	if(mkdir_p(settings.savepath) != 0) {
-		LOGE(TAG, " Could not make directory(%s)!\n", settings.savepath);
-		strcpy(settings.savepath, globals.path);
-	}
+    dpdf = opendir(globals.savepath);
+    if(dpdf == NULL) {
+        LOGE(TAG, " No savepath!\n");
+    } else {
+        last_num = 0;
+        while(epdf = readdir(dpdf)) {
+            //refusing "." & ".."
+            if(0 == strcmp(epdf->d_name, "."))
+                continue;
+            if(0 == strcmp(epdf->d_name, ".."))
+                continue;
 
-	//mappath//////////////////////////
-	struct stat info;
-	if(stat(settings.mappath, &info) != 0) {
-		sleep(5); //wait maybe sdcard loads
-		if(stat(settings.mappath, &info) != 0) {
-			sleep(5); //wait maybe sdcard loads
-		}
-	}
+            pure_num = 1;
+            len = strlen(epdf->d_name);
+            for(i = 0; i < len; i++)
+                if(isNum(epdf->d_name[i]) == 0) //not a number
+                    pure_num = 0;
+            if(pure_num == 0 || len <= 0) //not a pure number
+                continue;
+            //LOGI(TAG, " aa: %s\n", epdf->d_name);
 
+            //if pure number
+            last_num = nsrMax(last_num, atoi(epdf->d_name));
+        }
+    }
+
+    LOGW(TAG, " log: %i\n", last_num + 1);
+
+    sprintf(globals.savepath, "%s/%i", globals.savepath, last_num + 1);
+    LOGI(TAG, " savepath: %s\n", globals.savepath);
+    
+    if(mkdir_p(globals.savepath) != 0) {
+		LOGE(TAG, " Could not make directory(%s)!\n", globals.savepath);
+		strcpy(globals.savepath, globals.path);
+	}
+
+    
 	return 0;
 }
 
@@ -157,7 +198,7 @@ int setSharedBuffers()
 	//tp=gmtime(&mtime);
 	tp = localtime(&mtime);
 
-	LOGOPEN(settings.savepath, "messagelog.txt");
+	LOGOPEN(globals.savepath, "messagelog.txt");
 
 	LOGI(TAG, " -------------------------------------------------\n");
 	LOGI(TAG, " Just for ALLAH\n");
