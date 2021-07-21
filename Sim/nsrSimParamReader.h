@@ -27,7 +27,7 @@ extern char param_pattern_file[];
 extern char param_path_file[];
 enum PositionFmt {POSITION_FMT_LLA, POSITION_FMT_XYA, POSITION_FMT_XYZ};
 extern int param_position_format;
-enum TrackerType {TRACKER_TYPE_DESCRETE=0, TRACKER_TYPE_LINEAR=1, TRACKER_TYPE_1xSQRT=2, TRACKER_TYPE_2xSQRT_INOUT_FILTER=6};
+enum TrackerType {TRACKER_TYPE_DESCRETE=0, TRACKER_TYPE_LINEAR=1, TRACKER_TYPE_1xSQRT=2, TRACKER_TYPE_2xSQRT=3, TRACKER_TYPE_3xSQRT=4, TRACKER_TYPE_2xSQRT_INOUT_FILTER=6};
 extern int param_tracker_type;
 extern double param_control_freq;
 extern double param_max_acc;

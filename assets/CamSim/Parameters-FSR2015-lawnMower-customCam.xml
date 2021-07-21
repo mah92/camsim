@@ -57,7 +57,7 @@
 
     <dynamicParams0 td="0.0" tdErr="0." tr="0.00" te="6.875e-05" motionBlurExtraSamples="5" ti="0.0" desc="normal"/>
     <dynamicParams0 td="0.0" tdErr="0." tr="0.00" te="0." motionBlurExtraSamples="5" ti="0.0" desc="original"/>
-    <dynamicParams0 td="0.1" tdErr="0." tr="0.00" te="0.00" motionBlurExtraSamples="5" ti="0." desc="pure delay"/>
+    <dynamicParams0m td="0.1" tdErr="0." tr="0.00" te="0.00" motionBlurExtraSamples="5" ti="0." desc="pure delay"/>
     <dynamicParams0 td="0.0" tdErr="0." tr="0.00" te="0.10" motionBlurExtraSamples="30" ti="0." desc="motion blur"/>
     <dynamicParams0 td="0.0" tdErr="0." tr="0.10" te="0.00" motionBlurExtraSamples="5" ti="0." desc="rolling shutter"/>
     <dynamicParams0 td="0.0" tdErr="0." tr="0.00" te="0.00" motionBlurExtraSamples="5" ti="0.100" desc="interlacing"/>
@@ -84,10 +84,10 @@
     <idealParams width="720" height="540" desc="used for publishing a FullHD video in 2x2 cells(AR:4/3)" />
     <idealParams0 width="810" height="540" desc="used for publishing a FullHD video in 2x2 cells(AR:3/2)" />
     
-    <vehicle pathFile="models/rossboden.kml" roadDirReverse="false" />
-	<includeParams includeFile="vehiclePack.xml" />
-    <vehicle pathFile="models/rossboden.kml" roadDirReverse="true" />
-	<includeParams includeFile="vehiclePack.xml" />
+    <vehicle0 pathFile="models/rossboden.kml" roadDirReverse="false" />
+	<includeParams0 includeFile="vehiclePack.xml" />
+    <vehicle0 pathFile="models/rossboden.kml" roadDirReverse="true" />
+	<includeParams0 includeFile="vehiclePack.xml" />
     
     
     <dynamicParams td="0.0" tdErr="0." tr="0.1" te="6.875e-05" motionBlurExtraSamples="30" ti="0.00" desc="ideal"/>

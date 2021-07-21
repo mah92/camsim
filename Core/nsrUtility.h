@@ -64,6 +64,7 @@ int nsrRound2d(double var);
 double normalize_angle(double angle);
 
 inline double pow2(double var) {return var * var;}
+inline double pow3(double var) {return var * var * var;}
 
 //down_round_up<0: floor, down_round_up=0 round, down_round_up>0 ceil
 double discretize(double val, double min, double interval, int down_round_up);

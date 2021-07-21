@@ -91,19 +91,19 @@ VelocityView::VelocityView(bool enabled) : NsrFig(3, 1, enabled)
 {
 
 	addSubWin(0, 2, //int sub_win, int axis_num=2,
-			  "t(s)", "Total Vel", "", "Velocities"); //const char* xlable="", const char* ylable="", const char* zlable="", const char* title="",
+			  "t(s)", "Total Vel(m/s)", "", "Velocities"); //const char* xlable="", const char* ylable="", const char* zlable="", const char* title="",
 	setAxis(0, 0., 5., -2., 2., 0, 0);
 	addSignal(0, "real", PEN_LINE, 1, COL_BLUE); //real
 
 	//
 	addSubWin(1, 2, //int sub_win, int axis_num=2,
-			  "t(s)", "Horizontal Vel", "", ""); //const char* xlable="", const char* ylable="", const char* zlable="", const char* title="",
+			  "t(s)", "Horizontal Vel(m/s)", "", ""); //const char* xlable="", const char* ylable="", const char* zlable="", const char* title="",
 	setAxis(1, 0., 5., -2., 2., 0, 0);
 	addSignal(1, "", PEN_LINE, 1, COL_BLUE); //real
 
 	//
 	addSubWin(2, 2, //int sub_win, int axis_num=2,
-			  "t(s)", "Vertical Vel(DAlt)", "", ""); //const char* xlable="", const char* ylable="", const char* zlable="", const char* title="",
+			  "t(s)", "Vertical Vel(DAlt, m/s)", "", ""); //const char* xlable="", const char* ylable="", const char* zlable="", const char* title="",
 	setAxis(2, 0., 5., -2., 2., 0, 0);
 	addSignal(2, "", PEN_LINE, 1, COL_BLUE); //real
 }
@@ -127,19 +127,19 @@ AnglesView::AnglesView(bool enabled) : NsrFig(3, 1, enabled)
 {
 
 	addSubWin(0, 2, //int sub_win, int axis_num=2,
-			  "t(s)", "roll/phi", "", "Angles"); //const char* xlable="", const char* ylable="", const char* zlable="", const char* title="",
+			  "t(s)", "roll/phi(deg)", "", "Angles"); //const char* xlable="", const char* ylable="", const char* zlable="", const char* title="",
 	setAxis(0, 0., 5., -2., 2., 0, 0);
 	addSignal(0, "real", PEN_LINE, 1, COL_BLUE); //real
 
 	//
 	addSubWin(1, 2, //int sub_win, int axis_num=2,
-			  "t(s)", "pitch/theta", "", ""); //const char* xlable="", const char* ylable="", const char* zlable="", const char* title="",
+			  "t(s)", "pitch/theta(deg)", "", ""); //const char* xlable="", const char* ylable="", const char* zlable="", const char* title="",
 	setAxis(1, 0., 5., -2., 2., 0, 0);
 	addSignal(1, "", PEN_LINE, 1, COL_BLUE); //real
 
 	//
 	addSubWin(2, 2, //int sub_win, int axis_num=2,
-			  "t(s)", "yaw/psi", "", ""); //const char* xlable="", const char* ylable="", const char* zlable="", const char* title="",
+			  "t(s)", "yaw/psi(deg)", "", ""); //const char* xlable="", const char* ylable="", const char* zlable="", const char* title="",
 	setAxis(2, 0., 5., -2., 2., 0, 0);
 	addSignal(2, "", PEN_LINE, 1, COL_BLUE); //real
 }
@@ -163,21 +163,21 @@ GyroView::GyroView(bool enabled) : NsrFig(3, 1, enabled)
 {
 
 	addSubWin(0, 2, //int sub_win, int axis_num=2,
-			  "t(s)", "x", "", "Gyro"); //const char* xlable="", const char* ylable="", const char* zlable="", const char* title="",
+			  "t(s)", "x(deg/s)", "", "Gyro"); //const char* xlable="", const char* ylable="", const char* zlable="", const char* title="",
 	setAxis(0, 0., 5., -2., 2., 0, 0);
 	addSignal(0, "real", PEN_LINE, 1, COL_BLUE); //real
 	addSignal(0, "sensor", PEN_LINE, 2, COL_RED); //sensor
 
 	//
 	addSubWin(1, 2, //int sub_win, int axis_num=2,
-			  "t(s)", "y", "", ""); //const char* xlable="", const char* ylable="", const char* zlable="", const char* title="",
+			  "t(s)", "y(deg/s)", "", ""); //const char* xlable="", const char* ylable="", const char* zlable="", const char* title="",
 	setAxis(1, 0., 5., -2., 2., 0, 0);
 	addSignal(1, "", PEN_LINE, 1, COL_BLUE); //real
 	addSignal(1, "", PEN_LINE, 2, COL_RED); //sensor
 
 	//
 	addSubWin(2, 2, //int sub_win, int axis_num=2,
-			  "t(s)", "z", "", ""); //const char* xlable="", const char* ylable="", const char* zlable="", const char* title="",
+			  "t(s)", "z(deg/s)", "", ""); //const char* xlable="", const char* ylable="", const char* zlable="", const char* title="",
 	setAxis(2, 0., 5., -2., 2., 0, 0);
 	addSignal(2, "", PEN_LINE, 1, COL_BLUE); //real
 	addSignal(2, "", PEN_LINE, 2, COL_RED); //sensor
@@ -202,23 +202,23 @@ AccView::AccView(bool enabled) : NsrFig(3, 1, enabled)
 {
 
 	addSubWin(0, 2, //int sub_win, int axis_num=2,
-			  "t(s)", "x", "", "Acc"); //const char* xlable="", const char* ylable="", const char* zlable="", const char* title="",
+			  "t(s)", "x(m/s2)", "", "Acc"); //const char* xlable="", const char* ylable="", const char* zlable="", const char* title="",
 	setAxis(0, 0., 5., -2., 2., 0, 0);
-	addSignal(0, "real", PEN_LINE, 1, COL_BLUE); //real
+	addSignal(0, "ideal", PEN_LINE, 1, COL_BLUE); //ideal
 	addSignal(0, "sensor", PEN_LINE, 2, COL_RED); //sensor
 
 	//
 	addSubWin(1, 2, //int sub_win, int axis_num=2,
-			  "t(s)", "y", "", ""); //const char* xlable="", const char* ylable="", const char* zlable="", const char* title="",
+			  "t(s)", "y(m/s2)", "", ""); //const char* xlable="", const char* ylable="", const char* zlable="", const char* title="",
 	setAxis(1, 0., 5., -2., 2., 0, 0);
-	addSignal(1, "", PEN_LINE, 1, COL_BLUE); //real
+	addSignal(1, "", PEN_LINE, 1, COL_BLUE); //ideal
 	addSignal(1, "", PEN_LINE, 2, COL_RED); //sensor
 
 	//
 	addSubWin(2, 2, //int sub_win, int axis_num=2,
-			  "t(s)", "z", "", ""); //const char* xlable="", const char* ylable="", const char* zlable="", const char* title="",
+			  "t(s)", "z(m/s2)", "", ""); //const char* xlable="", const char* ylable="", const char* zlable="", const char* title="",
 	setAxis(2, 0., 5., -2., 2., 0, 0);
-	addSignal(2, "", PEN_LINE, 1, COL_BLUE); //real
+	addSignal(2, "", PEN_LINE, 1, COL_BLUE); //ideal
 	addSignal(2, "", PEN_LINE, 2, COL_RED); //sensor
 }
 
@@ -399,9 +399,9 @@ void Visualize(SimStorage &Sim, double Tplot2) //, Con)
 	if(accV == NULL)
 		accV = new AccView(ENABLE_PLOT && execution_turn < 0); //disable if execution_turn >=0
 
-	accV->draw(line_acc_x_real, t, a_ac.x());
-	accV->draw(line_acc_y_real, t, a_ac.y());
-	accV->draw(line_acc_z_real, t, a_ac.z());
+	accV->draw(line_acc_x_real, t, acc_ac.x());
+	accV->draw(line_acc_y_real, t, acc_ac.y());
+	accV->draw(line_acc_z_real, t, acc_ac.z());
 
 	if(n.Z.Acc != 0) {
 		_LOCKCPP(Z_lock, -1);

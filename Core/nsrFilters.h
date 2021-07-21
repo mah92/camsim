@@ -25,6 +25,26 @@ typedef struct {
 	ffloat* weight;
 } FIRData;
 
+typedef struct {
+	int inited;
+	ffloat data;
+	ffloat pre_time_s;
+	ffloat max_slope;
+} MaxSlopeData;
+
+typedef struct {
+	int inited;
+	ffloat data1;
+    ffloat data2;
+    ffloat data3;
+	ffloat pre_time_s1;
+	ffloat pre_time_s2;
+	ffloat pre_time_s3;
+	ffloat max_speed;
+    ffloat max_acc;
+    ffloat max_jerk;
+} Max3SlopeData;
+
 typedef struct _TotalData {
 	uint32_t turn;
 	ffloat data;
@@ -72,7 +92,11 @@ public:
 	double dt;
 
 public:
-	SQRTController(double _max_velocity, double _max_acceleration, double _linear_dist);
+    
+    //just the relative to target acceleration is bound(feedforward target acceleration is not limited)
+    //if you want to directly limit total acceleration, disable feefoward by passing target_vel = 0.,
+    //  it only effectively limits total acceleration if the target is not moving
+	SQRTController(double _max_velocity, double _max_relative_acceleration, double _linear_dist);
 	double control_step(double time_s, double value, double target, double target_vel = DBL_MAX);
 	double simulate_dynamic_step(double value);
 };
@@ -82,14 +106,18 @@ public:
 
 class SmoothPathFollower
 {
+    double max_velocity, max_accel, max_jerk;
+    double pre_time;
     IIRData2 path_filter, acc_filter;
-    SQRTController* pos2rate_cont, *rate2acc_cont;
+    Max3SlopeData slope_filter;
+    SQRTController* pos2rate_cont, *rate2acc_cont, *acc2jerk_cont;
     //memory
 	double real_position, real_velocity, real_acc;
 
 public:
 	SmoothPathFollower() : 
-        pos2rate_cont(0), rate2acc_cont(0), //NULL
+	pre_time(-1),
+        pos2rate_cont(0), rate2acc_cont(0), acc2jerk_cont(0), //NULL
             real_position(0.), real_velocity(0.), real_acc(0.)
 	{};
     
@@ -97,10 +125,11 @@ public:
     {
         if(pos2rate_cont!=0) delete pos2rate_cont;
         if(rate2acc_cont!=0) delete rate2acc_cont;
+        if(acc2jerk_cont!=0) delete acc2jerk_cont;
     }
     
     void setParams(double _max_velocity, double _max_accel, double _max_jerk,
-              double _linear_dist_position, double _linear_dist_velocity, 
+              double _linear_dist_position, double _linear_dist_velocity,  double _linear_dist_acc, 
               double _in_filter_taw, double _out_filter_taw //negative means disabled
     );
     
@@ -108,13 +137,18 @@ public:
     double get() {return real_position; }
     
     double step0(double time_s, double command_position); //Just a simple 1st order filter
-	double step1(double time_s, double command_position); //1xsqrt control loop 
-	double step2(double time_s, double command_position); //2xsqrt control loops + 2 filters
+	double step2(double time_s, double command_position); //1xsqrt control loop 
+	double step3(double time_s, double command_position); //2xsqrt control loop 
+    double step4(double time_s, double command_position); //3xsqrt control loop 
+	double step6(double time_s, double command_position); //2xsqrt control loops + 2 filters
+	double step7(double time_s, double command_position); //speed, acc, jerk saturation
 };
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+    
+extern int debug_flag;
 
 void initIIR2(IIRData2* fD, ffloat taw);
 ffloat doIIRfilter2(IIRData2* fD, ffloat data, ffloat time_s);
@@ -122,6 +156,12 @@ ffloat doIIRfilter2(IIRData2* fD, ffloat data, ffloat time_s);
 void initFIR(FIRData* fD, int datalen);
 ffloat doFIRfilter(FIRData* fD, ffloat data, float weight);
 void closeFIRFilter(FIRData* fD);
+
+void initMaxSlope(MaxSlopeData* fD, ffloat max_slope);
+ffloat doMaxSlope(MaxSlopeData* fD, ffloat data, ffloat time_s);
+
+void initMax3Slope(Max3SlopeData* fD, ffloat max_speed, ffloat max_acc, ffloat max_jerk);
+ffloat doMax3Slope(Max3SlopeData* fD, ffloat data, ffloat time_s);
 
 void initTotalAverager(TotalAveragerData* fD);
 ffloat doTotalAverage(TotalAveragerData* fD, ffloat data);

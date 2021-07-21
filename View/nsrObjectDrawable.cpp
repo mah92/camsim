@@ -195,7 +195,7 @@ void ObjectDrawable::setPath(char* _pathFile, bool _onEarth, double _phase, doub
     
     for(int i; i < 6; i++)
         smoother[i]->setParams(0., 0., 0.,
-              0., 0., 
+              0., 0., 0.,
               0.5, -1);
     
     //Read kml file///////////////////////////////////////////////////

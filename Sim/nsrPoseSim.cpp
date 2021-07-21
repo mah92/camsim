@@ -149,43 +149,60 @@ void nsrPoseMakerInit()
 	}
 
 	/////////////////////////////////////////////////////////////
-	//a controller used for states to limit accelerations as in real aircraft
-
-#define MAX_ACC (param_max_acc*param_world_scale)
-#define MAX_JERK (100*param_world_scale)
-
-#define MAX_ANGULAR_ACC (param_max_ang_acc)
-#define MAX_ANGULAR_JERK (600)
-
-//input path filter
-#define TAW (0.5)
-
-//output command filter lowers acceleration variance to match real data
-//just minor output filter can be used as it causes oscilation
-#define TAW2 (0.5) //linear
-#define TAW3 (0.05) //angular
-    
+	//Controller loops used for states to limit accelerations as in a real aircraft
     for(i = 0; i < 6; i++)
         smoother[i] = new SmoothPathFollower();
 
+///For tuning, 
+//1) uncomment debug_flag to print remnant error
+//2) 
+
+//input path filter lowers acceleration variance to match real data, causes unacceptable amounts of remnant error but no divergance
+#define TAW_IN_LINEAR (0.0)
+//No need for speed saturation as we already move on logical interpolated log points
+#define MAX_LINEAR_ACC (param_max_acc*param_world_scale)  //m/s2
+#define MAX_LINEAR_JERK (param_max_acc*param_world_scale) //m/s3 //Not effectively lowering the acceleration with acceptable longterm error
+    
+#define MAX_LINEAR_LINEAR_DIST (10.*param_world_scale) //m, when an inner loop with saturation is present, the linear dist can be 0 (good jitter)
+#define MAX_LINEAR_LINEAR_VEL_DIST (3.*param_world_scale) //reducing inner sqrt to a simple saturation //(3.*param_world_scale) //m/s
+#define MAX_LINEAR_LINEAR_ACC_DIST 0.0000001 //(1.*param_world_scale) //m/s2 //just used in 3x sqrt
+//output command filter lowers acceleration variance(for accelerometer sensor) to match real data
+//increase with caution to match real vibrations, but it causes remnant error and even divergance on high values
+#define TAW_OUT_LINEAR (0.5) //linear, pre: 0.5
+        
+
+ //input path filter lowers acceleration variance to match real data, causes unacceptable amounts of remnant error but no divergance    
+#define TAW_IN_ANGULAR (0.0)
+#define MAX_ANGULAR_ACC (param_max_ang_acc)    //deg/s2
+#define MAX_ANGULAR_JERK (0*param_max_ang_acc) //deg/s3
+    
+#define MAX_ANGULAR_LINEAR_DIST 0.0000001 //deg, 
+#define MAX_ANGULAR_LINEAR_VEL_DIST 0.0000001  //reducing inner sqrt to a simple saturation  //deg/s
+#define MAX_ANGULAR_LINEAR_ACC_DIST 0.0000001 //(1.) //deg/s2 //just used in 3x sqrt
+//just minor output filter can be used as it causes oscillation in angles
+#define TAW_OUT_ANGULAR (0.0) //angular, pre: 0.05, 
+
     smoother[0]->setParams(0.,
-                            MAX_ACC * X2LAT(),
-                                MAX_JERK * X2LAT(),
-                                    X2LAT()*param_world_scale * 10, //10m
-                                        X2LAT()*param_world_scale * 3, //3m/s
-                                            TAW, TAW2);
+                            MAX_LINEAR_ACC * X2LAT(),
+                                MAX_LINEAR_JERK * X2LAT(),
+                                    X2LAT()*MAX_LINEAR_LINEAR_DIST,
+                                        X2LAT()*MAX_LINEAR_LINEAR_VEL_DIST,
+                                            X2LAT()*MAX_LINEAR_LINEAR_ACC_DIST,
+                                                TAW_IN_LINEAR, TAW_OUT_LINEAR);
     smoother[1]->setParams(0.,
-                            MAX_ACC * Y2LON(param_map_center_lat),
-                                MAX_JERK * Y2LON(param_map_center_lat),
-                                    Y2LON(param_map_center_lat)*param_world_scale * 10, //10m
-                                        Y2LON(param_map_center_lat)*param_world_scale * 3, //3m/s
-                                            TAW, TAW2);
+                            MAX_LINEAR_ACC * Y2LON(param_map_center_lat),
+                                MAX_LINEAR_JERK * Y2LON(param_map_center_lat),
+                                    Y2LON(param_map_center_lat)*MAX_LINEAR_LINEAR_DIST,
+                                        Y2LON(param_map_center_lat)*MAX_LINEAR_LINEAR_VEL_DIST,
+                                            Y2LON(param_map_center_lat)*MAX_LINEAR_LINEAR_ACC_DIST,
+                                                TAW_IN_LINEAR, TAW_OUT_LINEAR);
     
-    smoother[2]->setParams(0., MAX_ACC, MAX_JERK, param_world_scale * 10, param_world_scale * 10, TAW, TAW2);
+    smoother[2]->setParams(0., MAX_LINEAR_ACC, MAX_LINEAR_JERK, MAX_LINEAR_LINEAR_DIST, MAX_LINEAR_LINEAR_VEL_DIST, MAX_LINEAR_LINEAR_ACC_DIST, TAW_IN_LINEAR, TAW_OUT_LINEAR);
     
-    smoother[3]->setParams(0., MAX_ANGULAR_ACC, MAX_ANGULAR_JERK, 0.01, 1., TAW, TAW3);
-    smoother[4]->setParams(0., MAX_ANGULAR_ACC, MAX_ANGULAR_JERK, 0.01, 1., TAW, TAW3);
-    smoother[5]->setParams(0., MAX_ANGULAR_ACC, MAX_ANGULAR_JERK,   1., 1., TAW, TAW3);
+    //Works in deg units
+    smoother[3]->setParams(0., MAX_ANGULAR_ACC, MAX_ANGULAR_JERK, MAX_ANGULAR_LINEAR_DIST, MAX_ANGULAR_LINEAR_VEL_DIST, MAX_ANGULAR_LINEAR_ACC_DIST, TAW_IN_ANGULAR, TAW_OUT_ANGULAR);
+    smoother[4]->setParams(0., MAX_ANGULAR_ACC, MAX_ANGULAR_JERK, MAX_ANGULAR_LINEAR_DIST, MAX_ANGULAR_LINEAR_VEL_DIST, MAX_ANGULAR_LINEAR_ACC_DIST, TAW_IN_ANGULAR, TAW_OUT_ANGULAR);
+    smoother[5]->setParams(0., MAX_ANGULAR_ACC, MAX_ANGULAR_JERK, MAX_ANGULAR_LINEAR_DIST, MAX_ANGULAR_LINEAR_VEL_DIST, MAX_ANGULAR_LINEAR_ACC_DIST, TAW_IN_ANGULAR, TAW_OUT_ANGULAR);
 }
 
 double nsrPoseMakerGetStartTime()
@@ -278,6 +295,8 @@ void nsrPoseMakerStep()
 			ac_command[0] += SPEED * CY * X2LAT() * dt; //lat(deg)
 			ac_command[1] += SPEED * SY * Y2LON(ac_command[0]) * dt; //lat(deg)
         }
+        
+        //printf("lat:%f, lon:%f\n", ac_command[0], ac_command[1]);
 		if(ch == KEY_DOWN) {
 			ac_command[0] -= SPEED * CY * X2LAT() * dt; //lat(deg)
 			ac_command[1] -= SPEED * SY * Y2LON(ac_command[0]) * dt; //lat(deg)
@@ -337,7 +356,7 @@ void nsrPoseMakerStep()
     
     //printf("ac_real:%f, post_cmd:%f", ac_real[5], ac_command[5]);
     
-    	//debug////////
+    //debug////////
 #if 0
 	ac_real[0] = 0;
 	ac_real[1] = 0;
@@ -354,6 +373,8 @@ void nsrPoseMakerStep()
 	}
 	
     //follow linear interpolation//////////
+    //param_tracker_type = TRACKER_TYPE_1xSQRT;
+    //param_tracker_type = TRACKER_TYPE_3xSQRT;
 	if(param_tracker_type == TRACKER_TYPE_LINEAR) {
 		for(i = 0; i < 6; i++)
 			ac_real[i] = ac_command[i];
@@ -361,16 +382,47 @@ void nsrPoseMakerStep()
 	
     //1 controller loop to track linear interpolation///////
 	if(param_tracker_type == TRACKER_TYPE_1xSQRT) {
-        for(i = 0; i < 6; i++)
-            ac_real[i] = smoother[i]->step1(pose_maker_time_s, ac_command[i]);
+        for(i = 0; i < 6; i++) {
+            //if(i==0) debug_flag = 1;
+            ac_real[i] = smoother[i]->step2(pose_maker_time_s, ac_command[i]);
+            //debug_flag = 0;
+        }
+	}
+	
+    if(param_tracker_type == TRACKER_TYPE_2xSQRT) {
+        for(i = 0; i < 6; i++) {
+            //if(i==0) debug_flag = 1;
+            ac_real[i] = smoother[i]->step3(pose_maker_time_s, ac_command[i]);
+            //debug_flag = 0;
+        }
+	}
+	
+    if(param_tracker_type == TRACKER_TYPE_3xSQRT) {
+        for(i = 0; i < 6; i++) {
+            //if(i==0) debug_flag = 1;
+            ac_real[i] = smoother[i]->step4(pose_maker_time_s, ac_command[i]);
+            //debug_flag = 0;
+        }
 	}
 	
 	//2 x controller loops to track linear interpolation and input/output 1st order filter for continuous acceleration///////
 	if(param_tracker_type == TRACKER_TYPE_2xSQRT_INOUT_FILTER) {
-		for(i = 0; i < 6; i++) 
-            ac_real[i] = smoother[i]->step2(pose_maker_time_s, ac_command[i]);
+		for(i = 0; i < 6; i++) {
+            //if(i==0) debug_flag = 1;
+            ac_real[i] = smoother[i]->step6(pose_maker_time_s, ac_command[i]);
+            //debug_flag = 0;
+        }
 	}
-
+    
+/*    for(i = 0; i < 3; i++) {
+        if(i==0) debug_flag = 1;
+        ac_real[i] = smoother[i]->step4(pose_maker_time_s, ac_command[i]);
+        debug_flag = 0;
+    }
+            
+    for(i = 3; i < 6; i++)
+        ac_real[i] = smoother[i]->step3(pose_maker_time_s, ac_command[i]);
+*/
 	//LOGI(TAG, " pose kernel:%f, %f, %f, %f, %f, %f, %f\n", pose_maker_time_s, ac[0], ac[1], ac[2], ac[3], ac[4], ac[5]);
 
 	_LOCKCPP(Z_lock,);
