@@ -33,6 +33,7 @@ extern double param_control_freq;
 extern double param_max_acc;
 extern double param_max_ang_acc;
 
+extern double param_end_time;
 extern double param_speed_factor;
 extern double param_world_scale;
 extern double param_alt_offset;
@@ -94,10 +95,9 @@ extern double param_cam_in_ac_err_x;
 extern double param_cam_in_ac_err_y;
 extern double param_cam_in_ac_err_z;
 
+
 #define SAFE_MODE 0
 #define SAFE_START 1
-#define param_end_time (20*60/param_speed_factor)
-//#define param_end_time (5*60/param_speed_factor)
 
 #ifdef __cplusplus
 extern "C" {

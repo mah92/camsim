@@ -200,6 +200,11 @@ Installation angle errors:
 	controlFreq: path follower controller frequency, also used for advancing time in calculating velocities and sensor data log, should be a multiple of cameraFps
 	
 	* pathParamsExtra
+	
+    endTime: The time to end simulation before path file or other input ends
+    
+    if speedFactor!=1, the endTime will extend or shrink
+		
 	speedFactor: the speed at which the flight log would be passes, default: 1x
 	
 	worldScale: scale every metric thing, including earth radius, dem elevations, aircraft path

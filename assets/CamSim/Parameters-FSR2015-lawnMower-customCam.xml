@@ -19,11 +19,13 @@
 	<mapParams0 desc = "fsr2015" centerLat="47.115880655" centerLon="8.67212173" maxAlt="100000" maxDist="1110" zoomLevel = "18"/> //21fps
 	
 	<!-- pathParams -->
-	<pathParams0 pathFile="path_1hSegment.csv" csvPositionFmt="LLA" trackerType="6" accMax="10" angAccMax="60" controlFreq="800"/>
-	<pathParams pathFile="path_lawnmower.csv" csvPositionFmt="LLA" trackerType="6" accMax="10" angAccMax="60" controlFreq="800"/>
-	<pathParams0 pathFile="path_rectSpiral.csv" csvPositionFmt="LLA" trackerType="6" accMax="10" angAccMax="60" controlFreq="800"/>
+	<pathParams csvPositionFmt="LLA" trackerType="6" accMax="10" angAccMax="60" controlFreq="800"/>
+	<pathParams0 pathFile="path_1hSegment.csv" />
+	<pathParams pathFile="path_lawnmower.csv" />
+	<pathParams0 pathFile="path_rectSpiral.csv" />
     
-	<pathParamsExtra speedFactor="1." worldScale="1." altOffset="0."/>
+    <!-- 5min=300s, 20min=1200s, 30min=1800s -->
+	<pathParamsExtra endTime="1200" speedFactor="1." worldScale="1." altOffset="0."/>
 
 	<!-- default parameters for usual cameras -->
 	<!-- ### DON'T CHANGE, BUT OVERRIDE BY INCLUDED CAM FILE ### -->

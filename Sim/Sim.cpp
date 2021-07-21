@@ -74,7 +74,7 @@ int simLoop(double time_barrier)
 
 		/////////////////////////////////////
 		pauseTrap();
-		if(Sim.t > param_end_time) {
+		if(Sim.t > param_end_time/param_speed_factor) {
 			if(execution_turn < 0) //Don't stop is an automatic run is in progress
 				refreshPlotsOnEnd();
 			LOGE(TAG, " Exit due to end of filter time...\n");

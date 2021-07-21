@@ -45,6 +45,7 @@ double param_control_freq = 50.;
 double param_max_acc = 0; //disabled
 double param_max_ang_acc = 0; //disabled
 
+double param_end_time = 1e10;
 double param_speed_factor = 1.;
 double param_world_scale = 1.;
 double param_alt_offset = 0.;
@@ -262,10 +263,11 @@ void nsrReadSimParams(const char* filename)
 		}
 
 		if(strcmp(node_name, "pathParamsExtra") == 0) {
+            if((atr = node.attribute("endTime"))) param_end_time = atr.as_double();
 			if((atr = node.attribute("speedFactor"))) param_speed_factor = atr.as_double();
 			if((atr = node.attribute("worldScale"))) param_world_scale = atr.as_double();
 			if((atr = node.attribute("altOffset"))) param_alt_offset = atr.as_double();
-			LOGI(TAG, "pathParamsExtra: %f, %f, %f\n", param_speed_factor, param_world_scale, param_alt_offset);
+			LOGI(TAG, "pathParamsExtra: %f, %f, %f, %f\n", param_end_time, param_speed_factor, param_world_scale, param_alt_offset);
 		}
 
 		if(strcmp(node_name, "sensorParams") == 0) {
