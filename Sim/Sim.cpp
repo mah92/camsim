@@ -35,7 +35,7 @@ int simInit()
 	nsrPoseMakerInit();
     
     if(param_do_what == DO_SAVE_ROS_BAG)
-        rosOpen();
+        rosOpen(param_rosbag_compression);
     
     return 0;
 }

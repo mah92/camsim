@@ -113,6 +113,10 @@ Installation angle errors:
 
 [![](http://img.youtube.com/vi/-k1eqQOB8QE/0.jpg)](http://www.youtube.com/watch?v=-k1eqQOB8QE "Installation angle errors")
 
+Vehicles on the road:
+
+[![](http://img.youtube.com/vi/7wEOmm9NBmE/0.jpg)](http://www.youtube.com/watch?v=7wEOmm9NBmE "Vehicles")
+
 ## Usage
 
 1. Set addresses.txt for input maps - output log addresses
@@ -150,14 +154,20 @@ Installation angle errors:
 	Other xml files "with the same structure" can be included
 	
 	All meaningfull tags should be defined inside the "simParams" tag
+	
+	Deactivated TAG names are deformed by adding a zero or anything
 
 	* mainParams
 	
-	renderWhat = "IMAGE" or "DEPTH"
+	renderWhat = "LUMIN" (for grayscale image), "COLOR", or "DEPTH"
 	
 	showWhat = "MAP" or "PATTERN"
 	
 	doWhat = "NOTHING", "SAVE_BMP", "IMAGE_PROC", or "SAVE_ROS_BAG" (if ros exists)
+	
+	rosBagCompression = "ture", "false"
+	
+	compression will cause a 30% decrease in fps but compresses images up to 6x
 	
 	* demParams
 	

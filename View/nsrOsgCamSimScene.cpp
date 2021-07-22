@@ -80,7 +80,13 @@ void createTextureCamera(osg::ref_ptr<osg::Camera> &cam, osg::ref_ptr<osg::Textu
 
 	texture = new osg::Texture2D;
 	texture->setTextureSize(width, height);
-	texture->setInternalFormat(GL_RGBA);
+                
+    //even in grayscale output, the shader should access colorfull data
+    /*if(param_render_what == RENDER_LUMINANCE)
+        texture->setInternalFormat(GL_LUMINANCE);
+    else*/    
+        texture->setInternalFormat(GL_RGBA);
+    
 	if(render_depth == 0) {
 		texture->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::LINEAR);
 		texture->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture2D::LINEAR);
@@ -262,12 +268,12 @@ int CamSimScene::InitOsgWindow(int x, int y, int _screen_width, int _screen_heig
 		distortedDrawable->setLensFromTexture1(prms[0], &scrDim,
 											   idealImageTexture1.get(),
 											   idealDepthTexture1.get(),
-											   vignetTexture.get(), param_render_what == RENDER_DEPTH ? true : false);
+											   vignetTexture.get(), param_render_what);
 	} else {
 		distortedDrawable->setLensFromTexture2(prms[0], &scrDim,
 											   idealImageTexture1.get(), idealImageTexture2.get(),
 											   idealDepthTexture1.get(), idealDepthTexture2.get(),
-											   vignetTexture.get(), param_render_what == RENDER_DEPTH ? true : false);
+											   vignetTexture.get(), param_render_what);
 	}
 
 #endif

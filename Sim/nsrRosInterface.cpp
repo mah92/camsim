@@ -4,13 +4,15 @@
 
 #include "Sim/nsrRosInterface.h"
 
+#include "nsrCore.h"
+
 #ifndef ROS_FOUND
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void rosOpen() {}
+void rosOpen(bool compress) {}
 void rosClose() {}
 
 void registerRosGroundTruth(double t, double lat, double lon, double alt, double e1, double e2, double e3, double et) {}
@@ -60,6 +62,9 @@ void registerRosCamInfo(double t) {}
 #include "Sim/nsrSimParamReader.h"
 //#include "nsrQuat.h"
 
+#undef TAG
+#define TAG "Cpp:RosInterface:"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -77,11 +82,14 @@ static uint32_t seq = 0;
 static ros::Time epoch0;
 static int acc_registered = 0;
 
-void rosOpen()
+void rosOpen(bool compress)
 {
     ros::Time::init(); //for standalone applications 	
     epoch0 = ros::Time::now();
-    bag.open("test.bag", rosbag::bagmode::Write);    
+    
+    if(compress)
+        bag.setCompression(rosbag::compression::BZ2); //lowers fps by 30%, but compresses images about 6times
+    bag.open(std::string(globals.savepath) + "/test.bag", rosbag::bagmode::Write);
     ros_open = true;
 }
 
@@ -91,6 +99,7 @@ void rosClose()
     
     ros_open = false;
     bag.close();
+    LOGW(TAG, " Ros is Closed!\n");
 }
     
 void registerRosGroundTruth(double t, double lat, double lon, double alt, double e1, double e2, double e3, double et)

@@ -418,7 +418,7 @@ int ImageDrawable::setImageFromTexture(ImageDrawableParams* prm, osg::Vec2* scrD
 	return 0;
 }
 
-int ImageDrawable::setLensFromTexture1(ImageDrawableParams* prm, osg::Vec2* scrDim, osg::Texture2D* baseTexture, osg::Texture2D* depthTexture, osg::Texture2D* vignetTexture, bool render_depth)
+int ImageDrawable::setLensFromTexture1(ImageDrawableParams* prm, osg::Vec2* scrDim, osg::Texture2D* baseTexture, osg::Texture2D* depthTexture, osg::Texture2D* vignetTexture, int render_what)
 {
     osg::ref_ptr<osg::Drawable> quad = osg::createTexturedQuadGeometry(
 										   osg::Vec3(-scrDim->x() * prm->width * 0.5f, -scrDim->y() * prm->height * 0.5f, 0.0f),
@@ -444,7 +444,7 @@ int ImageDrawable::setLensFromTexture1(ImageDrawableParams* prm, osg::Vec2* scrD
 	_state->addUniform(inputVectUniform);
 	inVecCallback = new InputVectorCallback();
 	inputVectUniform->setUpdateCallback(inVecCallback);
-	inVecCallback->setElement(UNIFORM_RENDER_DEPTH, render_depth ? 1. : 0.);
+	inVecCallback->setElement(UNIFORM_RENDER_WHAT, render_what);
 	inVecCallback->setElement(UNIFORM_DOUBLE_INPUT, 0);
 
 	osg::Program * prog = new osg::Program;
@@ -468,7 +468,7 @@ int ImageDrawable::setLensFromTexture1(ImageDrawableParams* prm, osg::Vec2* scrD
 int ImageDrawable::setLensFromTexture2(ImageDrawableParams* prm, osg::Vec2* scrDim,
 									   osg::Texture2D* baseTexture1, osg::Texture2D* baseTexture2,
 									   osg::Texture2D* depthTexture1, osg::Texture2D* depthTexture2,
-									   osg::Texture2D* vignetTexture, bool render_depth)
+									   osg::Texture2D* vignetTexture, int render_what)
 {
 	osg::ref_ptr<osg::Drawable> quad = osg::createTexturedQuadGeometry(
 										   osg::Vec3(-scrDim->x() * prm->width * 0.5f, -scrDim->y() * prm->height * 0.5f, 0.0f),
@@ -502,7 +502,7 @@ int ImageDrawable::setLensFromTexture2(ImageDrawableParams* prm, osg::Vec2* scrD
 	_state->addUniform(inputVectUniform);
 	inVecCallback = new InputVectorCallback();
 	inputVectUniform->setUpdateCallback(inVecCallback);
-	inVecCallback->setElement(UNIFORM_RENDER_DEPTH, render_depth ? 1. : 0.);
+	inVecCallback->setElement(UNIFORM_RENDER_WHAT, render_what);
 	inVecCallback->setElement(UNIFORM_DOUBLE_INPUT, 1);
 
 	osg::Program * prog = new osg::Program;

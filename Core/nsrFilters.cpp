@@ -129,7 +129,7 @@ ffloat doMaxSlope(MaxSlopeData* fD, ffloat data, ffloat time_s)
 
 	dt = time_s - fD->pre_time_s;
     
-    if(equals(fD->max_slope, 0., 1e-8) || equals(dt, 0., 1e-8)) { //filter disabled
+    if(EQUALS(fD->max_slope, 0., 1e-8) || EQUALS(dt, 0., 1e-8)) { //filter disabled
         fD->data = data; 
         fD->pre_time_s = time_s;
         return fD->data;
@@ -174,12 +174,12 @@ ffloat doMax3Slope(Max3SlopeData* fD, ffloat data, ffloat time_s)
 	
 	dt1 = time_s - fD->pre_time_s1;
     
-    if(equals(dt1, 0., 1e-8)) { //reject data, it can not change in zero time
+    if(EQUALS(dt1, 0., 1e-8)) { //reject data, it can not change in zero time
         return fD->data1;
     }
     
     //1st check max_speed
-    if(!(equals(fD->max_speed, 0., 1e-8))) { //enabled
+    if(!(EQUALS(fD->max_speed, 0., 1e-8))) { //enabled
         ffloat speed = (data - fD->data1)/dt1;
         if(speed > fD->max_speed)
             data = fD->data1 + fD->max_speed * dt1;
@@ -201,7 +201,7 @@ ffloat doMax3Slope(Max3SlopeData* fD, ffloat data, ffloat time_s)
 	    
     dt2 = fD->pre_time_s1 - fD->pre_time_s2;
     
-    if(!(equals(fD->max_acc, 0., 1e-8))) { //enabled
+    if(!(EQUALS(fD->max_acc, 0., 1e-8))) { //enabled
         ffloat v1 = (data - fD->data1)/dt1;
         ffloat v2 = (fD->data1 - fD->data2)/dt2;
         ffloat acc = (v1 - v2)/((dt1+dt2)/2);
@@ -238,7 +238,7 @@ ffloat doMax3Slope(Max3SlopeData* fD, ffloat data, ffloat time_s)
 
     dt3 = fD->pre_time_s2 - fD->pre_time_s3;
     
-    if(!(equals(fD->max_jerk, 0., 1e-8))) { //enabled
+    if(!(EQUALS(fD->max_jerk, 0., 1e-8))) { //enabled
         ffloat v1 = (data - fD->data1)/dt1;
         ffloat v2 = (fD->data1 - fD->data2)/dt2;
         ffloat v3 = (fD->data2 - fD->data3)/dt3;

@@ -236,7 +236,7 @@ namespace nsr
 		}
 
 		//Rot Mat input
-		//equals to SO(3)
+		//EQUALS to SO(3)
 		inline int setRotMat(const Matrice &v)
 		{
 			assert(v.rows() == 3 && v.cols() == 3);
@@ -286,7 +286,7 @@ namespace nsr
 			return 0;
 		}
 
-		//equals to SO(3)
+		//EQUALS to SO(3)
 		void getRotMat(Matrice &CI2B) const
 		{
 			double et_2, e1_2, e2_2, e3_2;

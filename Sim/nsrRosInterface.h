@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 
-void rosOpen();
+void rosOpen(bool compress = false);
 void rosClose();
 
 //Quaternions are in JPL convention

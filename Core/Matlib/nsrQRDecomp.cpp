@@ -325,7 +325,7 @@ void QRdecompGiv_JustR_Economy(Matrice &A, Matrice &R)
 void givensrotation(Tfloat a, Tfloat b, Tfloat &c, Tfloat &s)
 {
 	Tfloat t;
-	if(equals(b, 0., EPS) == 1) { //element already zero
+	if(EQUALS(b, 0., EPS) == 1) { //element already zero
 		c = 1;
 		s = 0;
 	} else {
@@ -457,7 +457,7 @@ void nullSpaceProjection(Matrice &Hf_, Matrice &Hx_, Matrice &Ho)
 
 			aii = Hf(i, i);
 			aji = Hf(j, i);
-			if(equals(aii, 0., EPS) == 1) { //element already zero
+			if(EQUALS(aii, 0., EPS) == 1) { //element already zero
 				c = 0.;
 				s = 1.;
 			} else {

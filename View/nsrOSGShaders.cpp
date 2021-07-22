@@ -302,7 +302,7 @@ char lensFragmentShader[] =
 	"uniform float inputVect[40];\n"
 
 	"float \n"
-	"	render_depth, seed, time_s, wx, wy, wz, vx, vy, vz,\n"
+	"	render_what, seed, time_s, wx, wy, wz, vx, vy, vz,\n"
 	"		k1, k2, t1, t2, k3, k4, k5, k6,\n"
 	"			vignet_thresh1, vignet_thresh2, \n"
 	"				td, tr, te, ti,\n"
@@ -312,7 +312,7 @@ char lensFragmentShader[] =
     "                           fog_end;\n"
 	"int extra_sampling_points, double_input;\n"
 
-	//direct sampling = 4, interpolated = 2, + xx + xx + xx +, equals 10 points
+	//direct sampling = 4, interpolated = 2, + xx + xx + xx +, EQUALS 10 points
 	"#define DIRECT_SAMPLING_POINTS 2\n" //for motion blur
 	"#define MAX_LENS_ITERATIONS (int(inputVect[9]))\n" //points interploated between two sampling points, more efficient than just using DIRECT_SAMPLING_POINTS
 	"#define MAX_PIX_ERR inputVect[10]\n"
@@ -672,7 +672,7 @@ char lensFragmentShader[] =
 	"		}\n"
 	"		if(do_break == 1) break;\n"
 	"	}\n"
-	"	texColor /= float(count);\n" //sampling = 4, interpolated = 2, + xx + xx + xx +, equals 10 points
+	"	texColor /= float(count);\n" //sampling = 4, interpolated = 2, + xx + xx + xx +, EQUALS 10 points
 	"}\n"
         
     //Fog/////////////////////////////////////////////////////////////////
@@ -717,7 +717,7 @@ char lensFragmentShader[] =
 	"	vec4 texColor, vignetTex, depthTex;\n"
 
 	///Getting uniform inputs
-	"	render_depth = inputVect[0];\n"
+	"	render_what = inputVect[0];\n"
 	"	seed = inputVect[1];\n"
     "	time_s = inputVect[2];\n"
 	"	wx = inputVect[3]; wy = inputVect[4]; wz = inputVect[5];\n" //W of cam/ned in cam axes
@@ -744,7 +744,7 @@ char lensFragmentShader[] =
 	"	vignetTex = vec4(vignetTex.x<vignet_thresh1?0.:vignetTex.x, vignetTex.y<vignet_thresh1?0.:vignetTex.y, vignetTex.z<vignet_thresh1?0.:vignetTex.z, 1.);\n"
 
 	"   n1=0.;n2=0.;n3=0.;\n"
-	"	if(render_depth < 0.5) {\n" //if rendering color
+	"	if(render_what < 1.5) {\n" //if rendering color or luminance
 
     "		s1 = rand(fract(seed*0.99));\n"
 
@@ -820,7 +820,7 @@ char lensFragmentShader[] =
 	"	}\n"
 
 	"	//if(texCoord_noLens.x > 0.5) {\n" //render depth, not color
-	"	if(render_depth > 0.5) {\n" //render depth, not color
+	"	if(render_what > 1.5) {\n" //render depth, not color
 	"		mean_texCoord = (texCoord3f1[0] + texCoord3f1[DIRECT_SAMPLING_POINTS-1])/2.;\n"
 	"		texCoord_realResMean = (mean_texCoord - vec2(.5, .5)) / extra_margin + vec2(.5, .5);\n"
 	"		texCoord_realResMin = (texCoord3f1[0] - vec2(.5, .5)) / extra_margin + vec2(.5, .5);\n"
@@ -850,10 +850,18 @@ char lensFragmentShader[] =
     "           texColor = applyFog(texColor, distance, rayOri, rayDir);\n"
     "       }\n"
     
-	"		mgl_FragColor = vec4(vignetTex.x*day_light*texColor.r + n1,"
-	"								vignetTex.y*day_light*texColor.g + n2,"
-	"									vignetTex.z*day_light*texColor.b + n3, 1.);\n"
-
+    "       float _r = vignetTex.x*day_light*texColor.r + n1;\n"
+    "       float _g = vignetTex.y*day_light*texColor.g + n2;\n"
+    "       float _b = vignetTex.z*day_light*texColor.b + n3;\n"
+    
+    "       if(render_what < 0.5) { \n" //render luminance
+    "           //float lum = 0.3333333*(_r + _g + _b);\n"
+    "           float lum = 0.299*_r + 0.587*_g + 0.114*_b; \n"
+	"		    mgl_FragColor = vec4(lum, lum, lum, 1.);\n"
+    "       } else {\n" //render color
+	"		    mgl_FragColor = vec4(_r, _g, _b, 1.);\n"
+    "       }\n"
+    
 	"		//if(texCoord_noLens.x < 0.47)\n"
 	"		//	mgl_FragColor = texture2D (baseTexture1, texCoord_noLens.xy);\n" //no space after texture2D will cause warning
 	"		//else if(texCoord_noLens.x < 0.5)\n"

@@ -43,7 +43,7 @@ private:
 };
 
 //Everything updated here should also be updated in the shader
-enum {UNIFORM_RENDER_DEPTH, UNIFORM_SEED, UNIFORM_TIME,
+enum {UNIFORM_RENDER_WHAT, UNIFORM_SEED, UNIFORM_TIME,
 	  UNIFORM_WX, UNIFORM_WY, UNIFORM_WZ,
 	  UNIFORM_VX, UNIFORM_VY, UNIFORM_VZ,
 
@@ -118,11 +118,11 @@ public:
 	int setImageFromTexture(ImageDrawableParams* prm, osg::Vec2* scrDim, osg::Texture2D* texture);
 
 	InputVectorCallback* inVecCallback;
-	int setLensFromTexture1(ImageDrawableParams* prm, osg::Vec2* scrDim, osg::Texture2D* baseTexture, osg::Texture2D* depthTexture, osg::Texture2D* vignetTexture, bool render_depth = false);
+	int setLensFromTexture1(ImageDrawableParams* prm, osg::Vec2* scrDim, osg::Texture2D* baseTexture, osg::Texture2D* depthTexture, osg::Texture2D* vignetTexture, int render_what);
 	int setLensFromTexture2(ImageDrawableParams* prm, osg::Vec2* scrDim,
 							osg::Texture2D* baseTexture1, osg::Texture2D* baseTexture2,
 							osg::Texture2D* depthTexture1, osg::Texture2D* depthTexture2,
-							osg::Texture2D* vignetTexture, bool render_depth = false);
+							osg::Texture2D* vignetTexture, int render_what);
 
 	void setTransparency(float transparency);
 

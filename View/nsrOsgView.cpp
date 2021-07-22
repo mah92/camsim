@@ -107,7 +107,12 @@ public:
 		//	fbo2->apply(*(renderInfo.getState()), osg::FrameBufferObject::READ_FRAMEBUFFER);
 
 		//reading GL_RGB is a quarter faster but is not supported everywhere(in phones)
-		image->readPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE);  //GL_LUMINANCE, GL_FLOAT);
+        if(param_render_what == RENDER_LUMINANCE)
+            image->readPixels(0, 0, width, height, GL_LUMINANCE, GL_UNSIGNED_BYTE);  //GL_LUMINANCE, GL_FLOAT);
+        else    
+            image->readPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE);  //GL_LUMINANCE, GL_FLOAT);
+        
+        int chans = (param_render_what==RENDER_LUMINANCE)? 1 : 4;
 
 		if(param_do_what == DO_SAVE_BMP) {
 			sprintf((char*)address, "%s/screenshot%05i.bmp", globals.savepath, shotindex);
@@ -121,13 +126,13 @@ public:
 		}
 
 		if(param_do_what == DO_IMAGE_PROC) {
-			image->flipVertical();//5 fps drop!!
-			nsrImageProc(image->data(), width, height, 4, frame_timestamp_s);
+			image->flipVertical();//5 fps drop!
+            nsrImageProc(image->data(), width, height, chans, frame_timestamp_s);
 		}
 		
 		if(param_do_what == DO_SAVE_ROS_BAG) {
             image->flipVertical();//5 fps drop!!
-            registerRosImage(frame_timestamp_s, image->data(), width, height, width*4, 4);
+            registerRosImage(frame_timestamp_s, image->data(), width, height, width*chans, chans);
             registerRosCamInfo(frame_timestamp_s);
         }
 	}
@@ -205,7 +210,11 @@ int nsrOsgInitOsgWindow(int x, int y, int _full_screen_width, int _full_screen_h
 	///Attach textue
 	saveTexture = new osg::Texture2D;
 	saveTexture->setTextureSize(saveScrDim->x(), saveScrDim->y());
-	saveTexture->setInternalFormat(GL_RGBA); //GL_RGB is three/forth faster but is not supported in all phones...
+    
+    if(param_render_what == RENDER_LUMINANCE)
+        saveTexture->setInternalFormat(GL_LUMINANCE);
+    else
+        saveTexture->setInternalFormat(GL_RGBA); //GL_RGB is three/forth faster but is not supported in all phones...
 	saveTexture->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::LINEAR);
 	saveTexture->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture2D::LINEAR);
 

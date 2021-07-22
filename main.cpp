@@ -5,6 +5,7 @@
 #include "View/nsrOsgCommonView.h"
 #include "Visualize/nsrLinuxKeyBoard2.h"
 #include "Visualize/nsrPlot.h"
+#include "Sim/nsrRosInterface.h"
 
 #include <X11/Xlib.h> //for getting screen resolution
 #include <signal.h>
@@ -38,12 +39,15 @@ static volatile int programInterrupted = 0;
 
 void finish()
 {
+    rosClose();
+
 	nsrOsgPause();
 	nsrOsgClose();
 	LOGI(TAG, " 40 Closing All..\n");
 	LOGDUMP();
 	NativeClose();
 	LOGI(TAG, " Destroyed!-\n");
+    printf(" Destroyed!-\n");
 }
 
 void intHandler(int sig)

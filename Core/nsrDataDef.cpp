@@ -84,6 +84,58 @@ int mkdir_p(const char *path)
 	return 0;
 }
 
+//path is input/output
+int make_savepath_dir(char* path)
+{
+    int i;
+    DIR *dpdf;
+    struct dirent *epdf;
+    dpdf = opendir(path);
+    if(dpdf == NULL) {  //root log directory does not exist
+        if(mkdir_p(path) != 0) { //make log directory in specified path
+            LOGW(TAG, " Could not make root savepath directory in(%s)!\n", path); //specified path unaccessible
+            return -1;
+        } else {
+            LOGW(TAG, " Made root savepath directory in(%s)!\n", path);
+        }
+    }
+            
+    int len;
+    int last_num = 0, pure_num;
+
+    last_num = 0;
+    while((epdf = readdir(dpdf))) {
+        //refusing "." & ".."
+        if(0 == strcmp(epdf->d_name, "."))
+            continue;
+        if(0 == strcmp(epdf->d_name, ".."))
+            continue;
+
+        pure_num = 1;
+        len = strlen(epdf->d_name);
+        for(i = 0; i < len; i++)
+            if(isNum(epdf->d_name[i]) == 0) //not a number
+                pure_num = 0;
+        if(pure_num == 0 || len <= 0) //not a pure number
+            continue;
+        //LOGI(TAG, " aa: %s\n", epdf->d_name);
+
+        //if pure number
+        last_num = nsrMax(last_num, atoi(epdf->d_name));
+    }
+
+    LOGW(TAG, " log: %i\n", last_num + 1);
+
+    sprintf(path, "%s/%i", path, last_num + 1);
+    
+    if(mkdir_p(path) != 0) {
+        return -1;
+	} else {
+        LOGW(TAG, " final savepath: %s\n", path);
+    }
+	return 0;
+}
+
 int NativeOpen(const char* rootpath,
 			   double starttime)
 {
@@ -101,14 +153,12 @@ int NativeOpen(const char* rootpath,
 	strcpy(globals.path, globals.rootpath);
 	LOGI(TAG, " Project Name: %s , globals.rootpath(%s)\n", PROJECT_NAME, globals.rootpath);
 
-	int i;
-
 	if(mkdir_p(globals.path) != 0) {
 		sleep(5); //wait maybe sdcard loads
 		if(mkdir_p(globals.path) != 0) {
 			sleep(5); //wait maybe sdcard loads
 			if(mkdir_p(globals.path) != 0) {
-				LOGE(TAG, " Could not make directory(%s)!\n", globals.path);
+				LOGE(TAG, " Could not make path directory(%s)!\n", globals.path);
 				strcpy(globals.path, globals.rootpath);
 			}
 		}
@@ -120,69 +170,21 @@ int NativeOpen(const char* rootpath,
 	strcat(globals.datapath, PROJECT_NAME);
 
 	if(mkdir_p(globals.datapath) != 0) {
-		LOGE(TAG, " Could not make directory(%s)!\n", globals.datapath);
+		LOGE(TAG, " Could not make data directory(%s)!\n", globals.datapath);
 		strcpy(globals.datapath, globals.path);
 	}
 
 	//savepath//////////////////////////
 	//whenever the program is run, it build a new folder in this address and stores used setting(.xml) files, simulation output, log files, ...
 	
-    strcpy(globals.savepath, globals.path);
-    strcat(globals.savepath, "/log");
-                
-    DIR *dpdf;
-    struct dirent *epdf;
-    dpdf = opendir(globals.savepath);
-    if(dpdf == NULL) {  //log directory does not exist
-        if(mkdir_p(globals.savepath) != 0) { //make log directory in specified path
-            LOGW(TAG, " Could not make directory in(%s)!\n", globals.savepath); //specified path unaccessible
-            sprintf(globals.savepath, "%s/log", globals.path); //change to default path(project name/log)
-            if(mkdir_p(globals.savepath) != 0) { //make directory in default path
-                LOGE(TAG, " Could not make directory in(%s)!\n", globals.savepath); //default path unaccessible!!!
-                sprintf(globals.savepath, "mnt/sdcard/log"); //change to root path(mnt/sdcard/log)
-            }
+    strcpy(globals.savepath, "/mnt/usb"); //Preferably use a flash drive so your Harddrive does not grow old, Use "Disks" to mount your flash at this point 
+	if(make_savepath_dir(globals.savepath)!=0) {
+        sprintf(globals.savepath, "%s/log", globals.path); //change to default path(project name/log)
+        if(make_savepath_dir(globals.savepath)!=0) {
+            LOGW(TAG, " Could not make final savepath directory!\n");
+            exit(110);
         }
     }
-            
-    int len;
-    int last_num = 0, pure_num;
-
-    dpdf = opendir(globals.savepath);
-    if(dpdf == NULL) {
-        LOGE(TAG, " No savepath!\n");
-    } else {
-        last_num = 0;
-        while(epdf = readdir(dpdf)) {
-            //refusing "." & ".."
-            if(0 == strcmp(epdf->d_name, "."))
-                continue;
-            if(0 == strcmp(epdf->d_name, ".."))
-                continue;
-
-            pure_num = 1;
-            len = strlen(epdf->d_name);
-            for(i = 0; i < len; i++)
-                if(isNum(epdf->d_name[i]) == 0) //not a number
-                    pure_num = 0;
-            if(pure_num == 0 || len <= 0) //not a pure number
-                continue;
-            //LOGI(TAG, " aa: %s\n", epdf->d_name);
-
-            //if pure number
-            last_num = nsrMax(last_num, atoi(epdf->d_name));
-        }
-    }
-
-    LOGW(TAG, " log: %i\n", last_num + 1);
-
-    sprintf(globals.savepath, "%s/%i", globals.savepath, last_num + 1);
-    LOGI(TAG, " savepath: %s\n", globals.savepath);
-    
-    if(mkdir_p(globals.savepath) != 0) {
-		LOGE(TAG, " Could not make directory(%s)!\n", globals.savepath);
-		strcpy(globals.savepath, globals.path);
-	}
-
     
 	return 0;
 }

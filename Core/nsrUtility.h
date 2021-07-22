@@ -27,7 +27,7 @@ extern "C" {
 //#define pi 3.14159265358979
 //#endif
 
-#define equals(variable, value, thresh)	\
+#define EQUALS(variable, value, thresh)	\
 	((((variable) - (value)) <= thresh && ((value) - (variable)) <= thresh)?1:0)
 
 #define saturate(variable, minimum, maximum) \

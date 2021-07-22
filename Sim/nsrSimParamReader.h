@@ -3,7 +3,7 @@
 
 //#include <osg/PositionAttitudeTransform>
 
-enum RenderWhat {RENDER_IMAGE, RENDER_DEPTH};
+enum RenderWhat {RENDER_LUMINANCE, RENDER_COLOR_IMAGE, RENDER_DEPTH};
 enum ShowWhat {SHOW_MAP, SHOW_PATTERN};
 enum DoWhat {DO_NOTHING, DO_SAVE_BMP, DO_IMAGE_PROC, DO_SAVE_ROS_BAG};
 
@@ -11,6 +11,8 @@ extern int param_seed;
 extern int param_render_what;
 extern int param_show_what;
 extern int param_do_what;
+
+extern bool param_rosbag_compression;
 
 extern char settings_dempath[];
 extern char settings_mappath[];
@@ -97,7 +99,6 @@ extern double param_cam_in_ac_err_z;
 
 
 #define SAFE_MODE 0
-#define SAFE_START 1
 
 #ifdef __cplusplus
 extern "C" {

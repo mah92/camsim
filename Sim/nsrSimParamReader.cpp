@@ -22,9 +22,10 @@
 
 int param_seed = 12;
 
-int param_render_what = RENDER_IMAGE;
+int param_render_what = RENDER_COLOR_IMAGE;
 int param_show_what = SHOW_PATTERN;
 int param_do_what = DO_SAVE_BMP;
+bool param_rosbag_compression = false;
 
 char settings_dempath[MAX_PATH_LENGTH];
 char settings_mappath[MAX_PATH_LENGTH];
@@ -163,10 +164,13 @@ void nsrReadSimParams(const char* filename)
 			if((atr = node.attribute("renderWhat"))) {
 				char strparam_render_what[20];
 				strcpy(strparam_render_what, atr.as_string());
-				if(strcmp("IMAGE", strparam_render_what) == 0)
-					param_render_what = RENDER_IMAGE;
-				if(strcmp("DEPTH", strparam_render_what) == 0)
+                if(strncmp("LUM", strparam_render_what, 3) == 0)
+					param_render_what = RENDER_LUMINANCE;
+				if(strncmp("COL", strparam_render_what, 3) == 0 || strncmp("IM", strparam_render_what, 2) == 0)
+					param_render_what = RENDER_COLOR_IMAGE;
+				if(strncmp("DEP", strparam_render_what, 3) == 0)
 					param_render_what = RENDER_DEPTH;
+
 			}
 			if((atr = node.attribute("showWhat"))) {
 				char strparam_show_what[20];
@@ -189,8 +193,10 @@ void nsrReadSimParams(const char* filename)
                 if(strcmp("SAVE_ROS_BAG", strparam_do_what) == 0)
                     param_do_what = DO_SAVE_ROS_BAG;
 			}
+			
+			if((atr = node.attribute("rosBagCompression"))) param_rosbag_compression = atr.as_bool();
 
-			LOGI(TAG, "mainParams: %i, %i, %i\n", param_render_what, param_show_what, param_do_what);
+			LOGI(TAG, "mainParams: %i, %i, %i, %i\n", param_render_what, param_show_what, param_do_what, param_rosbag_compression?1:0);
 		}
 		
         //demParams////////////////////////////////////////////

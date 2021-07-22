@@ -1,4 +1,4 @@
-﻿//In the name of ALLAH
+//In the name of ALLAH
 
 /**
  * <h1> بافر اعداد <h1>
@@ -64,7 +64,7 @@
 #include <string.h> //for malloc and memcpy
 #include <stdlib.h>//for malloc in some architectures
 
-#define equals(variable, value, thresh)	\
+#define EQUALS(variable, value, thresh)	\
 	((((variable) - (value)) <= thresh && ((value) - (variable)) <= thresh)?1:0)
 
 #ifdef __cplusplus
@@ -190,7 +190,7 @@ int cbPushIfChanged(NumBuffer* mNB, int elem, double PushData, double time)     
 	mNB->ERR = 0;
 	double val = cbLast(mNB, elem);
 
-	if(mNB->ERR != 0 || equals(PushData, val, 1e-6) == 0) { //buffer empty or value not equal, so push
+	if(mNB->ERR != 0 || EQUALS(PushData, val, 1e-6) == 0) { //buffer empty or value not equal, so push
 		cbPush(mNB, elem, PushData, time);
 		return 1;
 	}

@@ -461,7 +461,7 @@ osg::Vec3d calcWfromQu(osg::Quat pre_qu, osg::Quat qu, double dt)
 
 	unitvect = osg::Vec3d(dQu.x(), dQu.y(), dQu.z());
 	len = unitvect.length();
-	if(equals(len, 0., 1e-12) == 0) { //nonzero
+	if(EQUALS(len, 0., 1e-12) == 0) { //nonzero
 		unitvect /= len;
 		//Error cutting
 		dQu.w() = dQu.w() > 1. ? 1. : dQu.w();
