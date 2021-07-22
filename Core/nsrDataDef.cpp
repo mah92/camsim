@@ -24,6 +24,13 @@
 #include <limits.h>     // PATH_MAX
 #include <sys/stat.h> //for stat
 
+#include <cstdio>
+#include <iostream>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <array>
+
 #include <dirent.h>
 
 #include <exception>      // std::exception, std::terminate
@@ -82,6 +89,20 @@ int mkdir_p(const char *path)
 	}
 
 	return 0;
+}
+
+std::string exec(const char* cmd) 
+{
+    std::array<char, 128> buffer;
+    std::string result;
+    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
+    if (!pipe) {
+        throw std::runtime_error("popen() failed!");
+    }
+    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+        result += buffer.data();
+    }
+    return result;
 }
 
 //path is input/output
@@ -176,8 +197,14 @@ int NativeOpen(const char* rootpath,
 
 	//savepath//////////////////////////
 	//whenever the program is run, it build a new folder in this address and stores used setting(.xml) files, simulation output, log files, ...
-	
-    strcpy(globals.savepath, "/mnt/usb"); //Preferably use a flash drive so your Harddrive does not grow old, Use "Disks" to mount your flash at this point 
+    //Preferably use a flash drive so your Harddrive does not grow old, Use "Disks" to mount your flash at this point 
+    //
+    
+	std::string flash_path = exec("lsblk -o NAME,HOTPLUG,MOUNTPOINT | grep -w 1 | grep -vE \"sr|loop\" | awk \'{print $3}\'");
+    flash_path.erase(std::remove(flash_path.begin(), flash_path.end(), '\n'), flash_path.end()); //erase new lines
+    strcpy(globals.savepath, flash_path.c_str());
+    //strcpy(globals.savepath, "/mnt/usb"); 
+    
 	if(make_savepath_dir(globals.savepath)!=0) {
         sprintf(globals.savepath, "%s/log", globals.path); //change to default path(project name/log)
         if(make_savepath_dir(globals.savepath)!=0) {

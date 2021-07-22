@@ -167,7 +167,13 @@ Vehicles on the road:
 	
 	rosBagCompression = "ture", "false"
 	
-	compression will cause a 30% decrease in fps but compresses images up to 6x
+	Notice that the rosbag would be very bulky (in order of 200MB/min for 10fps grayscale 640x480 camera images if not compressed, the color image would even need 4x bandwidth
+	
+	The program will firstly use the flash drive for storing log files, to prevent extreme harddisk usage.
+	
+	Compression will cause a 30% decrease in fps but compresses images up to 6x
+	
+	Using a USB2.0 instead of a USB3.0 flash lowers fps by 50%
 	
 	* demParams
 	
