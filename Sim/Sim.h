@@ -16,7 +16,6 @@ int simLoop(double time_barrier);
 int simClose();
 
 void Sensors(SimStorage &Sim);
-void addDynamic(Matrice &O, double T);
 
 #ifdef __cplusplus
 }

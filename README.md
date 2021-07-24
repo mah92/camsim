@@ -40,48 +40,62 @@ It is tested on ubuntu 16.04 and 18.04 LTS, although it also used to work on And
 Ensure that the proper GPU driver is installed to prevent bad behaviour like system-wide lockups.
 
 A good graphic card ensures the speed of execution.
-
+```
 $sudo apt-get install cmake build-essential
-
+```
+```
 $sudo apt-get install xdotool
-
+```
+```
 $sudo apt-get install libplplot-dev
-
+```
+```
 $sudo apt-get install libopenscenegraph-dev openscenegraph
-
+```
+```
 $sudo apt-get install libopencv-dev (optional)
-
+```
 Install ROS (optional)
 
 It is also possible to install libosgearth-dev, openscenegraph-plugin-osgearth if the OpenSceneGraph does not get installed correctly.
 
 After installations, go to the program folder and run:
 
+```
 $mkdir build
-
+```
+```
 $cd build
-
+```
+```
 $cmake ..
-
+```
+```
 $make -j4
+```
+```
+$sudo -E LD_LIBRARY_PATH=/opt/ros/noetic/lib ./CamSim
+```
 
-remember 
+Remember to use sudo for running as the keyboard input for piloting and diagram navigation is read directly from keyboard device
 
-## Typcal Errors
+## Typical Errors
 In Ubuntu 20.04 I also needed to do the following commands to prevent some complier linker errors:
-
-sudo ln -s /usr/lib/x86_64-linux-gnu/libSM.so.6 /usr/lib/x86_64-linux-gnu/libSM.so
-
-sudo ln -s /usr/lib/x86_64-linux-gnu/libICE.so.6 /usr/lib/x86_64-linux-gnu/libICE.so
-
-sudo ln -s /usr/lib/x86_64-linux-gnu/libXext.so.6 /usr/lib/x86_64-linux-gnu/libXext.so
-
+```
+$sudo ln -s /usr/lib/x86_64-linux-gnu/libSM.so.6 /usr/lib/x86_64-linux-gnu/libSM.so
+```
+```
+$sudo ln -s /usr/lib/x86_64-linux-gnu/libICE.so.6 /usr/lib/x86_64-linux-gnu/libICE.so
+```
+```
+$sudo ln -s /usr/lib/x86_64-linux-gnu/libXext.so.6 /usr/lib/x86_64-linux-gnu/libXext.so
+```
 On run-time faults, try replacing between wxwidgets and qtwidget in plplots library (nsrPlot.cpp).
 
 On error: "assertion 'G_IS_DBUS_CONNECTION (connection)' failed", solve by:
-
-sudo apt purge fcitx-module-dbus
-
+```
+$sudo apt purge fcitx-module-dbus
+```
 ## Demos
 This is a simulated flight on the FSR2015-ASL dataset path. 
 
@@ -119,7 +133,9 @@ Vehicles on the road:
 
 ## Usage
 
-1. Set addresses.txt for input maps - output log addresses
+0. The program searches for a flash drive to store log files(not to exhaust your hard disk), try to use a USB3.0 flash drive with enough free space
+
+1. Prepare and set map addresses in .xml files(see demParams & mapParams below)
 
 2. (Optional) vignet.bmp should be a 3 channel(RGB) bitmap, having the same resolution with output, each channel multiplies to corresponding channel
 
@@ -409,9 +425,10 @@ Remember: Run the program with sudo if you want keyboard inputs to work
 ### Manual piloting shortkeys
 Working with manual aircraft path is possible using short keys described as follows:
 * 'm':  entering/exiting  manual path mode
-* right/left/up/down arrow keys: moving aircraft to east/west/north/south respectively (manual mode)
-* page up/down: increasing/decreasing aircraft  (manual mode)
-* '+'/'-': increasing/decreasing aircraft yawaltitude angle (manual mode)
+* up/down arrow keys: go forward/backward (manual mode)
+* right/left arrow keys: turn right/left (manual mode)
+* '+'/'-': moving aircraft to right/left (manual mode)
+* page up/down: increasing/decreasing aircraft (manual mode)
 
 ### Investigating through diagrams
 Being used to matlab plots, I was searching for a similar ploting toolbox in C/C++ with no success, so I wrote a similar library based on plplot.
@@ -430,29 +447,20 @@ It is not very nice but is usable. Navigating through diagrams is possible using
 
 ## Notes
 * In this simulation, a custom coordinate system named CCEF is used to place things in openscenegraph
-	
-	As the earth surface is placed in ECEF coordinates, objects have very big coordinates, meaning 6,400km+
-	
+	As the earth surface is placed in ECEF coordinates, objects have very big coordinates, meaning 6,400km+.
 	The openscenegraph engine can not render such big coordinates without numerical errors in order of tens of centimeters.
-	
 	To eliminate these errors, a custom coordinates system parallel to ecef is used, named CCEF (Custom centered earth fixed)
 
 * If flickering is seen on far mountains or objects farther than 65Km are needed to be seen, decrease worldScale in Parameters.xml or increase both zNear, zFar in nsrOsgCamScene.cpp. Openscenegraph has limited resolution for depth.
 
 * Mountains shape seem unsusual
-
 	Increase TILES_DEM_RES_FACTOR in View/nsrMapDrawable2.h file
 
 * High or low accelerometer/ gyro rms
-
     change 1st order filter constants: TAW, TAW2, ... in nsrPoseSim.cpp
 
 * Opencv circular or chessboard patterns -cannot- calibrate fisheye lens,
-
  as whole pattern become non-detectable near the edges. 
- 
  so near the edges calibration(near vignetts) become unusable
- 
  use opencv "charuco", kalibr "april", or better, agisoft-lens "wide chess" pattern(if focus in close range is not a problem)
 
-* Remember to correct alt and angle offsets in nsrPoseSim.cpp line 194

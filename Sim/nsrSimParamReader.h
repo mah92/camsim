@@ -1,8 +1,6 @@
 #ifndef _NSRSIMPARAMREADER_H_
 #define _NSRSIMPARAMREADER_H_
 
-//#include <osg/PositionAttitudeTransform>
-
 enum RenderWhat {RENDER_LUMINANCE, RENDER_COLOR_IMAGE, RENDER_DEPTH};
 enum ShowWhat {SHOW_MAP, SHOW_PATTERN};
 enum DoWhat {DO_NOTHING, DO_SAVE_BMP, DO_IMAGE_PROC, DO_SAVE_ROS_BAG};
@@ -44,8 +42,8 @@ extern double param_camera_fps;
 extern double param_camera_phase_percent;
 
 extern double param_resolution_scale;
-extern int param_width; //overrides settings.render2stream_width
-extern int param_height; //overrides settings.render2stream_height
+extern int param_width;
+extern int param_height;
 extern double param_fx, param_fy;
 extern double param_ox;
 extern double param_oy;
