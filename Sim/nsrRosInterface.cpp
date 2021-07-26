@@ -510,6 +510,8 @@ void registerRosCamInfo(double t)
     info.P[2] = info.K[2]; //ox
     info.P[6] = info.K[5]; //oy
     info.P[10] = info.K[8]; //1.
+    
+    bag.write("/cam0/camera_info", epoch, info);
 }
 
 #ifdef __cplusplus
