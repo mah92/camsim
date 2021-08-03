@@ -25,8 +25,6 @@ extern "C" {
 #endif
 
 DataIndex n;
-int execution_turn = -1;
-char execution_desc[100];
 
 int createBuf(int* elem, int width)
 {

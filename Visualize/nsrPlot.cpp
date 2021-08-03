@@ -747,34 +747,18 @@ void *refresh_thread_function(void *argument)
 static int last_read_index = 0;
 int refreshPlotsOnEnd()
 {
-	uint16_t ch = 0;
+	//uint16_t ch = 0;
 
-	while(1) {
-		ch = kb->getch(last_read_index);
+	//while(1) {
+		/*ch = kb->getch(last_read_index);
 		if(ch == KEY_ESC || ch == KEY_Q) {
 			printf("got!\n"); fflush(stdout);
 			return -1;
-		}
+		}*/
 		_refreshPlots();
 		usleep(100000);
-	}
+	//}
 
-	return 0;
-}
-
-int pauseTrap()
-{
-	uint16_t ch = 0;
-
-	ch = kb->getch(last_read_index);
-	if(ch == KEY_P) {
-		ch = 0;
-		while(ch != KEY_P && ch != KEY_ESC && ch != KEY_Q) {
-			_refreshPlots();
-			usleep(100000);
-			ch = kb->getch(last_read_index);
-		}
-	}
 	return 0;
 }
 

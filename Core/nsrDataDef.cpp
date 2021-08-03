@@ -121,7 +121,8 @@ int make_savepath_dir(char* path)
         }
     }
             
-    int len;
+	//Add numbered folder to path/////////////////////////////////
+    /*int len;
     int last_num = 0, pure_num;
 
     last_num = 0;
@@ -146,8 +147,10 @@ int make_savepath_dir(char* path)
     }
 
     LOGW(TAG, " log: %i\n", last_num + 1);
-
+	
     sprintf(path, "%s/%i", path, last_num + 1);
+	*/
+	//////////////////////////////////
     
     if(mkdir_p(path) != 0) {
         return -1;
@@ -203,8 +206,8 @@ int NativeOpen(const char* rootpath,
 	std::string flash_path = exec("lsblk -o NAME,HOTPLUG,MOUNTPOINT | grep -w 1 | grep -vE \"sr|loop\" | awk \'{print $3}\'");
     flash_path.erase(std::remove(flash_path.begin(), flash_path.end(), '\n'), flash_path.end()); //erase new lines
     strcpy(globals.savepath, flash_path.c_str());
-    //strcpy(globals.savepath, "/mnt/usb"); 
-    
+    sprintf(globals.savepath, "%s/" PROJECT_NAME "/log", flash_path.c_str());
+	
 	if(make_savepath_dir(globals.savepath)!=0) {
         sprintf(globals.savepath, "%s/log", globals.path); //change to default path(project name/log)
         if(make_savepath_dir(globals.savepath)!=0) {
@@ -253,12 +256,6 @@ int NativeClose()
 	LOGCLOSE(); //Should be done before blocking errors
 
 	return 0;
-}
-
-int nsrExit()
-{
-	exit(0);
-	//std::terminate(); //causes SIGABRT
 }
 
 #ifdef __cplusplus

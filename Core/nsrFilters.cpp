@@ -457,9 +457,9 @@ void SmoothPathFollower::setParams(double _max_velocity, double _max_accel, doub
     if(_max_jerk > 0.)
         acc2jerk_cont = new SQRTController(_max_jerk, 0., _linear_dist_acc>0?_linear_dist_acc:rate2acc_cont->linear_max_command);
     
-    if(_max_velocity>0 || _max_accel >0) {
+    /*if(_max_velocity>0 || _max_accel >0) {
         printf("linear_dist:%f, %f, %f\n\n", _linear_dist_position, pos2rate_cont->linear_max_command, rate2acc_cont->linear_max_command);
-    }
+    }*/
     
     initMax3Slope(&slope_filter, _max_velocity, _max_accel, _max_jerk);
     initIIR2(&path_filter, _in_filter_taw);

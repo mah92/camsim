@@ -10,3 +10,6 @@
 #include "./nsrMsgLog.h"
 #include "./nsrDataDef.h"
 #include "./nsrFilters.h"
+
+void finish();
+void ask_for_finish();

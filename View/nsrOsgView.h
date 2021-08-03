@@ -9,7 +9,7 @@ extern "C" {
 void nsrOsgInit();
 int nsrOsgInitOsgWindow(int x, int y, int screen_width, int screen_height);
 //Draw
-int nsrOsgDraw();
+int nsrOsgDraw(double frame_time_stamp);
 void nsrOsgPause();
 //Finish, just called on program total exit
 void nsrOsgClose();

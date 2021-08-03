@@ -63,6 +63,7 @@ void Sensors(SimStorage &Sim)
     q.getRotMat(CI2B);
     
     registerRosGroundTruth(t, lla.x(), lla.y(), lla.z(), q.e1, q.e2, q.e3, q.et);
+    //registerRosGroundTruth2(pose_maker_time_s / param_speed_factor, ac_real[0], ac_real[1], ac_real[2], ac_real[3]*M_PI / 180, ac_real[4]*M_PI / 180, ac_real[5]*M_PI / 180);
 
 	//Accelerometers////////////////////////////////////////
 	if(n.Z.Acc != 0 && Freq(n.Z.Acc) > 1e-6)  //40Hz Acc

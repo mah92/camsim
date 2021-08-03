@@ -388,10 +388,10 @@ int CamSimScene::Draw(double frame_timestamp_s)
 
 void CamSimScene::Pause()
 {
-	idealImageCam1->detach(osg::Camera::COLOR_BUFFER);
-	idealImageCam2->detach(osg::Camera::COLOR_BUFFER);
-	idealDepthCam1->detach(osg::Camera::COLOR_BUFFER);
-	idealDepthCam2->detach(osg::Camera::COLOR_BUFFER);
+	if(idealImageCam1!=NULL) idealImageCam1->detach(osg::Camera::COLOR_BUFFER);
+	if(idealImageCam2!=NULL) idealImageCam2->detach(osg::Camera::COLOR_BUFFER);
+	if(idealDepthCam1!=NULL) idealDepthCam1->detach(osg::Camera::COLOR_BUFFER);
+	if(idealDepthCam2!=NULL) idealDepthCam2->detach(osg::Camera::COLOR_BUFFER);
 
 	idealImageTexture1 = NULL;
 	idealImageTexture2 = NULL;

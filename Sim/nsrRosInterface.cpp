@@ -3,6 +3,7 @@
 #endif
 
 #include "Sim/nsrRosInterface.h"
+#include "Core/Matlib/nsrQuat.h"
 
 #include "nsrCore.h"
 
@@ -16,6 +17,7 @@ void rosOpen(bool compress) {}
 void rosClose() {}
 
 void registerRosGroundTruth(double t, double lat, double lon, double alt, double e1, double e2, double e3, double et) {}
+void registerRosGroundTruth2(double t, double lat, double lon, double alt, double roll, double pitch, double yaw) {}
 
 void registerRosAcc(double t, double x, double y, double z, double rms_x, double rms_y, double rms_z) {}
 void registerRosGyro(double t, double x, double y, double z, double rms_x, double rms_y, double rms_z) {}
@@ -84,12 +86,24 @@ static int acc_registered = 0;
 
 void rosOpen(bool compress)
 {
+	std::string str = std::string(globals.savepath) + "/test.bag";
+	
+	//Remove the bag if it already exists
+	std::remove(str.c_str());
+
+	FILE *file;
+	if ((file = fopen(str.c_str(), "r"))) {
+		fclose(file);
+		LOGE(TAG, "Unable to remove previous rosbag, remove it manually!\n");
+		exit(100);
+	}
+	
     ros::Time::init(); //for standalone applications 	
     epoch0 = ros::Time::now();
     
     if(compress)
         bag.setCompression(rosbag::compression::BZ2); //lowers fps by 30%, but compresses images about 6times
-    bag.open(std::string(globals.savepath) + "/test.bag", rosbag::bagmode::Write);
+    bag.open(str, rosbag::bagmode::Write);
     ros_open = true;
 }
 
@@ -101,14 +115,16 @@ void rosClose()
     bag.close();
     LOGW(TAG, " Ros is Closed!\n");
 }
-    
+
 void registerRosGroundTruth(double t, double lat, double lon, double alt, double e1, double e2, double e3, double et)
 {
     if(ros_open == false) return;
     
     ros::Time epoch = epoch0;
     epoch.sec += floor(t);
-    epoch.nsec += t - floor(t);
+    epoch.nsec += (t - floor(t))*1e9;
+    
+    //printf("t:%f\n", epoch.sec + epoch.nsec*1e-9);
     
     // /vicon/firefly_sbx/firefly_sbx : geometry_msgs/TransformStamped
     /*
@@ -140,6 +156,47 @@ void registerRosGroundTruth(double t, double lat, double lon, double alt, double
     bag.write("/vicon/firefly_sbx/firefly_sbx", epoch, tfs);
 }
 
+void registerRosGroundTruth2(double t, double lat, double lon, double alt, double roll, double pitch, double yaw)
+{
+    if(ros_open == false) return;
+    
+    ros::Time epoch = epoch0;
+    epoch.sec += floor(t);
+    epoch.nsec += (t - floor(t))*1e9;
+    
+    // /vicon/firefly_sbx/firefly_sbx : geometry_msgs/TransformStamped
+    /*
+    std_msgs/Header header
+    geometry_msgs/Vector3 magnetic_field
+    float64[9] magnetic_field_covariance
+    */
+        
+    geometry_msgs::TransformStamped tfs;
+    tfs.header.stamp = epoch;
+    tfs.header.seq = seq++;
+    
+    tfs.header.frame_id = "NED";
+    tfs.child_frame_id = "AircraftBody";
+    
+    tfs.transform.translation.x = lat;
+    tfs.transform.translation.y = lon;
+    tfs.transform.translation.z = alt;
+	
+	nsr::Quat qu;
+	qu.setEu(roll, pitch, yaw);
+    
+    //nsr::Quat q; //JPL convention
+    //q.setEu(roll, pitch, yaw);
+ 
+    //JPL convention, as used in ASL-FSR2015 rosbags ground truth
+    tfs.transform.rotation.x = qu.e1;
+    tfs.transform.rotation.y = qu.e2;
+    tfs.transform.rotation.z = qu.e3;
+    tfs.transform.rotation.w = qu.et;
+    
+    bag.write("/vicon/firefly_sbx/firefly_sbx", epoch, tfs);
+}
+
 static sensor_msgs::Imu imu; //catch accelerometer to publish acc-gyro together, this is needed for some algorithms like ROVIO
 
 void registerRosAcc(double t, double x, double y, double z, double rms_x, double rms_y, double rms_z) 
@@ -148,7 +205,7 @@ void registerRosAcc(double t, double x, double y, double z, double rms_x, double
     
     //ros::Time epoch = epoch0;
     //epoch.sec += floor(t);
-    //epoch.nsec += t - floor(t);
+    //epoch.nsec += (t - floor(t))*1e9;
 
     /*std_msgs/Header header
     geometry_msgs/Quaternion orientation
@@ -180,7 +237,7 @@ void registerRosGyro(double t, double x, double y, double z, double rms_x, doubl
     
     ros::Time epoch = epoch0;
     epoch.sec += floor(t);
-    epoch.nsec += t - floor(t);
+    epoch.nsec += (t - floor(t))*1e9;
     
     /*std_msgs/Header header
     geometry_msgs/Quaternion orientation
@@ -215,7 +272,7 @@ void registerRosMag(double t, double x, double y, double z, double rms_x, double
     
     ros::Time epoch = epoch0;
     epoch.sec += floor(t);
-    epoch.nsec += t - floor(t);
+    epoch.nsec += (t - floor(t))*1e9;
 
     /*
     std_msgs/Header header
@@ -243,7 +300,7 @@ void registerRosMagRef(double t, double x, double y, double z, double rms_x, dou
     
     ros::Time epoch = epoch0;
     epoch.sec += floor(t);
-    epoch.nsec += t - floor(t);
+    epoch.nsec += (t - floor(t))*1e9;
     
     /*
     std_msgs/Header header
@@ -272,7 +329,7 @@ void registerRosGPS(double t, double lat, double lon, double alt, double rms_x, 
     
     ros::Time epoch = epoch0;
     epoch.sec += floor(t);
-    epoch.nsec += t - floor(t);
+    epoch.nsec += (t - floor(t))*1e9;
     
     /*
     sensor_msgs/NavSatFix:
@@ -328,7 +385,7 @@ void registerRosGPSVel(double t, double x, double y, double z, double rms_x, dou
     
     ros::Time epoch = epoch0;
     epoch.sec += floor(t);
-    epoch.nsec += t - floor(t);
+    epoch.nsec += (t - floor(t))*1e9;
 
     // /kitti/oxts/gps/vel : geometry_msgs/TwistStamped
 
@@ -358,7 +415,7 @@ void registerRosPrsAlt(double t, double alt, double rms_x)
     
     ros::Time epoch = epoch0;
     epoch.sec += floor(t);
-    epoch.nsec += t - floor(t);
+    epoch.nsec += (t - floor(t))*1e9;
 
     //geometry_msgs/PointStamped, z: alt(m), y: cov (defined here)
     
@@ -385,7 +442,7 @@ void registerRosImage(double t, const unsigned char* data, int width, int height
     
     ros::Time epoch = epoch0;
     epoch.sec += floor(t);
-    epoch.nsec += t - floor(t);
+    epoch.nsec += (t - floor(t))*1e9;
     
     /*
     std_msgs/Header header
@@ -453,7 +510,7 @@ void registerRosCamInfo(double t)
     
     ros::Time epoch = epoch0;
     epoch.sec += floor(t);
-    epoch.nsec += t - floor(t);
+    epoch.nsec += (t - floor(t))*1e9;
     
     /*
     std_msgs/Header header

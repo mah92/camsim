@@ -49,12 +49,11 @@ extern "C" {
 
 int sn;
 osg::Vec2 *showScrDim, *fullScrDim, *saveScrDim;
-double frame_timestamp_s = -100000;
 
 //get video callback/////////////////////////////////////////////
 
 int shotindex = 0;
-
+static double _frame_timestamp_s = 0;
 class ReadBufferCallback: public osg::Camera::DrawCallback
 {
 public:
@@ -127,13 +126,13 @@ public:
 
 		if(param_do_what == DO_IMAGE_PROC) {
 			image->flipVertical();//5 fps drop!
-            nsrImageProc(image->data(), width, height, chans, frame_timestamp_s);
+            nsrImageProc(image->data(), width, height, chans, _frame_timestamp_s);
 		}
 		
 		if(param_do_what == DO_SAVE_ROS_BAG) {
             image->flipVertical();//5 fps drop!!
-            registerRosImage(frame_timestamp_s, image->data(), width, height, width*chans, chans);
-            registerRosCamInfo(frame_timestamp_s);
+            registerRosImage(_frame_timestamp_s, image->data(), width, height, width*chans, chans);
+            registerRosCamInfo(_frame_timestamp_s);
         }
 	}
 };
@@ -142,8 +141,6 @@ public:
 
 void nsrOsgInit()
 {
-	simInit();
-
 	commonOsgInit();
 	camSimScene1 = new CamSimScene();
 }
@@ -231,18 +228,13 @@ int nsrOsgInitOsgWindow(int x, int y, int _full_screen_width, int _full_screen_h
     return 0;
 }
 
-int nsrOsgDraw()
+int nsrOsgDraw(double frame_timestamp_s)
 {
 	if(_viewer == NULL)
 		return -1;
 
-	if(frame_timestamp_s < 0) //first time
-		frame_timestamp_s = nsrPoseMakerGetStartTime() + param_camera_phase_percent * (1. / param_camera_fps); ////first frame start from an offset from 1st row time
-	else
-		frame_timestamp_s += (1. / param_camera_fps);
-
-	simLoop(frame_timestamp_s);
-
+	_frame_timestamp_s = frame_timestamp_s; //keep last time for use in above callback
+	
 	//LOGI(TAG, "Frame Time:%f\n", frame_timestamp_s);
 	if(camSimScene1 != NULL) camSimScene1->Draw(frame_timestamp_s);
 
@@ -260,18 +252,16 @@ int nsrOsgDraw()
 
 void nsrOsgPause()
 {
-	LOGI(TAG, "osg Pause1");
+	LOGI(TAG, "osg Pause1\n");
+	
 	if(saveCamera != NULL) saveCamera->detach(osg::Camera::COLOR_BUFFER);
-
 	if(camSimScene1 != NULL) camSimScene1->Pause();
 
 	commonOsgPause();
 	saveCamera = NULL;
 	showCamera = NULL;
-
-	simClose();
-
-	LOGI(TAG, "osg Pause2");
+	
+	LOGI(TAG, "osg Pause2\n");
 }
 
 void nsrOsgClose()

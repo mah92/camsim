@@ -5,6 +5,9 @@ enum RenderWhat {RENDER_LUMINANCE, RENDER_COLOR_IMAGE, RENDER_DEPTH};
 enum ShowWhat {SHOW_MAP, SHOW_PATTERN};
 enum DoWhat {DO_NOTHING, DO_SAVE_BMP, DO_IMAGE_PROC, DO_SAVE_ROS_BAG};
 
+extern int execution_turn;
+extern char execution_desc[];
+
 extern int param_seed;
 extern int param_render_what;
 extern int param_show_what;
@@ -41,7 +44,7 @@ extern double param_alt_offset;
 extern double param_camera_fps;
 extern double param_camera_phase_percent;
 
-extern double param_resolution_scale;
+//extern double param_resolution_scale;
 extern int param_width;
 extern int param_height;
 extern double param_fx, param_fy;
@@ -103,6 +106,7 @@ extern "C" {
 #endif
 
 void nsrReadSimParams(const char *filename);
+void nsrSaveSimParams(const char* filename);
 
 #ifdef __cplusplus
 }

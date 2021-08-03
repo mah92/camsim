@@ -62,7 +62,6 @@ int setSharedBuffers();
  * @return شماره خطا
  */
 int NativeClose();
-int nsrExit();
 
 int mkdir_p(const char *path);
 

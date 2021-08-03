@@ -20,6 +20,9 @@
 #undef TAG
 #define TAG "Cpp:SimParamReader:"
 
+int execution_turn = -1;
+char execution_desc[100];
+
 int param_seed = 12;
 
 int param_render_what = RENDER_COLOR_IMAGE;
@@ -54,7 +57,7 @@ double param_alt_offset = 0.;
 double param_camera_fps = 30;
 double param_camera_phase_percent = 0.;
 
-double param_resolution_scale = 1.0;
+static double param_resolution_scale = 1.0;
 int param_width = 640; //should match settings.render2stream_width
 int param_height = 480; //should match settings.render2stream_height
 double param_fx = 100.;
@@ -119,13 +122,19 @@ void copyToSavePath(const char* filename)
 	char source_addr[MAX_PATH_LENGTH];
 	char dest_addr[MAX_PATH_LENGTH];
 	uint8_t buf[200];
+
+	if(strlen(filename)==0) return;
+	
 	sprintf(source_addr, "%s/%s", globals.datapath, filename);
 	sprintf(dest_addr, "%s/%s", globals.savepath, filename);
 
+	LOGI(TAG, "Copying:%s->%s\n", source_addr, dest_addr);
 	FILE *src, *dst;
 	src = fopen(source_addr, "r");
+	if(src==NULL) { LOGE(TAG, "Source does not exist!(%s)\n", source_addr); return;}
 	dst = fopen(dest_addr, "w");
-
+	if(dst==NULL) { LOGE(TAG, "Destination file could not be created!(%s)\n", dest_addr); return;}
+	
 	while((len = fread(buf, 1, sizeof(buf), src)) > 0) {
 		fwrite(buf, 1, len, dst);
 	}
@@ -150,7 +159,7 @@ void nsrReadSimParams(const char* filename)
 	}
 	LOGI(TAG, " %s loaded successfully!(%s)\n", filename, result.description()); fflush(stdout);
 
-	copyToSavePath(filename);
+	//copyToSavePath(filename);
 
 	pugi::xml_node simParams = calibDoc.child("simParams");
 	pugi::xml_node node;
@@ -159,7 +168,12 @@ void nsrReadSimParams(const char* filename)
 			continue;
 
 		strcpy(node_name, node.name());
-
+	
+		if(strcmp(node_name, "description") == 0) {
+			if((atr = node.attribute("executeTurn"))) execution_turn = atr.as_int();
+			if((atr = node.attribute("description"))) strcpy(execution_desc, atr.as_string());
+		}
+		
 		if(strcmp(node_name, "mainParams") == 0) {
 			if((atr = node.attribute("renderWhat"))) {
 				char strparam_render_what[20];
@@ -239,6 +253,7 @@ void nsrReadSimParams(const char* filename)
 				strcpy(param_pattern_file, globals.datapath);
 				strcat(param_pattern_file, "/");
 				strcat(param_pattern_file, atr.as_string());
+                //copyToSavePath(atr.as_string());
 			}
 
 			LOGI(TAG, "patternParams: %f, %s\n", param_pattern_metric_width, param_pattern_file);
@@ -249,6 +264,7 @@ void nsrReadSimParams(const char* filename)
 				strcpy(param_path_file, globals.datapath);
 				strcat(param_path_file, "/");
 				strcat(param_path_file, atr.as_string());
+                //copyToSavePath(atr.as_string());
 			}
 			if((atr = node.attribute("csvPositionFmt"))) {
 				char strparam_position_format[10];
@@ -366,6 +382,7 @@ void nsrReadSimParams(const char* filename)
 				strcpy(param_vignet_file, globals.datapath);
 				strcat(param_vignet_file, "/");
 				strcat(param_vignet_file, atr.as_string());
+                //copyToSavePath(atr.as_string());
 			}
 			if((atr = node.attribute("vignetThresh1"))) param_vignet_thresh1 = atr.as_double();
 			if((atr = node.attribute("vignetThresh2"))) param_vignet_thresh2 = atr.as_double();
@@ -501,6 +518,131 @@ void nsrReadSimParams(const char* filename)
 	}*/
 
 	LOGI(TAG, " file: %s reading completed!\n", filename); fflush(stdout);
+}
+
+void nsrSaveSimParams(const char* filename)
+{
+	char dest_addr[MAX_PATH_LENGTH];
+	uint8_t buf[200];
+
+	if(strlen(filename)==0) return;
+	
+	sprintf(dest_addr, "%s/%s", globals.savepath, filename);
+
+	pugi::xml_document doc;
+	pugi::xml_node parent_node = doc.append_child("simParams");
+	pugi::xml_node param;
+	
+	///////////////////////////////////////////////
+	if(strlen(execution_desc)>0 || execution_turn>=0) {
+		param = parent_node.append_child("description");
+	
+		param.append_attribute("executeTurn") = execution_turn;
+		param.append_attribute("description") = execution_desc;
+	}
+	
+	///////////////////////////////////////////////
+	param = parent_node.append_child("idealParams");
+	
+	param.append_attribute("width") = param_width;
+	param.append_attribute("height") = param_height;
+	
+	if(EQUALS(param_fx, param_fy, 1e-6)) {
+		param.append_attribute("f") = param_fx;	
+	} else {
+		param.append_attribute("fx") = param_fx;
+		param.append_attribute("fy") = param_fy;
+	}
+	
+	double fov_x, fov_y;
+	fov_x = atan((param_width  / 2.) / param_fx) * 2. * 180./M_PI;
+	fov_y = atan((param_height / 2.) / param_fy) * 2. * 180./M_PI;
+			
+	param.append_attribute("fovX") = fov_x;
+	param.append_attribute("fovY") = fov_y;
+	
+	double ox_offset, oy_offset;
+	ox_offset = param_ox - param_width / 2.;
+	oy_offset = param_oy - param_height / 2.;
+	
+	if(fabs(ox_offset) > 1e-6) param.append_attribute("oxOffset") = ox_offset;
+	if(fabs(oy_offset) > 1e-6) param.append_attribute("oyOffset") = oy_offset;
+
+	if(fabs(param_f_err) + fabs(param_ox_err) + fabs(param_oy_err) > 1e-6) {
+		param = parent_node.append_child("idealParams");
+		
+		if(fabs(param_f_err)  > 1e-6) param.append_attribute("fErr") = param_f_err;
+		if(fabs(param_ox_err) > 1e-6) param.append_attribute("oxErr") = param_ox_err;
+		if(fabs(param_oy_err) > 1e-6) param.append_attribute("oyErr") = param_oy_err;
+	}
+	
+	///////////////////////////////////////
+	param = parent_node.append_child("staticParams");
+
+	param.append_attribute("k1") = param_k1;
+	param.append_attribute("k2") = param_k2;
+	param.append_attribute("t1") = param_t1;
+	param.append_attribute("t2") = param_t2;
+	param.append_attribute("k3") = param_k3;
+	
+	if(fabs(param_k1_err) + fabs(param_k2_err) + fabs(param_t1_err) + fabs(param_t2_err) + fabs(param_k3_err) > 1e-6) {
+		param = parent_node.append_child("staticParams");
+		
+		if(fabs(param_k1_err) > 1e-6) param.append_attribute("k1Err") = param_k1_err;
+		if(fabs(param_k2_err) > 1e-6) param.append_attribute("k2Err") = param_k2_err;
+		if(fabs(param_t1_err) > 1e-6) param.append_attribute("t1Err") = param_t1_err;
+		if(fabs(param_t2_err) > 1e-6) param.append_attribute("t2Err") = param_t2_err;
+		if(fabs(param_k3_err) > 1e-6) param.append_attribute("k3Err") = param_k3_err;
+	}
+
+	///////////////////////////////////////
+
+	//remove path from file name
+	int slash_position = -1;
+	int path_len = strlen(param_vignet_file);
+	for(int i=0;i<path_len; i++)
+		if(param_vignet_file[i]=='/') slash_position = i;
+	
+	if(path_len > 0 && slash_position<path_len-1) { //path is not empty and slash is not the last char
+		param = parent_node.append_child("vignetParams");
+		
+		param.append_attribute("vignetFile") = (&param_vignet_file[slash_position+1]);
+		param.append_attribute("vignetThresh1") = param_vignet_thresh1;
+		param.append_attribute("vignetThresh2") = param_vignet_thresh2;
+	}
+
+	///////////////////////////////////////
+	param = parent_node.append_child("dynamicParams");
+	
+	param.append_attribute("td") = param_td;
+	param.append_attribute("tr") = param_tr;
+	param.append_attribute("te") = param_te;
+	param.append_attribute("ti") = param_ti;
+	
+	if(fabs(param_td_err) + fabs(param_tr_err) > 1e-6) {
+		param = parent_node.append_child("dynamicParams");
+		
+		param.append_attribute("tdErr") = param_td_err;
+		param.append_attribute("trErr") = param_tr_err;	
+	}
+
+	///////////////////////////////////////
+	param = parent_node.append_child("camInAcEu");
+	
+	param.append_attribute("roll") = param_cam_in_ac_roll;
+	param.append_attribute("pitch") = param_cam_in_ac_pitch;
+	param.append_attribute("yaw") = param_cam_in_ac_yaw;
+
+	if(fabs(param_cam_in_ac_err_x) + fabs(param_cam_in_ac_err_y) + fabs(param_cam_in_ac_err_z) > 1e-6) {
+		param = parent_node.append_child("camInAcEu");
+		
+		if(fabs(param_cam_in_ac_err_x) > 1e-6) param.append_attribute("xErr") = param_cam_in_ac_err_x;
+		if(fabs(param_cam_in_ac_err_y) > 1e-6) param.append_attribute("yErr") = param_cam_in_ac_err_y;
+		if(fabs(param_cam_in_ac_err_z) > 1e-6) param.append_attribute("zErr") = param_cam_in_ac_err_z;
+	}
+
+    //doc.print(std::cout);
+	doc.save_file(dest_addr);
 }
 
 #ifdef __cplusplus

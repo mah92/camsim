@@ -3,6 +3,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include "Sim/nsrSimParamReader.h"
 
 static void onMouse(int event, int x, int y, int, void* data);
 static void distanceCallback(int, void* data);

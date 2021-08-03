@@ -5,7 +5,9 @@
 #include "View/nsrOsgCommonView.h"
 #include "Visualize/nsrLinuxKeyBoard2.h"
 #include "Visualize/nsrPlot.h"
+#include "Sim/Sim.h"
 #include "Sim/nsrRosInterface.h"
+#include "Sim/nsrSimParamReader.h"
 
 #include <X11/Xlib.h> //for getting screen resolution
 #include <signal.h>
@@ -35,27 +37,7 @@ void scrAutoDetect()
 	XCloseDisplay(d);
 }
 
-static volatile int programInterrupted = 0;
-
-void finish()
-{
-    rosClose();
-
-	nsrOsgPause();
-	nsrOsgClose();
-	LOGI(TAG, " 40 Closing All..\n");
-	LOGDUMP();
-	NativeClose();
-	LOGI(TAG, " Destroyed!-\n");
-    printf(" Destroyed!-\n");
-}
-
-void intHandler(int sig)
-{
-	programInterrupted = 1;
-	LOGW(TAG, " Catched interrupt request(%i)!\n", sig);
-	finish();
-}
+void intHandler(int sig);
 
 void linuxInit()
 {
@@ -69,28 +51,72 @@ void linuxInit()
 	NativeOpen(root_path, myTime());
 	setSharedBuffers();
 
-	LOGI(TAG, " Initialization complete!-\n");
-
+	simInit();
 	nsrOsgInit();
 	nsrOsgInitOsgWindow(0, 0, scr_width, scr_height);
+	LOGI(TAG, " Initialization complete!-\n");
+}
+
+
+static volatile int programInterrupted = 0;
+
+void finish()
+{
+	LOGDUMP();	
+	LOGI(TAG, " Destroyed0!-\n");
+    simClose();
+	LOGI(TAG, " Destroyed1!-\n");
+	nsrOsgPause();
+	LOGI(TAG, " Destroyed2!-\n");
+	nsrOsgClose();
+	LOGI(TAG, " Destroyed3!-\n");
+	NativeClose();
+	LOGI(TAG, " Destroyed4!-\n");
+}
+
+void ask_for_finish()
+{
+	programInterrupted++;
+	if(programInterrupted >=3)
+		exit(110);
+	LOGW(TAG, " Catched interrupt request for %s time!\n", programInterrupted==1?"1st":"2nd");
+}
+
+void intHandler(int sig) //CTRL+C
+{
+	ask_for_finish();
+	//finish();
 }
 
 static nsrKeyBoard selfkb;
 static int last_read_index = 0;
 
-void IOhandler()
+void exitIOhandler()
 {
 	uint16_t ch = selfkb.getch(last_read_index);
-	if(ch == KEY_ESC || ch == KEY_Q || (selfkb.ctrl_pressed && ch == KEY_C)) {
-		LOGW(TAG, " Cached custom interrupt request!\n");
-		programInterrupted = 1;
+	if(ch == KEY_ESC || ch == KEY_Q) {
+		ask_for_finish();
 	}
+}
+
+int pauseTrap()
+{
+	uint16_t ch = selfkb.getch(last_read_index);
+	if(ch == KEY_P) {
+		ch = 0;
+		while(ch != KEY_P && ch != KEY_ESC && ch != KEY_Q) {
+			refreshPlotsOnEnd();
+			usleep(100000);
+			ch = selfkb.getch(last_read_index);
+		}
+	}
+	return 0;
 }
 
 int main(int argc, char *argv[])
 {
 	if(argc >= 2)
-		execution_turn = atoi(argv[1]);
+		execution_turn = atoi(argv[1]); //can be overriden by the .xml if present
 
 	/*cpu_set_t  mask;
 	CPU_ZERO(&mask);
@@ -100,19 +126,31 @@ int main(int argc, char *argv[])
 	*/
 
 	//execution_turn = 0;
-	double time_s = 0, last_time_s = -1;
+	double last_time_s = -1, frame_timestamp_s = -1;
+	frame_timestamp_s = nsrPoseMakerGetStartTime() + param_camera_phase_percent * (1. / param_camera_fps); ////first frame start from an offset from 1st row time
+
 	linuxInit();
 	while(!_viewer->done() && !programInterrupted) {
-		time_s = myTime();
-		if(time_reached(0.25, 0., time_s, last_time_s) == 1)
+		if(time_reached(0.25, 0., frame_timestamp_s, last_time_s) == 1) //dump logs every 0.25 seconds
 			LOGDUMP();
 
-		IOhandler();
-		nsrOsgDraw();
-		last_time_s = time_s;
+		frame_timestamp_s += (1. / param_camera_fps);
+
+		if(simLoop(frame_timestamp_s) < 0) //Loop until next frame
+			break;
+	
+		if(nsrOsgDraw(frame_timestamp_s) < 0) //Render next frame
+			break;
+		
+		pauseTrap();
+		exitIOhandler();
+		last_time_s = frame_timestamp_s;
 	}
 
-	refreshPlotsOnEnd();
+	while(programInterrupted == 1) { //Wait for a second interrupt
+		exitIOhandler();
+		refreshPlotsOnEnd();
+	}
 	finish();
 
 	return 0;

@@ -31,7 +31,8 @@ SimStorage Sim;
 
 int simInit()
 {
-	Init_Sim(Sim);
+	nsrReadSimParams("Parameters.xml");
+	Init_Sim(Sim); //overrides parameters
 	nsrPoseMakerInit();
     
     if(param_do_what == DO_SAVE_ROS_BAG)
@@ -42,9 +43,13 @@ int simInit()
 
 int simLoop(double time_barrier)
 {
-	nsrPoseMakerLoop(nsrMax(time_barrier, //sensors needs until next frame
+	int err;
+	
+	err = nsrPoseMakerLoop(nsrMax(time_barrier, //sensors needs until next frame
 							time_barrier - (param_td + param_td_err) + 0.5 * (param_tr + param_tr_err) - 0. + 0.5 * param_te) //next camera frame needs
 					);
+	
+	if(err < 0) return -1; //end of path .csv
 
 	while(Sim.t <= time_barrier) {
 		/*if(Sim.DynamicInTheLoop==1) {
@@ -73,13 +78,10 @@ int simLoop(double time_barrier)
 			Visualize(Sim, Sim.Tplot2);//, Con);
 
 		/////////////////////////////////////
-		pauseTrap();
-		if(Sim.t > param_end_time/param_speed_factor) {
-			if(execution_turn < 0) //Don't stop is an automatic run is in progress
-				refreshPlotsOnEnd();
+		if(Sim.t >= param_end_time/param_speed_factor) {
 			LOGE(TAG, " Exit due to end of filter time...\n");
-			simClose();
-			nsrExit(); //end program
+			ask_for_finish(); //end program
+			return -1;
 		}
 
 		Sim.i = Sim.i + 1;

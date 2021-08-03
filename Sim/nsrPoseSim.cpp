@@ -9,6 +9,7 @@
 #include "Matlib/nsrQuat.h"
 #include "nsrLinuxKeyBoard2.h"
 #include "nsrVisualize.h"
+#include "nsrRosInterface.h"
 
 #undef TAG
 #define TAG "Cpp:PoseSim:"
@@ -17,7 +18,7 @@
 extern "C" {
 #endif
 
-void nsrPoseMakerStep();
+int nsrPoseMakerStep();
 
 int parsePathCSVLine(char* linebuf, double* ac_time, double* ac_lat, double* ac_lon, double* ac_alt, double* ac_roll, double* ac_pitch, double* ac_yaw)
 {
@@ -123,7 +124,7 @@ void nsrPoseMakerInit()
 		if(fgets(linebuf, MAX_LINE_LENGTH, pathCsvFile) == NULL) { //EOF
 			fclose(sensorsCsvFile);
 			LOGE(TAG, " Exit due to empty Path csv\n");
-			nsrExit(); //end program
+			exit(100);
 		}
 
 		if(linebuf[0] == '#') continue; //comment
@@ -138,15 +139,6 @@ void nsrPoseMakerInit()
 	}
 
 	pose_maker_time_s = path_start_time_s;
-
-	////////////////////////////////////////////////////////////
-	char sensorsCsvFilePath[MAX_PATH_LENGTH];
-	strcpy(sensorsCsvFilePath, globals.savepath);
-	strcat(sensorsCsvFilePath, "/log.csv");
-	sensorsCsvFile = fopen(sensorsCsvFilePath, "w");	//"w":= write only
-	if(sensorsCsvFile == NULL) {
-		LOGE(TAG, " Sensors file opening failed in address %s! check settings file\n", sensorsCsvFilePath);
-	}
 
 	/////////////////////////////////////////////////////////////
 	//Controller loops used for states to limit accelerations as in a real aircraft
@@ -212,13 +204,14 @@ double nsrPoseMakerGetStartTime()
 
 #define SENSOR_DERIVATIVE_STEP_TIME (1./param_control_freq)
 
-void nsrPoseMakerLoop(double time_barrier)
+int nsrPoseMakerLoop(double time_barrier)
 {
 	//Try to reach time_barrier(if not reached yet)
 	while(pose_maker_time_s <= time_barrier * param_speed_factor + SENSOR_DERIVATIVE_STEP_TIME) {
 		//LOGI(TAG, "[[%f < %f]]\n", pose_maker_time_s , time_barrier + SENSOR_DERIVATIVE_STEP_TIME);
 
-		nsrPoseMakerStep(); //pose_maker_time_s is input
+		if(nsrPoseMakerStep() < 0)
+			return -1; //pose_maker_time_s is input
 
 		//Log sensor data
 		/*nsrPoseMakerExtract((pose_maker_time_s - SENSOR_DERIVATIVE_STEP_TIME) / param_speed_factor, 1,
@@ -226,9 +219,10 @@ void nsrPoseMakerLoop(double time_barrier)
 							NULL, NULL, NULL);*/
 		pose_maker_time_s += SENSOR_DERIVATIVE_STEP_TIME;
 	}
+	return 0;
 }
 
-void nsrPoseMakerStep()
+int nsrPoseMakerStep()
 {
 	int i, err;
 	char linebuf[MAX_LINE_LENGTH];
@@ -254,10 +248,9 @@ void nsrPoseMakerStep()
 			//read a line, exit if unsuccessfull //don't use fscanf(), it can leave your file pointer in an unknown location on failure
 			if(fgets(linebuf, MAX_LINE_LENGTH, pathCsvFile) == NULL
 					|| linebuf[0] == '#') {
-				fclose(sensorsCsvFile);
 				LOGE(TAG, " Exit due to end of Path csv\n");
-				nsrPoseMakerClose();
-				nsrExit(); //end program
+				ask_for_finish(); //end program
+				return -1;
 			}
 
 			if(next_line_time_s >= 0) {
@@ -433,6 +426,8 @@ void nsrPoseMakerStep()
 	cbPush(mZB, n.Z.GROUND_TRUTH_EU + 1, ac_real[4]*M_PI / 180, pose_maker_time_s / param_speed_factor);
 	cbPush(mZB, n.Z.GROUND_TRUTH_EU + 2, ac_real[5]*M_PI / 180, pose_maker_time_s / param_speed_factor);
 	_UNLOCKCPP(Z_lock,);
+	
+	return 0;
 }
 
 void nsrPoseMakerExtract(double time_s, int do_log,
@@ -602,15 +597,22 @@ void nsrPoseMakerExtract(double time_s, int do_log,
 		w_cam = osg::Matrixd::rotate(camInAcQu) * w_ac + w_cam_in_ac; //cam/ned, in cam
 		if(_w_cam != NULL) *_w_cam = w_cam;
 	}
-
-	///////////
+	
+	///////////////////////////////////////////////////////////
 
 	if(do_log) {
-		static bool title_printed = false;
-		if(title_printed == false) {
+		
+		if(sensorsCsvFile == NULL) {
+			char sensorsCsvFilePath[MAX_PATH_LENGTH];
+			strcpy(sensorsCsvFilePath, globals.savepath);
+			strcat(sensorsCsvFilePath, "/log.csv");
+			sensorsCsvFile = fopen(sensorsCsvFilePath, "w");	//"w":= write only
+			if(sensorsCsvFile == NULL) {
+				LOGE(TAG, " Sensors file opening failed in address %s! check settings file\n", sensorsCsvFilePath);
+			}
+		
 			fprintf(sensorsCsvFile, "time_s,lla,,,xyz,,,v_in_ac,,,v_in_cam,,,a_in_ac,,,acc,,,"
-					"eu_ac,,,qu_ac,,,,qu_cam,,,,w_ac,,,w_cam,,,\n");
-			title_printed = true;
+				"eu_ac,,,qu_ac,,,,qu_cam,,,,w_ac,,,w_cam,,,\n");
 		}
 
 		xyz = LLA2NED(osg::Vec3d(ac_lat, ac_lon, ac_alt), //dr

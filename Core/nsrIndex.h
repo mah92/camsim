@@ -32,9 +32,6 @@ extern DataIndex n;
 
 void SetIndexes();
 int createBuf(int* elem, int width);
-
-extern int execution_turn;
-extern char execution_desc[];
 	
 #ifdef __cplusplus
 }

@@ -11,6 +11,7 @@ void rosClose();
 
 //Quaternions are in JPL convention
 void registerRosGroundTruth(double t, double lat, double lon, double alt, double e1, double e2, double e3, double et); 
+void registerRosGroundTruth2(double t, double lat, double lon, double alt, double roll, double pitch, double yaw);
 
 void registerRosAcc(double t, double x, double y, double z, double rms_x, double rms_y, double rms_z);
 void registerRosGyro(double t, double x, double y, double z, double rms_x, double rms_y, double rms_z);
