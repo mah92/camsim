@@ -499,13 +499,16 @@ void Init_Sim(SimStorage &Sim)
         //if((execution_turn / REPEAT_COUNT) == cc++) {strcpy(execution_desc, "1754-mag_ref_bias=(1deg)-filter:5deg");}
         //if((execution_turn / REPEAT_COUNT) == cc++) {strcpy(execution_desc, "1755-mag_ref_bias=(1deg)-filter:10deg");}
         
-        //if((execution_turn / REPEAT_COUNT) == cc++) {strcpy(execution_desc, "1762-mag_ref_bias=(0deg)-filter:10deg");}
-        
-		if((execution_turn / REPEAT_COUNT) >= cc) exit(110);
+        if((execution_turn / REPEAT_COUNT) == cc++) {strcpy(execution_desc, "1762-mag_ref_bias=(0deg)-filter:10deg");}
+		
+		if((execution_turn / REPEAT_COUNT) >= cc) {
+			LOGI(TAG, " Finished!\n");
+			exit(110);
+		}
+				
 		LOGI(TAG, " !!!!!!!!!!!!!!!!!!!Breaking news!!!!!!!!!!!!!!!!!!!!\n Override command(%i): %s\n", execution_turn, execution_desc);
 	}
-	
-	
+		
 	//Use instead of copying .xml files to apply changed parameters
 	//These paramers cannot be saved inside the rosbag as they are needed at the beginning
 	nsrSaveSimParams("finalParameters.xml");
@@ -530,7 +533,6 @@ void Init_Sim(SimStorage &Sim)
 	//Init Simulation////////////////////////////////////////
 	Sim.t = 0;
 	Sim.i = 0;
-	Sim.Texec = 1. / 200.;    //Autopilot freq, has real effect on accuracy, can be tested by safe_mode divergance
 	Sim.Tenv = 1. / param_control_freq; //Sim.Texec/4.; //800Hz simulation freq.
 	Sim.Tplot1 = 1 / 5.;   // Visualize1 interval, used for whole Visualize function call
 	Sim.Tplot2 = 1 / 1.;   // Visualize2 interval for more sensitive material, should be less than Visualize1
@@ -583,7 +585,7 @@ void Init_Sim(SimStorage &Sim)
 		Sim.Bias(n.Z.Acc + 0) = -0.003 * g; //0.03
 		Sim.Bias(n.Z.Acc + 1) = +0.003 * g;
 		Sim.Bias(n.Z.Acc + 2) = -0.003 * g;
-		Sim.Freq(n.Z.Acc) = 1. / Sim.Texec; //200Hz Acc
+		Sim.Freq(n.Z.Acc) = 200.; //200Hz Acc
 	}
 	//gyro
 	if(n.Z.Gyro != 0) {
@@ -593,7 +595,7 @@ void Init_Sim(SimStorage &Sim)
 		Sim.Bias(n.Z.Gyro + 0) = -0.3 / 180 * M_PI; //0.0052
 		Sim.Bias(n.Z.Gyro + 1) = +0.3 / 180 * M_PI;
 		Sim.Bias(n.Z.Gyro + 2) = -0.3 / 180 * M_PI;
-		Sim.Freq(n.Z.Gyro) = 1. / Sim.Texec; //200Hz Gyro
+		Sim.Freq(n.Z.Gyro) = 200.; //200Hz Gyro
 	}
 	//Magnetometer
 	if(n.Z.MMM != 0) {

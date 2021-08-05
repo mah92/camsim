@@ -39,6 +39,7 @@ void Sensors(SimStorage &Sim)
     double senx, seny, senz;
 	double t = Sim.t;
 
+	//printf("sen:%f\n", t);
 	nsrPoseMakerExtract(t, 0,
 						&lla, &v_ac, /*wrt. ned, in ned*/ &a_ac, /*wrt. ned, in ned*/ &acc_ac,/*accelerometer output*/
 						&acInNedQu, /* ac/ned */ &w_ac, /* ac/ned, in ac */
@@ -62,8 +63,7 @@ void Sensors(SimStorage &Sim)
 	nsr::Quat q(acInNedQu.x(), acInNedQu.y(), acInNedQu.z(), acInNedQu.w());
     q.getRotMat(CI2B);
     
-    registerRosGroundTruth(t, lla.x(), lla.y(), lla.z(), q.e1, q.e2, q.e3, q.et);
-    //registerRosGroundTruth2(pose_maker_time_s / param_speed_factor, ac_real[0], ac_real[1], ac_real[2], ac_real[3]*M_PI / 180, ac_real[4]*M_PI / 180, ac_real[5]*M_PI / 180);
+    //registerRosGroundTruth(t, lla.x(), lla.y(), lla.z(), q.e1, q.e2, q.e3, q.et);
 
 	//Accelerometers////////////////////////////////////////
 	if(n.Z.Acc != 0 && Freq(n.Z.Acc) > 1e-6)  //40Hz Acc
@@ -152,7 +152,8 @@ void Sensors(SimStorage &Sim)
 		}
 
 	//GPS////////////////////////////////////////////////////
-	if(n.Z.GPS_LLA!=0 && Freq(n.Z.GPS_LLA) > 1e-6)
+	if(n.Z.GPS_LLA!=0 && Freq(n.Z.GPS_LLA) > 1e-6
+				&& (Sim.t < (10. / param_speed_factor) /*&& SAFE_START==0*/)) //On 1st 10seconds, if SAFE_START procedure is present, gps is not needed
 		if(time_reached(1. / Freq(n.Z.GPS_LLA), 0., Sim.t, tPre) == 1) {  // && (t<30 || t>130))
 			if(n.Z.GPS_LLA != 0) {
 				Noise(n.Z.GPS_LLA + 0) = normrnd(Bias(n.Z.GPS_LLA + 0), RMS(n.Z.GPS_LLA + 0));

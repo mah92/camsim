@@ -170,8 +170,9 @@ void nsrReadSimParams(const char* filename)
 		strcpy(node_name, node.name());
 	
 		if(strcmp(node_name, "description") == 0) {
-			if((atr = node.attribute("executeTurn"))) execution_turn = atr.as_int();
-			if((atr = node.attribute("description"))) strcpy(execution_desc, atr.as_string());
+			//Do not override
+			if(execution_turn < 0 && (atr = node.attribute("executeTurn"))) execution_turn = atr.as_int();
+			if(strlen(execution_desc)<=0 && (atr = node.attribute("description"))) strcpy(execution_desc, atr.as_string());
 		}
 		
 		if(strcmp(node_name, "mainParams") == 0) {

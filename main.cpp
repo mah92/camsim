@@ -1,3 +1,11 @@
+/*
+Add sensor errors to .xml
+
+add sensor disables, cut off distances to .xml
+
+*/
+
+
 #include"/usr/include/time.h"
 
 #include "nsrCore.h"
@@ -8,6 +16,7 @@
 #include "Sim/Sim.h"
 #include "Sim/nsrRosInterface.h"
 #include "Sim/nsrSimParamReader.h"
+#include "Sim/nsrPoseSim.h"
 
 #include <X11/Xlib.h> //for getting screen resolution
 #include <signal.h>
@@ -51,6 +60,9 @@ void linuxInit()
 	NativeOpen(root_path, myTime());
 	setSharedBuffers();
 
+	nsrReadSimParams("Parameters.xml");
+	Init_Sim(Sim); //overrides parameters
+	nsrPoseMakerInit();
 	simInit();
 	nsrOsgInit();
 	nsrOsgInitOsgWindow(0, 0, scr_width, scr_height);
@@ -66,12 +78,14 @@ void finish()
 	LOGI(TAG, " Destroyed0!-\n");
     simClose();
 	LOGI(TAG, " Destroyed1!-\n");
-	nsrOsgPause();
+	nsrPoseMakerClose();
 	LOGI(TAG, " Destroyed2!-\n");
-	nsrOsgClose();
+	nsrOsgPause();
 	LOGI(TAG, " Destroyed3!-\n");
-	NativeClose();
+	nsrOsgClose();
 	LOGI(TAG, " Destroyed4!-\n");
+	NativeClose();
+	LOGI(TAG, " Destroyed5!-\n");
 }
 
 void ask_for_finish()
@@ -136,6 +150,17 @@ int main(int argc, char *argv[])
 
 		frame_timestamp_s += (1. / param_camera_fps);
 
+		double sensor_time_needs = frame_timestamp_s; //make sensors needs until next frame
+		double camera_time_needs = frame_timestamp_s - (param_td + param_td_err) + 0.5 * (param_tr + param_tr_err) - 0. + 0.5 * param_te; //max time in next camera frame 
+		if(camera_time_needs > frame_timestamp_s) {
+			printf("At least some part of the frame is captured in the future, increase camera delay!\n");
+			exit(100);
+		}
+		
+		//printf("t1:%f, t2:%f\n", sensor_time_needs, frame_timestamp_s);
+		if(nsrPoseMakerLoop(sensor_time_needs) < 0)
+			break; //end of path .csv
+	
 		if(simLoop(frame_timestamp_s) < 0) //Loop until next frame
 			break;
 	
@@ -147,7 +172,7 @@ int main(int argc, char *argv[])
 		last_time_s = frame_timestamp_s;
 	}
 
-	while(programInterrupted == 1) { //Wait for a second interrupt
+	while(programInterrupted == 1 && execution_turn<0) { //Wait for a second interrupt (not in an automatic run)
 		exitIOhandler();
 		refreshPlotsOnEnd();
 	}

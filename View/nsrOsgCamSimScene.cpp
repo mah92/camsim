@@ -348,7 +348,8 @@ int CamSimScene::Draw(double frame_timestamp_s)
 	//deviation: 0.5*(tr + te + ti)
 
 	//at mean time
-	nsrPoseMakerExtract(frame_timestamp_s - (param_td + param_td_err) - 0.5 * param_ti, 0,
+	double frame_mean_time = frame_timestamp_s - (param_td + param_td_err) - 0.5 * param_ti;
+	nsrPoseMakerExtract(frame_mean_time, 0,
 						&lla2, NULL, NULL, NULL, NULL, NULL,
 						&v_cam2, &camInNedQu2, &w_cam2);
 
@@ -357,14 +358,16 @@ int CamSimScene::Draw(double frame_timestamp_s)
 		setCamera_LLA_QU(idealDepthCam1.get(), lla2, camInNedQu2);
 	} else {
 		//at min time
-		nsrPoseMakerExtract(frame_timestamp_s - (param_td + param_td_err) - 0.5 * (param_tr + param_tr_err) - param_ti - 0.5 * param_te, 0,
+		double frame_min_time = frame_timestamp_s - (param_td + param_td_err) - 0.5 * (param_tr + param_tr_err) - param_ti - 0.5 * param_te;
+		nsrPoseMakerExtract(frame_min_time, 0,
 							&lla1, NULL, NULL, NULL, NULL, NULL,
 							&v_cam1, &camInNedQu1, &w_cam1);
 		setCamera_LLA_QU(idealImageCam1.get(), lla1, camInNedQu1);
 		setCamera_LLA_QU(idealDepthCam1.get(), lla1, camInNedQu1);
 
 		//at max time
-		nsrPoseMakerExtract(frame_timestamp_s - (param_td + param_td_err) + 0.5 * (param_tr + param_tr_err) - 0. + 0.5 * param_te, 0,
+		double frame_max_time = frame_timestamp_s - (param_td + param_td_err) + 0.5 * (param_tr + param_tr_err) - 0. + 0.5 * param_te;
+		nsrPoseMakerExtract(frame_max_time, 0,
 							&lla3, NULL, NULL, NULL, NULL, NULL,
 							&v_cam3, &camInNedQu3, &w_cam3);
 		setCamera_LLA_QU(idealImageCam2.get(), lla3, camInNedQu3);

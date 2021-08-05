@@ -427,6 +427,12 @@ int nsrPoseMakerStep()
 	cbPush(mZB, n.Z.GROUND_TRUTH_EU + 2, ac_real[5]*M_PI / 180, pose_maker_time_s / param_speed_factor);
 	_UNLOCKCPP(Z_lock,);
 	
+	//No use to put this in here(to have groundtruth in future) as rosbags sort timestamps automatically
+	registerRosGroundTruth2(pose_maker_time_s / param_speed_factor, ac_real[0], ac_real[1], ac_real[2],
+							ac_real[3]*M_PI / 180, ac_real[4]*M_PI / 180, ac_real[5]*M_PI / 180);
+	
+	//printf("gt:%f\n", pose_maker_time_s / param_speed_factor);
+	
 	return 0;
 }
 

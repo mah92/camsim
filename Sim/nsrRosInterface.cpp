@@ -103,7 +103,9 @@ void rosOpen(bool compress)
     
     if(compress)
         bag.setCompression(rosbag::compression::BZ2); //lowers fps by 30%, but compresses images about 6times
+	
     bag.open(str, rosbag::bagmode::Write);
+		
     ros_open = true;
 }
 
@@ -115,6 +117,8 @@ void rosClose()
     bag.close();
     LOGW(TAG, " Ros is Closed!\n");
 }
+
+//High frequency(800Hz) ground truth lowers fps from 70->50
 
 void registerRosGroundTruth(double t, double lat, double lon, double alt, double e1, double e2, double e3, double et)
 {
@@ -195,6 +199,7 @@ void registerRosGroundTruth2(double t, double lat, double lon, double alt, doubl
     tfs.transform.rotation.w = qu.et;
     
     bag.write("/vicon/firefly_sbx/firefly_sbx", epoch, tfs);
+	//printf("%f, lat:%.8f\n", t, tfs.transform.translation.x);
 }
 
 static sensor_msgs::Imu imu; //catch accelerometer to publish acc-gyro together, this is needed for some algorithms like ROVIO

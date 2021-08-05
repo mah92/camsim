@@ -20,7 +20,6 @@ typedef struct {
 	double t;
 	int i;
 
-	double Texec;        //80 Hz Autopilot freq.
 	double Tenv; 		 //320Hz simulation freq.
 	double Tplot1;       //1 Hz Visualize1 freq.
 	double Tplot2;       //0.3 Hz Visualize2 freq.
