@@ -33,6 +33,7 @@ int simInit()
     if(param_do_what == DO_SAVE_ROS_BAG)
         rosOpen(param_rosbag_compression);
     
+	Sim.t = nsrPoseMakerGetStartTime();
     return 0;
 }
 
@@ -49,7 +50,9 @@ int simLoop(double time_barrier)
 			Visualize(Sim, Sim.Tplot2);
 
 		//end program//////////////////////////////////////////
-		if(Sim.t >= param_end_time/param_speed_factor) {
+			//while((pose_maker_time_s - path_start_time_s) <= (time_barrier - path_start_time_s)* param_speed_factor + SENSOR_DERIVATIVE_STEP_TIME) {
+
+		if(Sim.t - nsrPoseMakerGetStartTime() >= param_end_time/param_speed_factor) {
 			LOGE(TAG, " Exit due to end of filter time...\n");
 			ask_for_finish(); 
 			return -1;

@@ -139,11 +139,12 @@ int main(int argc, char *argv[])
 	int result = sched_setaffinity(0, sizeof(mask), &mask);
 	*/
 
+	linuxInit();
+	
 	//execution_turn = 0;
 	double last_time_s = -1, frame_timestamp_s = -1;
 	frame_timestamp_s = nsrPoseMakerGetStartTime() + param_camera_phase_percent * (1. / param_camera_fps); ////first frame start from an offset from 1st row time
-
-	linuxInit();
+	
 	while(!_viewer->done() && !programInterrupted) {
 		if(time_reached(0.25, 0., frame_timestamp_s, last_time_s) == 1) //dump logs every 0.25 seconds
 			LOGDUMP();

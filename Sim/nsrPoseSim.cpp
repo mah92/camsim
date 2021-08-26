@@ -207,9 +207,10 @@ double nsrPoseMakerGetStartTime()
 int nsrPoseMakerLoop(double time_barrier)
 {
 	//Try to reach time_barrier(if not reached yet)
-	while(pose_maker_time_s <= time_barrier * param_speed_factor + SENSOR_DERIVATIVE_STEP_TIME) {
+	//printf("Hosein1:%f, %f, %f\n", pose_maker_time_s, time_barrier, path_start_time_s);
+	while((pose_maker_time_s - path_start_time_s) <= (time_barrier - path_start_time_s)* param_speed_factor + SENSOR_DERIVATIVE_STEP_TIME) {
 		//LOGI(TAG, "[[%f < %f]]\n", pose_maker_time_s , time_barrier + SENSOR_DERIVATIVE_STEP_TIME);
-
+	//printf("Hosein2:%f, %f\n", pose_maker_time_s, time_barrier);
 		if(nsrPoseMakerStep() < 0)
 			return -1; //pose_maker_time_s is input
 
@@ -259,6 +260,7 @@ int nsrPoseMakerStep()
 			}
 
 			err = parsePathCSVLine(linebuf, &next_line_time_s, &next_ac[0], &next_ac[1], &next_ac[2], &next_ac[3], &next_ac[4], &next_ac[5]);
+			//printf("path:%i, %f, %f, %f\n", err, next_ac[0], next_ac[1], next_ac[2]);
 		}
 
 		//interpolate commanded pose
@@ -418,20 +420,21 @@ int nsrPoseMakerStep()
 */
 	//LOGI(TAG, " pose kernel:%f, %f, %f, %f, %f, %f, %f\n", pose_maker_time_s, ac[0], ac[1], ac[2], ac[3], ac[4], ac[5]);
 
+	double real_time = (pose_maker_time_s - path_start_time_s) / param_speed_factor + path_start_time_s;
 	_LOCKCPP(Z_lock,);
-	cbPush(mZB, n.Z.GROUND_TRUTH_LLA + 0, ac_real[0], pose_maker_time_s / param_speed_factor);
-	cbPush(mZB, n.Z.GROUND_TRUTH_LLA + 1, ac_real[1], pose_maker_time_s / param_speed_factor);
-	cbPush(mZB, n.Z.GROUND_TRUTH_LLA + 2, ac_real[2], pose_maker_time_s / param_speed_factor);
-	cbPush(mZB, n.Z.GROUND_TRUTH_EU + 0, ac_real[3]*M_PI / 180, pose_maker_time_s / param_speed_factor); //in rad
-	cbPush(mZB, n.Z.GROUND_TRUTH_EU + 1, ac_real[4]*M_PI / 180, pose_maker_time_s / param_speed_factor);
-	cbPush(mZB, n.Z.GROUND_TRUTH_EU + 2, ac_real[5]*M_PI / 180, pose_maker_time_s / param_speed_factor);
+	cbPush(mZB, n.Z.GROUND_TRUTH_LLA + 0, ac_real[0], real_time);
+	cbPush(mZB, n.Z.GROUND_TRUTH_LLA + 1, ac_real[1], real_time);
+	cbPush(mZB, n.Z.GROUND_TRUTH_LLA + 2, ac_real[2], real_time);
+	cbPush(mZB, n.Z.GROUND_TRUTH_EU + 0, ac_real[3]*M_PI / 180, real_time); //in rad
+	cbPush(mZB, n.Z.GROUND_TRUTH_EU + 1, ac_real[4]*M_PI / 180, real_time);
+	cbPush(mZB, n.Z.GROUND_TRUTH_EU + 2, ac_real[5]*M_PI / 180, real_time);
 	_UNLOCKCPP(Z_lock,);
 	
 	//No use to put this in here(to have groundtruth in future) as rosbags sort timestamps automatically
-	registerRosGroundTruth2(pose_maker_time_s / param_speed_factor, ac_real[0], ac_real[1], ac_real[2],
+	registerRosGroundTruth2(real_time, ac_real[0], ac_real[1], ac_real[2],
 							ac_real[3]*M_PI / 180, ac_real[4]*M_PI / 180, ac_real[5]*M_PI / 180);
 	
-	//printf("gt:%f\n", pose_maker_time_s / param_speed_factor);
+	printf("gt:%f, %f, %f, %f\n", real_time, ac_real[0], ac_real[1], ac_real[2]);
 	
 	return 0;
 }

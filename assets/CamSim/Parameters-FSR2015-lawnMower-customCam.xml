@@ -18,7 +18,6 @@
     
 	<!-- mapParams -->
     <mapParams addr = "/media/oem/Map/map" />
-    <mapParams0 addr = "/media/oem/Map/map2" />
     
 	<mapParams0 desc = "fsr2015" centerLat="47.115880655" centerLon="8.67212173" maxAlt="100000" maxDist="11100" zoomLevel = "16"/> //25fps
 	<mapParams0 desc = "fsr2015" centerLat="47.115880655" centerLon="8.67212173" maxAlt="100000" maxDist="11100" zoomLevel = "17"/> //15fps

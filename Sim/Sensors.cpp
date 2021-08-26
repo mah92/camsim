@@ -153,7 +153,8 @@ void Sensors(SimStorage &Sim)
 
 	//GPS////////////////////////////////////////////////////
 	if(n.Z.GPS_LLA!=0 && Freq(n.Z.GPS_LLA) > 1e-6
-				&& (Sim.t < (10. / param_speed_factor) /*&& SAFE_START==0*/)) //On 1st 10seconds, if SAFE_START procedure is present, gps is not needed
+				//&& (Sim.t < (100. / param_speed_factor) + nsrPoseMakerGetStartTime() /*&& SAFE_START==0*/)) //On 1st 10seconds(1x), if SAFE_START procedure is present, gps is not needed
+				&& (Sim.t < (60.*4 / param_speed_factor) + nsrPoseMakerGetStartTime() /*&& SAFE_START==0*/)) //On 1st 10seconds(1x), if SAFE_START procedure is present, gps
 		if(time_reached(1. / Freq(n.Z.GPS_LLA), 0., Sim.t, tPre) == 1) {  // && (t<30 || t>130))
 			if(n.Z.GPS_LLA != 0) {
 				Noise(n.Z.GPS_LLA + 0) = normrnd(Bias(n.Z.GPS_LLA + 0), RMS(n.Z.GPS_LLA + 0));
