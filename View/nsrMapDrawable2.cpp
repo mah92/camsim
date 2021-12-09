@@ -352,8 +352,8 @@ int MapDrawable2::addMapRegion(double latmin, double latmax, double lonmin, doub
 		for(j = yTileMin; j < yTileMax; j++)
 			addMapTile(i, j, zoom, tile_dem_res);
 
+	LOGW(TAG, " Loaded %i tiles using %iMB memory///\n", tiles, tiles*(256*256*3)/1024/1024);
 	LOGW(TAG, " //zoom:%i///\n", zoom);
-	LOGW(TAG, " ///tiles: %i///\n", tiles);
 	LOGW(TAG, " ///tile dem res: %i///\n", tile_dem_res);
 
 	return tiles;

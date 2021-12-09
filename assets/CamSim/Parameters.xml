@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <simParams>
 	<!-- INCLUDE MAIN SETTING FILE HERE -->
-	<includeParams0 includeFile="Parameters-FSR2015-lawnMower-customCam.xml" />
-	<includeParams includeFile="cheshme/Parameters-CheshmeNadi-01.xml" />
+	<includeParams includeFile="Parameters-FSR2015-lawnMower-customCam.xml" />
+	<includeParams0 includeFile="cheshme/Parameters-CheshmeNadi-01.xml" />
 </simParams>

@@ -27,7 +27,7 @@ int param_seed = 12;
 
 int param_render_what = RENDER_COLOR_IMAGE;
 int param_show_what = SHOW_PATTERN;
-int param_do_what = DO_SAVE_BMP;
+int param_do_what = DO_SAVE_RAW;
 bool param_rosbag_compression = false;
 
 char settings_dempath[MAX_PATH_LENGTH];
@@ -201,8 +201,8 @@ void nsrReadSimParams(const char* filename)
                 
 				if(strcmp("NOTHING", strparam_do_what) == 0)
 					param_do_what = DO_NOTHING;
-                if(strcmp("SAVE_BMP", strparam_do_what) == 0)
-					param_do_what = DO_SAVE_BMP;
+                if(strcmp("SAVE_RAW", strparam_do_what) == 0)
+					param_do_what = DO_SAVE_RAW;
 				if(strcmp("IMAGE_PROC", strparam_do_what) == 0)
 					param_do_what = DO_IMAGE_PROC;
                 if(strcmp("SAVE_ROS_BAG", strparam_do_what) == 0)

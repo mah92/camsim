@@ -3,7 +3,7 @@
 
 enum RenderWhat {RENDER_LUMINANCE, RENDER_COLOR_IMAGE, RENDER_DEPTH};
 enum ShowWhat {SHOW_MAP, SHOW_PATTERN};
-enum DoWhat {DO_NOTHING, DO_SAVE_BMP, DO_IMAGE_PROC, DO_SAVE_ROS_BAG};
+enum DoWhat {DO_NOTHING, DO_SAVE_RAW, DO_IMAGE_PROC, DO_SAVE_ROS_BAG};
 
 extern int execution_turn;
 extern char execution_desc[];

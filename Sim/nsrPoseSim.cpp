@@ -434,7 +434,7 @@ int nsrPoseMakerStep()
 	registerRosGroundTruth2(real_time, ac_real[0], ac_real[1], ac_real[2],
 							ac_real[3]*M_PI / 180, ac_real[4]*M_PI / 180, ac_real[5]*M_PI / 180);
 	
-	printf("gt:%f, %f, %f, %f\n", real_time, ac_real[0], ac_real[1], ac_real[2]);
+	//printf("gt:%f, %f, %f, %f\n", real_time, ac_real[0], ac_real[1], ac_real[2]);
 	
 	return 0;
 }

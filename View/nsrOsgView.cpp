@@ -113,8 +113,8 @@ public:
         
         int chans = (param_render_what==RENDER_LUMINANCE)? 1 : 4;
 
-		if(param_do_what == DO_SAVE_BMP) {
-			sprintf((char*)address, "%s/screenshot%05i.bmp", globals.savepath, shotindex);
+		if(param_do_what == DO_SAVE_RAW) {
+			sprintf((char*)address, "%s/screenshot%05i.png", globals.savepath, shotindex);
 			osgDB::writeImageFile(*image, std::string(address));
 			//bmp bad resolution, works with both GL_RGB & GL_RGBA, 1.5GB for 30fpsx60s, 7fps
 			//jpeg just works with GL_RGB in both image and save texture, 380MB for 30fpsx60s, 4fps, rms2bmp: 1.95
